@@ -1,0 +1,21 @@
+funscript\_editor.data namespace
+================================
+
+Submodules
+----------
+
+funscript\_editor.data.filevideostream module
+---------------------------------------------
+
+.. automodule:: funscript_editor.data.filevideostream
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+funscript\_editor.data.funscript module
+---------------------------------------
+
+.. automodule:: funscript_editor.data.funscript
+   :members:
+   :undoc-members:
+   :show-inheritance:

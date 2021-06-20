@@ -1,0 +1,20 @@
+# ui configuration
+
+vertical_stretch_factor: [1, 8]
+horizontal_stretch_factor: [40, 1]
+
+autosave_in_sec: 30
+
+seek_next_sec: 0.1
+seek_prev_sec: 0.1
+
+visualizer:
+  left: 0.05
+  right: 0.995
+  top: 0.92
+  bottom: 0.08
+
+player:
+  fontsize: 32
+  stroke_indicator_pos: [25,50]
+  stroke_indicator_size: 10

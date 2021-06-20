@@ -1,0 +1,32 @@
+funscript\_editor namespace
+===========================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 3
+
+   funscript_editor.algorithms
+   funscript_editor.data
+   funscript_editor.ui
+   funscript_editor.utils
+
+Submodules
+----------
+
+funscript\_editor.api module
+----------------------------
+
+.. automodule:: funscript_editor.api
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+funscript\_editor.definitions module
+------------------------------------
+
+.. automodule:: funscript_editor.definitions
+   :members:
+   :undoc-members:
+   :show-inheritance:

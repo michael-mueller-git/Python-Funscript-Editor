@@ -1,0 +1,29 @@
+funscript\_editor.algorithms namespace
+======================================
+
+Submodules
+----------
+
+funscript\_editor.algorithms.funscriptgenerator module
+------------------------------------------------------
+
+.. automodule:: funscript_editor.algorithms.funscriptgenerator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+funscript\_editor.algorithms.signalprocessing module
+----------------------------------------------------
+
+.. automodule:: funscript_editor.algorithms.signalprocessing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+funscript\_editor.algorithms.videotracker module
+------------------------------------------------
+
+.. automodule:: funscript_editor.algorithms.videotracker
+   :members:
+   :undoc-members:
+   :show-inheritance:

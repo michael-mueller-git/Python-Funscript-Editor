@@ -1,0 +1,4 @@
+VERSION.txt
+*.egg-info
+build
+dist
