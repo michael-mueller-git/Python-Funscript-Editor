@@ -1,6 +1,6 @@
 # Open Funscripter Integration
 
-A hacky lua script to use the python funscript generator scripts in Open Funscripter. Copy the lua script to `data/lua` in your OFS directory. Then adjust the python script path in OFS or direct in the source code. Finally add an shortcut for the script in OFS. The script was only tested on Linux!
+A hacky lua script to use the python funscript generator scripts in Open Funscripter. Copy the lua script (`funscript_generator.lua`) to `data/lua` in your OFS directory. Then adjust the python script path in OFS or direct in the source code. Finally add an shortcut for the script in OFS. The script was only tested on Linux!
 
 ## Memo for developer
 
