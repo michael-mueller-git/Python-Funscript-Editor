@@ -10,6 +10,7 @@ import threading
 import logging
 import shutil
 import webbrowser
+import platform
 
 import numpy as np
 
@@ -40,9 +41,21 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.__setup_shortcut_bindings()
         self.__setup_variables()
         self.__setup_autosave_timer()
+        self.setMouseTracking(True)
 
     __generateFunscript = QtCore.pyqtSignal()
     __logger = logging.getLogger(__name__)
+
+
+    def mouseMoveEvent(self, event):
+        """ Track the mouse in Qt Window """
+        # On Windows the embedded mpv player do not get the mouse events
+        if False:
+            if platform.system() == 'Windows':
+                self.video_player.send_mouse_pos(
+                        event.x() - self.ui.videoPane.x(),
+                        event.y() - self.ui.videoPane.y() - self.ui.menubar.height())
+
 
     def closeEvent(self, event):
         """ Implement for the Qt closeEvent handler """

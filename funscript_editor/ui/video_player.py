@@ -506,6 +506,20 @@ class VideoPlayer(QtCore.QThread):
                 )
 
 
+    def send_mouse_pos(self, x :int, y :int) -> None:
+        """ Control mouse on mpv via commands
+
+        Args:
+            x (int): x position
+            y (int): y position
+        """
+        self.player.command("mouse", str(x), str(y))
+        self.player.command("keydown", "MOUSE_BTN0")
+        time .sleep(0.01)
+        self.player.command("keyup", "MOUSE_BTN0")
+        # print("[DEBUG] click ui at", x, y)
+
+
     def run(self) -> None:
         """ Video Player Thread Function """
         self.player.wait_until_playing()
