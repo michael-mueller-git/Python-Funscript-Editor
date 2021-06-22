@@ -2,6 +2,8 @@
 
 A hacky lua script to use the python funscript generator scripts in Open Funscripter. Copy the lua script to `data/lua` in your OFS directory. Then adjust the python script path in OFS or direct in the source code. Finally add an shortcut for the script in OFS. The script was only tested on Linux!
 
+## Memo for developer
+
 **NOTE:** We should use luasockets for the communication but i could not get them to work. I install the lua socket module with `pacman -Sy lua-socket` and compile OFS with dynamic linked library support for lua. But when i load the socket module i got an exception `Symbol not found: some_symbol_name`.
 
 Below the code i used for my first lua socket test:
