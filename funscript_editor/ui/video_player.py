@@ -5,7 +5,6 @@ import cv2
 import time
 import os
 import logging
-import mpv # pip install python-mpv
 
 from typing import Callable
 from PIL import Image, ImageDraw, ImageFont
@@ -37,6 +36,8 @@ class VideoPlayer(QtCore.QThread):
         locale.setlocale(locale.LC_NUMERIC, 'C')
         self.video_pane.setAttribute(QtCore.Qt.WA_DontCreateNativeAncestors)
         self.video_pane.setAttribute(QtCore.Qt.WA_NativeWindow)
+        if os.getcwd() not in os.environ['PATH']: os.environ['PATH'] += os.getcwd() + os.sep
+        import mpv # pip install python-mpv
         self.player = mpv.MPV(wid=str(int(self.video_pane.winId())),
                 log_handler=self.__log_handler,
                 input_default_bindings=True,

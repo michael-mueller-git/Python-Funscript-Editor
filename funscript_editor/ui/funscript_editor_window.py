@@ -5,7 +5,6 @@ import time
 import os
 import copy
 import locale
-import mpv
 import threading
 import logging
 import shutil
