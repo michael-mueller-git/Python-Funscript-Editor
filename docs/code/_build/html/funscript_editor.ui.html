@@ -220,6 +220,12 @@
 <dd><p>Implement for the Qt keyPressEvent handler</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.ui.funscript_editor_window.FunscriptEditorWindow.mouseMoveEvent">
+<span class="sig-name descname"><span class="pre">mouseMoveEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.ui.funscript_editor_window.FunscriptEditorWindow.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Track the mouse in Qt Window</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -382,6 +388,16 @@ key_callback (Callable[[str], None]): key pressed (in video pane) handler</p>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.ui.video_player.VideoPlayer.get_length">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">get_length</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.ui.video_player.VideoPlayer.get_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get video length in frames</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: number of frames in video</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.ui.video_player.VideoPlayer.get_screenshot">
 <span class="sig-name descname"><span class="pre">get_screenshot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="headerlink" href="#funscript_editor.ui.video_player.VideoPlayer.get_screenshot" title="Permalink to this definition">¶</a></dt>
@@ -469,6 +485,17 @@ y (int): y move in percent [-99, +99]</p>
 <dd><p>Seek Video player to given timestamp</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>timestamp_in_seconds (float): timestamp in seconds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.ui.video_player.VideoPlayer.send_mouse_pos">
+<span class="sig-name descname"><span class="pre">send_mouse_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.ui.video_player.VideoPlayer.send_mouse_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control mouse on mpv via commands</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x (int): x position
+y (int): y position</p>
 </dd>
 </dl>
 </dd></dl>

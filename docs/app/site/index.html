@@ -54,6 +54,10 @@
             
             <li class="nav-item" data-level="1"><a href="#python-funscript-editor" class="nav-link">Python Funscript Editor</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#ui" class="nav-link">UI</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#algorithms" class="nav-link">Algorithms</a>
               <ul class="nav flex-column">
               </ul>
@@ -68,6 +72,139 @@
 <h1 id="python-funscript-editor">Python Funscript Editor</h1>
 <p>A Python program to quickly create prototype algorithms to partially automate the generation of funscripts.</p>
 <p><strong>NOTE:</strong> The program is currently not intended for productive use. But you can do whatever you want with this tool.</p>
+<h2 id="ui">UI</h2>
+<p>The UI use an embedded mpv video player and matplotlib to draw the actions timeseries at the bottom.</p>
+<h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P</td>
+<td>Pause / Playback</td>
+</tr>
+<tr>
+<td>.</td>
+<td>Next frame</td>
+</tr>
+<tr>
+<td>,</td>
+<td>Previous frame</td>
+</tr>
+<tr>
+<td>[</td>
+<td>Decrease speed</td>
+</tr>
+<tr>
+<td>]</td>
+<td>Increase speed</td>
+</tr>
+<tr>
+<td>Ctrl + Shift + Left</td>
+<td>Previous Action Point</td>
+</tr>
+<tr>
+<td>Ctrl + Shift + Right</td>
+<td>Next Action Point</td>
+</tr>
+<tr>
+<td>Shift + L</td>
+<td>Loop Video</td>
+</tr>
+<tr>
+<td>W</td>
+<td>Move Stroke Indicator Up</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Move Stroke Indicator Left</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Move Stroke Indicator Down</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Move Stroke Indicator Right</td>
+</tr>
+<tr>
+<td>Ctrl + I</td>
+<td>Invert Stroke Indicator</td>
+</tr>
+<tr>
+<td>Ctrl + Plus</td>
+<td>Increase Stroke Indicator</td>
+</tr>
+<tr>
+<td>Ctrl + Minus</td>
+<td>Decrease Stroke Indicator</td>
+</tr>
+<tr>
+<td>Gtrl + G</td>
+<td>Start Funscript Generator</td>
+</tr>
+<tr>
+<td>Shift + Pos1</td>
+<td>First Action Point</td>
+</tr>
+<tr>
+<td>Shift + End</td>
+<td>Last Action Point</td>
+</tr>
+<tr>
+<td>Pos1</td>
+<td>Jump to Video Start</td>
+</tr>
+<tr>
+<td>End</td>
+<td>Jump to Video End</td>
+</tr>
+<tr>
+<td>0</td>
+<td>Add Action Point at 0%</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Add Action Point at 10%</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Add Action Point at 20%</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Add Action Point at 30%</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Add Action Point at 40%</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Add Action Point at 50%</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Add Action Point at 60%</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Add Action Point at 70%</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Add Action Point at 80%</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Add Action Point at 90%</td>
+</tr>
+</tbody>
+</table>
 <h2 id="algorithms">Algorithms</h2>
 <h3 id="create-funscript-action-using-opencv-tracker">Create Funscript Action using OpenCV Tracker</h3>
 <p>Idea: By using <a href="https://learnopencv.com/object-tracking-using-opencv-cpp-python/">OpenCV Tracker</a>, we can determine the relative movements in a static camera setup and map them into Funscript actions using simple signal processing.</p>
@@ -183,5 +320,5 @@
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2021-06-20 14:05:59.620245+00:00
+Build Date UTC : 2021-06-23 18:38:21.986284+00:00
 -->
