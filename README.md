@@ -9,7 +9,18 @@ A Python program to quickly create prototype algorithms to partially automate th
 - The application documentation is located in `./docs/app/site/` (`index.html`).
 - The code documentation is located in `./docs/code/_build/html/` (`index.html`).
 
-## Build Pip-Package (Optional)
+## Build
+
+### Windows (currently not working)
+
+Use `pyinstaller` in anaconda environment:
+
+```
+pip install pyinstaller
+pyinstaller --onefile main.py
+```
+
+### Pip-Package (Recommend for Linux)
 
 Generate distribution package of this project. These are archives that can be uploaded to an local Package Index and can be installed by pip.
 
