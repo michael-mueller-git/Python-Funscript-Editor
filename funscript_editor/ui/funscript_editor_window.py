@@ -106,6 +106,8 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.video_player.set_frame_changed_callback(self.__frame_changed_handler)
 
     def __frame_changed_handler(self, frame_num):
+        if not self.ui.seekBar.isSliderDown():
+            self.ui.seekBar.setValue(frame_num)
         self.funscript_visualizer.set_frame(frame_num)
         if self.funscript is None: return
         self.ui.currentStrokeLabel.setText('{} ms'.format(\
@@ -126,6 +128,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         helpMenu.addAction("App Documentation", lambda : webbrowser.open(os.path.join(APP_DOCUMENTATION_DIR, 'index.html')))
         helpMenu.addAction("Code Documentation", lambda : webbrowser.open(os.path.join(CODE_DOCUMENTATION_DIR, 'index.html')))
         helpMenu.addAction(str('Version '+VERSION))
+        self.ui.seekBar.sliderReleased.connect(lambda: self.video_player.seek_frame(self.ui.seekBar.value()))
 
         self.__generateFunscript.connect(self.__generate_funscript)
 
@@ -269,6 +272,8 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
 
         self.video_player.set_funscript(self.funscript)
         self.funscript_visualizer.set_funscript(self.funscript)
+        self.ui.seekBar.setMaximum(max((0, self.video_player.get_length-1)))
+        self.ui.seekBar.setValue(0)
 
     def __new_funscript(self):
         self.funscript = Funscript(fps=self.video_player.get_fps)

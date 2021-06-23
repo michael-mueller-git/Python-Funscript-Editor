@@ -51,11 +51,12 @@ class VideoPlayer(QtCore.QThread):
         self.indicate_bussy = False
         self.bussy_indicator_pos = 0
         self.funscript = None
-        self.fps = None
+        self.fps = 60
         self.stroke_indicator_position = UI_CONFIG['player']['stroke_indicator_pos']
         self.stroke_indicator_size = UI_CONFIG['player']['stroke_indicator_size']
         self.quit = False
         self.duration = 0
+        self.length = 0
         self.key_callback = key_callback
         self.player.pause = True
         self.invert_stroke_indicator = False
@@ -261,6 +262,16 @@ class VideoPlayer(QtCore.QThread):
 
 
     @property
+    def get_length(self) -> int:
+        """ Get video length in frames
+
+        Returns:
+            int: number of frames in video
+        """
+        return self.length
+
+
+    @property
     def get_current_frame(self) -> int:
         """ Get current frame number
 
@@ -374,6 +385,7 @@ class VideoPlayer(QtCore.QThread):
         self.height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.duration = cap.get(cv2.CAP_PROP_FRAME_COUNT) / self.fps
+        self.length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.player.loadfile(video_file)
         self.video_file = video_file
 
@@ -403,6 +415,7 @@ class VideoPlayer(QtCore.QThread):
         Args:
             frame_number (int): frame number
         """
+        if self.length < 1: return
         self.player.seek(self.frame_to_millisec(frame_number) * 1.0 / 1000, "absolute", "exact")
 
 
