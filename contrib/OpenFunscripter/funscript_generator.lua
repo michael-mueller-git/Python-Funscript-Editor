@@ -1,12 +1,12 @@
 Settings = {}
-Settings.PythonScript = "/home/arch/Repos/private/stroker-robot/Code/Python Funscript Editor/main.py"
-Settings.TmpFile = "/tmp/funscript_actions.csv"
+Settings.FunscriptGenerator = "C:\\Users\\win10\\Desktop\\funscript-editor\\funscript-editor.exe"
+Settings.TmpFile = "C:\\Users\\win10\\AppData\\Local\\Temp\\funscript_actions.csv"
 SetSettings(Settings)
 
 function GetActions(video)
     local at = {}
     local pos = {}
-    local command = 'python3 "'..Settings.PythonScript..'" --generator -s '..tostring(CurrentTimeMs)..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
+    local command = Settings.FunscriptGenerator..' --generator -s '..tostring(CurrentTimeMs)..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
     print(command)
     os.execute(command)
     local f = io.open(Settings.TmpFile)
@@ -30,7 +30,8 @@ function GetActions(video)
 end
 
 print('start funscript generator')
-local video = VideoFilePath -- you have to set the metadata at OFS start
+local video = VideoFilePath -- NOTE: do not use special character in the video path!
+print('video file: ', video)
 local actions = {GetActions(video)}
 for i = 1, #actions[1] do
     CurrentScript:AddActionUnordered(tonumber(actions[1][i]), tonumber(actions[2][i]), true, 0)

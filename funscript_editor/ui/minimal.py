@@ -49,6 +49,7 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
             sys.exit()
 
         if not os.path.exists(video_file):
+            if video_file == "": video_file = "EMPTY"
             self.__logger.error("Video file not found: %s", video_file)
             self.__show_message("Video file not found ({})".format(video_file))
             sys.exit()
