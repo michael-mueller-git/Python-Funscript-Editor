@@ -11,14 +11,16 @@ A Python program to quickly create prototype algorithms to partially automate th
 
 ## Build
 
-### Windows (currently not working)
+### Windows
 
-Use `pyinstaller` in anaconda environment:
+Use `pyinstaller` in anaconda environment with all required packages set up:
 
 ```
 pip install pyinstaller
-pyinstaller --onefile main.py
+pyinstaller --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" main.py
 ```
+
+NOTE: don't use `--onefile`, this is way to slow
 
 ### Pip-Package (Recommend for Linux)
 
