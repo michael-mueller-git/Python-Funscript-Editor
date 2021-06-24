@@ -6,21 +6,20 @@ A Python program to quickly create prototype algorithms to partially automate th
 
 ## Documentation
 
-- The application documentation is located in `./docs/app/site/` (`index.html`).
-- The code documentation is located in `./docs/code/_build/html/` (`index.html`).
+The application documentation is located in [`./docs/app/docs/index.md`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/index.md)
 
 ## Build
 
 ### Windows
 
-Use `pyinstaller` in anaconda environment with all required packages set up:
+Use `pyinstaller` in anaconda environment with all packages from `requirements.txt` set up. Then run:
 
 ```
 pip install pyinstaller
-pyinstaller --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" main.py
+build.bat
 ```
 
-NOTE: don't use `--onefile`, this is way to slow
+NOTE: don't use `--onefile` with `pyinstaller`, this is way to slow
 
 ### Pip-Package (Recommend for Linux)
 
@@ -30,7 +29,7 @@ Generate distribution package of this project. These are archives that can be up
 make docs package
 ```
 
-This create the distribution package in `./dist`.
+This create the distribution package in `./dist`. Or simply type `make all` to build and install the package.
 
 ## TODOs
 
