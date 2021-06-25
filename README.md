@@ -19,7 +19,7 @@ pip install pyinstaller
 build.bat
 ```
 
-NOTE: don't use `--onefile` with `pyinstaller`, this is way to slow
+This create the Windows Package in `./dist`
 
 ### Pip-Package (Recommend for Linux)
 

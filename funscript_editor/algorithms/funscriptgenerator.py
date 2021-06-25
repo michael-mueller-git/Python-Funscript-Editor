@@ -28,7 +28,8 @@ class FunscriptGeneratorParameter:
     video_path: str
     start_frame: int = 0
     skip_frames: int = HYPERPARAMETER['skip_frames']
-    min_cycle_time_in_ms: int = 0 # TODO implement cycle time (indented to set playback speed)
+    max_playback_fps: int = 0
+    direction: str = 'y'
     track_men: bool = True
 
 
@@ -58,7 +59,8 @@ class FunscriptGenerator(QtCore.QThread):
 
         self.keypress_queue = Queue(maxsize=32)
         self.stopped = False
-        self.score = []
+        self.scone_x = []
+        self.scone_y = []
         self.bboxes = {
                 'Men': [],
                 'Woman': []
@@ -169,6 +171,8 @@ class FunscriptGenerator(QtCore.QThread):
             image_min :np.ndarray,
             image_max :np.ndarray,
             info :str = "",
+            title_min :str = "",
+            title_max : str = "",
             lower_limit :int = 0,
             upper_limit :int = 99) -> tuple:
         """ Min Max selection Window
@@ -177,6 +181,8 @@ class FunscriptGenerator(QtCore.QThread):
             image_min (np.ndarray): the frame/image with lowest position
             image_max (np.ndarray): the frame/image with highest position
             info (str): additional info string th show on the Window
+            title_min (str): title for the min selection
+            title_max (str): title for the max selection
             lower_limit (int): the lower possible value
             upper_limit (int): the highest possible value
 
@@ -186,8 +192,16 @@ class FunscriptGenerator(QtCore.QThread):
         cv2.createTrackbar("Min", self.window_name, lower_limit, upper_limit, lambda x: None)
         cv2.createTrackbar("Max", self.window_name, lower_limit+1, upper_limit, lambda x: None)
         image = np.concatenate((image_min, image_max), axis=1)
+
         if info != "":
             cv2.putText(image, "Info: "+info, (75, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+
+        if title_min != "":
+            cv2.putText(image, title_min, (75, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+
+        if title_max != "":
+            cv2.putText(image, title_max, (image_min.shape[1] + 75, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+
         cv2.putText(image, "Use 'space' to quit and set the trackbar values",
             (75, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
 
@@ -214,10 +228,17 @@ class FunscriptGenerator(QtCore.QThread):
         """ Calculate the score for the predicted tracking boxes
 
         Note:
-            We use y0 from the predicted tracking boxes to create a diff score
+            We use x0,y0 from the predicted tracking boxes to create a diff score
         """
-        if self.params.track_men: self.score = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
-        else: self.score = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
+        if self.params.track_men:
+            self.score_x = [m[0] - w[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
+            self.score_y = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
+        else:
+            self.score_x = [max([x[0] for x in self.bboxes['Woman']]) - w[0] for w in self.bboxes['Woman']]
+            self.score_y = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
+
+        self.score_x = sp.scale_signal(self.score_x, 0, 100)
+        self.score_y = sp.scale_signal(self.score_y, 0, 100)
 
 
     @staticmethod
@@ -235,7 +256,7 @@ class FunscriptGenerator(QtCore.QThread):
         return int(round(float(frame)*float(1000)/fps))
 
 
-    def scale_score(self, status: str) -> None:
+    def scale_score(self, status: str, direction : str = 'y') -> None:
         """ Scale the score to desired stroke high
 
         Note:
@@ -243,15 +264,20 @@ class FunscriptGenerator(QtCore.QThread):
 
         Args:
             status (str): a status/info message to display in the window
+            direction (str): scale the 'y' or 'x' score
         """
-        if len(self.score) < 2: return
+        if len(self.score_y) < 2: return
 
         cap = cv2.VideoCapture(self.params.video_path)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         scale = self.get_scaling(width)
 
-        min_frame = np.argmin(np.array(self.score)) + self.params.start_frame
-        max_frame = np.argmax(np.array(self.score)) + self.params.start_frame
+        if direction == 'x':
+            min_frame = np.argmin(np.array(self.score_x)) + self.params.start_frame
+            max_frame = np.argmax(np.array(self.score_x)) + self.params.start_frame
+        else:
+            min_frame = np.argmin(np.array(self.score_y)) + self.params.start_frame
+            max_frame = np.argmax(np.array(self.score_y)) + self.params.start_frame
 
         cap.set(cv2.CAP_PROP_POS_FRAMES, min_frame)
         successMin, imgMin = cap.read()
@@ -268,26 +294,61 @@ class FunscriptGenerator(QtCore.QThread):
             imgMin = imgMin[:, :int(imgMin.shape[1]/2)]
             imgMax = imgMax[:, :int(imgMax.shape[1]/2)]
 
-            (desired_min, desired_max) = self.min_max_selector(imgMin, imgMax, status)
+            (desired_min, desired_max) = self.min_max_selector(
+                    image_min = imgMin,
+                    image_max = imgMax,
+                    info = status,
+                    title_min = str("Bottom" if direction != "x" else "Left"),
+                    title_max = ("Top" if direction != "x" else "Right")
+                )
         else:
             self.__logger.warning("Determine min and max failed")
             desired_min = 0
             desired_max = 99
 
-        self.score = sp.scale_signal(self.score, desired_min, desired_max)
+        if direction == 'x':
+            self.score_x = sp.scale_signal(self.score_x, desired_min, desired_max)
+        else:
+            self.score_y = sp.scale_signal(self.score_y, desired_min, desired_max)
 
 
-    def plot_score(self, name: str) -> None:
+    def plot_y_score(self, name: str, idx_list: list, dpi : int = 300) -> None:
         """ Plot the score to an figure
 
         Args:
             name (str): file name for the figure
+            idx_list (list): list with funscript action points
+            dpi (int): picture output dpi
         """
-        if len(self.score) < 2: return
-        figure = Figure()
-        ax = figure.add_subplot(1,1,1)
-        ax.plot(self.score)
-        figure.savefig(fname=name, dpi=300, bbox_inches='tight')
+        if len(self.score_y) < 2: return
+        if len(idx_list) < 2: return
+        rows = 2
+        figure = Figure(figsize=(max([6,int(len(self.score_y)/50)]), rows*3+1), dpi=dpi)
+        ax = figure.add_subplot(2,1,1) # Rows, Columns, Position
+        ax.plot(self.score_y[idx_list[0]:idx_list[-1]])
+        ax.plot(idx_list, [self.score_y[idx] for idx in idx_list], 'o')
+        ax = figure.add_subplot(2,1,2)
+        ax.plot(idx_list, [self.score_y[idx] for idx in idx_list])
+        figure.savefig(fname=name, dpi=dpi, bbox_inches='tight')
+
+
+    def plot_scores(self, name: str, dpi : int = 300) -> None:
+        """ Plot the score to an figure
+
+        Args:
+            name (str): file name for the figure
+            dpi (int): picture output dpi
+        """
+        if len(self.score_y) < 2: return
+        rows = 2
+        figure = Figure(figsize=(max([6,int(len(self.score_y)/50)]), rows*3+1), dpi=dpi)
+        ax = figure.add_subplot(2,1,1) # Rows, Columns, Position
+        ax.title.set_text('Motion in x direction')
+        ax.plot(self.score_x)
+        ax = figure.add_subplot(2,1,2)
+        ax.title.set_text('Motion in y direction')
+        ax.plot(self.score_y)
+        figure.savefig(fname=name, dpi=dpi, bbox_inches='tight')
 
 
     def delete_last_tracking_predictions(self, num :int) -> None:
@@ -459,19 +520,32 @@ class FunscriptGenerator(QtCore.QThread):
 
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
+        # NOTE: score_y and score_x should have the same number of elements so it should be enouth to check one score length
         with Listener(on_press=self.on_key_press) as listener:
             status = self.tracking()
             self.calculate_score()
-            if len(self.score) >= HYPERPARAMETER['min_frames']: self.scale_score(status)
+            if len(self.score_y) >= HYPERPARAMETER['min_frames']:
+                if self.params.direction != 'x':
+                    self.scale_score(status, direction='y')
+                else:
+                    self.scale_score(status, direction='x')
 
-        if len(self.score) < HYPERPARAMETER['min_frames']:
+        if len(self.score_y) < HYPERPARAMETER['min_frames']:
             self.finished(status + ' -> Tracking time insufficient', False)
             return
 
-        idx_list = sp.get_local_max_and_min_idx(self.score, self.fps)
+        if self.params.direction != 'x':
+            idx_list = sp.get_local_max_and_min_idx(self.score_y, self.fps)
+        else:
+            idx_list = sp.get_local_max_and_min_idx(self.score_x, self.fps)
+
+        if False:
+            if self.params.direction != 'x': self.plot_y_score('debug_001.png', idx_list)
+            self.plot_scores('debug_002.png')
+
         for idx in idx_list:
             self.funscript.add_action(
-                    self.score[idx],
+                    self.score_y[idx],
                     self.frame_to_millisec(idx+self.params.start_frame, self.fps)
                 )
 
