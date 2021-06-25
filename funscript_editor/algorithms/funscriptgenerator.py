@@ -2,6 +2,7 @@
 
 import cv2
 import json
+import time
 import logging
 
 from threading import Thread
@@ -409,10 +410,16 @@ class FunscriptGenerator(QtCore.QThread):
             trackerMen = StaticVideoTracker(first_frame, bboxMen)
             self.bboxes['Men'].append(bboxMen)
 
+        if self.params.max_playback_fps > 2:
+            cycle_time_in_ms = (float(1000) / float(self.params.max_playback_fps)) * (self.params.skip_frames+1)
+        else:
+            cycle_time_in_ms = 0
+
         status = "End of video reached"
         self.clear_keypress_queue()
         last_frame, frame_num = None, 1 # first frame is was init frame
         while video.isOpen():
+            cycle_start = time.time()
             frame = video.read()
             frame_num += 1
 
@@ -462,6 +469,11 @@ class FunscriptGenerator(QtCore.QThread):
                     break
 
             last_frame = frame
+
+            if cycle_time_in_ms > 0:
+                wait = cycle_time_in_ms - (time.time() - cycle_start)*float(1000)
+                if wait > 0: time.sleep(wait/float(1000))
+
 
         video.stop()
         self.__logger.info(status)
