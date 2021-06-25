@@ -326,10 +326,15 @@ class FunscriptGenerator(QtCore.QThread):
         rows = 2
         figure = Figure(figsize=(max([6,int(len(self.score_y)/50)]), rows*3+1), dpi=dpi)
         ax = figure.add_subplot(2,1,1) # Rows, Columns, Position
-        ax.plot(self.score_y[idx_list[0]:idx_list[-1]])
+        ax.title.set_text('Motion in y direction')
+        # TODO why is there an offset of 1 in the data?
+        ax.plot(self.score_y[max((0,idx_list[0]-1)):idx_list[-1]])
         ax.plot(idx_list, [self.score_y[idx] for idx in idx_list], 'o')
+        ax.legend(['Tracker Prediction','Local Max and Min'], loc='upper right')
         ax = figure.add_subplot(2,1,2)
+        ax.title.set_text('Funscript')
         ax.plot(idx_list, [self.score_y[idx] for idx in idx_list])
+        ax.plot(idx_list, [self.score_y[idx] for idx in idx_list], 'o')
         figure.savefig(fname=name, dpi=dpi, bbox_inches='tight')
 
 
@@ -551,7 +556,7 @@ class FunscriptGenerator(QtCore.QThread):
         else:
             idx_list = sp.get_local_max_and_min_idx(self.score_x, self.fps)
 
-        if False:
+        if True:
             if self.params.direction != 'x': self.plot_y_score('debug_001.png', idx_list)
             self.plot_scores('debug_002.png')
 
