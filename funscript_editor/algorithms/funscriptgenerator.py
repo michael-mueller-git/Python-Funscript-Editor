@@ -25,12 +25,13 @@ import matplotlib.pyplot as plt
 
 @dataclass
 class FunscriptGeneratorParameter:
-    """ Funscript Generator Parameter Dataclass """
+    """ Funscript Generator Parameter Dataclass with default values """
     video_path: str
     start_frame: int = 0
     skip_frames: int = HYPERPARAMETER['skip_frames']
     max_playback_fps: int = 0
     direction: str = 'y'
+    use_zoom: bool = False
     track_men: bool = True
 
 
@@ -60,6 +61,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         self.keypress_queue = Queue(maxsize=32)
         self.stopped = False
+        self.x_text_start = 50
         self.scone_x = []
         self.scone_y = []
         self.bboxes = {
@@ -119,7 +121,7 @@ class FunscriptGenerator(QtCore.QThread):
         annotated_img = img.copy()
         fps = (self.params.skip_frames+1)*cv2.getTickFrequency()/(cv2.getTickCount()-self.timer)
         self.tracking_fps.append(fps)
-        cv2.putText(annotated_img, str(int(fps)) + ' fps', (75, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
+        cv2.putText(annotated_img, str(int(fps)) + ' fps', (self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
         self.timer = cv2.getTickCount()
         return annotated_img
 
@@ -137,7 +139,7 @@ class FunscriptGenerator(QtCore.QThread):
             np.ndarray: opencv image with text
         """
         annotated_img = img.copy()
-        cv2.putText(annotated_img, str(txt), (75, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+        cv2.putText(annotated_img, str(txt), (self.x_text_start, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
         return annotated_img
 
 
@@ -195,16 +197,16 @@ class FunscriptGenerator(QtCore.QThread):
         image = np.concatenate((image_min, image_max), axis=1)
 
         if info != "":
-            cv2.putText(image, "Info: "+info, (75, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+            cv2.putText(image, "Info: "+info, (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
 
         if title_min != "":
-            cv2.putText(image, title_min, (75, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+            cv2.putText(image, title_min, (self.x_text_start, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
 
         if title_max != "":
-            cv2.putText(image, title_max, (image_min.shape[1] + 75, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+            cv2.putText(image, title_max, (image_min.shape[1] + self.x_text_start, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
 
         cv2.putText(image, "Use 'space' to quit and set the trackbar values",
-            (75, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+            (self.x_text_start, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
 
         self.clear_keypress_queue()
         trackbarValueMin = lower_limit
@@ -213,9 +215,9 @@ class FunscriptGenerator(QtCore.QThread):
             try:
                 preview = image.copy()
                 cv2.putText(preview, "Set {} to {}".format('Min', trackbarValueMin),
-                    (75, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
+                    (self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
                 cv2.putText(preview, "Set {} to {}".format('Max', trackbarValueMax),
-                    (image_min.shape[1] + 75, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
+                    (image_min.shape[1] + self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
                 cv2.imshow(self.window_name, preview)
                 if self.was_space_pressed() or cv2.waitKey(25) == ord(' '): break
                 trackbarValueMin = cv2.getTrackbarPos("Min", self.window_name)
@@ -382,13 +384,33 @@ class FunscriptGenerator(QtCore.QThread):
         Returns:
             tuple: the entered box tuple (x,y,w,h)
         """
-        image = self.drawText(image, txt)
         image = self.drawText(image, "Press 'space' or 'enter' to continue (sometimes not very responsive)", y = 75, color = (255, 0, 0))
+        # cv2.namedWindow(self.window_name)
+        # cv2.createTrackbar("Scale", self.window_name, 1, 10, lambda x: None)
+
+        if self.params.use_zoom:
+            while True:
+                zoom_bbox = cv2.selectROI(self.window_name, self.drawText(image, "Zoom selected area"), False)
+                if zoom_bbox is None or len(zoom_bbox) == 0: continue
+                if zoom_bbox[2] < 100 or zoom_bbox[3] < 100:
+                    self.__logger.error("The selected zoom area is to small")
+                    continue
+                break
+
+            image = image[zoom_bbox[1]:zoom_bbox[1]+zoom_bbox[3], zoom_bbox[0]:zoom_bbox[0]+zoom_bbox[2]]
+            image = cv2.resize(image, None, fx=2, fy=2)
+
         while True:
             bbox = cv2.selectROI(self.window_name, self.drawText(image, txt), False)
             if bbox is None or len(bbox) == 0: continue
             if bbox[0] == 0 or bbox[1] == 0 or bbox[2] < 9 or bbox[3] < 9: continue
-            return bbox
+            break
+
+        if self.params.use_zoom:
+            # NOTE: we upscale the preview by 2
+            bbox = (round(bbox[0]/2)+zoom_bbox[0], round(bbox[1]/2)+zoom_bbox[1], round(bbox[2]/2), round(bbox[3]/2))
+
+        return bbox
 
 
     def tracking(self) -> str:
@@ -452,7 +474,7 @@ class FunscriptGenerator(QtCore.QThread):
 
                 last_frame = self.drawFPS(last_frame)
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
-                        (75, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+                        (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
                 cv2.imshow(self.window_name, last_frame)
 
                 if self.was_q_pressed() or cv2.waitKey(1) == ord('q'):
@@ -556,7 +578,7 @@ class FunscriptGenerator(QtCore.QThread):
         else:
             idx_list = sp.get_local_max_and_min_idx(self.score_x, self.fps)
 
-        if True:
+        if False:
             if self.params.direction != 'x': self.plot_y_score('debug_001.png', idx_list)
             self.plot_scores('debug_002.png')
 
