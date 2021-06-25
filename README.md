@@ -30,7 +30,3 @@ make docs package
 ```
 
 This create the distribution package in `./dist`. Or simply type `make all` to build and install the package.
-
-## TODOs
-
-- Append script to predict x-Movement

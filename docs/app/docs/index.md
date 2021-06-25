@@ -67,7 +67,7 @@ The Algorithm is implemented for 3D Side-By-Side VR Videos. Some parameter are c
 4. Map the relative difference to an absolute difference score by user input.
 5. Filter all local min and max points to get the final action positions for the Funscript.
 
-### Improvements
+#### Improvements
 
 - You can change the OpenCV tracker in the source code which predicts the position. OpenCV offers several trackers which differ in prediction accuracy and processing speed. See also [OpenCV Tracker](https://learnopencv.com/object-tracking-using-opencv-cpp-python/).
 

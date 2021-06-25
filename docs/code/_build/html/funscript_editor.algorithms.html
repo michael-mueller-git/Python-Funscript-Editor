@@ -210,7 +210,7 @@ target (str): the target where to save the interpolated tracking boxes</p>
 <span class="sig-name descname"><span class="pre">calculate_score</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.calculate_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the score for the predicted tracking boxes</p>
 <dl class="simple">
-<dt>Note:</dt><dd><p>We use y0 from the predicted tracking boxes to create a diff score</p>
+<dt>Note:</dt><dd><p>We use x0,y0 from the predicted tracking boxes to create a diff score</p>
 </dd>
 </dl>
 </dd></dl>
@@ -338,12 +338,14 @@ txt (str): additional text to display on the selection window</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.min_max_selector">
-<span class="sig-name descname"><span class="pre">min_max_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_max</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">99</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.min_max_selector" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">min_max_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_max</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_max</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">99</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.min_max_selector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Min Max selection Window</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>image_min (np.ndarray): the frame/image with lowest position
 image_max (np.ndarray): the frame/image with highest position
 info (str): additional info string th show on the Window
+title_min (str): title for the min selection
+title_max (str): title for the max selection
 lower_limit (int): the lower possible value
 upper_limit (int): the highest possible value</p>
 </dd>
@@ -363,11 +365,24 @@ upper_limit (int): the highest possible value</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.plot_score">
-<span class="sig-name descname"><span class="pre">plot_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.plot_score" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.plot_scores">
+<span class="sig-name descname"><span class="pre">plot_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.plot_scores" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the score to an figure</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>name (str): file name for the figure</p>
+<dt>Args:</dt><dd><p>name (str): file name for the figure
+dpi (int): picture output dpi</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.plot_y_score">
+<span class="sig-name descname"><span class="pre">plot_y_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.plot_y_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the score to an figure</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>name (str): file name for the figure
+idx_list (list): list with funscript action points
+dpi (int): picture output dpi</p>
 </dd>
 </dl>
 </dd></dl>
@@ -386,12 +401,13 @@ upper_limit (int): the highest possible value</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.scale_score">
-<span class="sig-name descname"><span class="pre">scale_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.scale_score" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">scale_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'y'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.scale_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scale the score to desired stroke high</p>
 <dl class="simple">
 <dt>Note:</dt><dd><p>We determine the lowerst and highes positions in the score and request the real position from user.</p>
 </dd>
-<dt>Args:</dt><dd><p>status (str): a status/info message to display in the window</p>
+<dt>Args:</dt><dd><p>status (str): a status/info message to display in the window
+direction (str): scale the ‘y’ or ‘x’ score</p>
 </dd>
 </dl>
 </dd></dl>
@@ -430,12 +446,17 @@ upper_limit (int): the highest possible value</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.funscriptgenerator.</span></span><span class="sig-name descname"><span class="pre">FunscriptGeneratorParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_frames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cycle_time_in_ms</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_men</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.funscriptgenerator.</span></span><span class="sig-name descname"><span class="pre">FunscriptGeneratorParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_frames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_playback_fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_men</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Funscript Generator Parameter Dataclass</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.min_cycle_time_in_ms">
-<span class="sig-name descname"><span class="pre">min_cycle_time_in_ms</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.min_cycle_time_in_ms" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.direction">
+<span class="sig-name descname"><span class="pre">direction</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><em class="property"> <span class="pre">=</span> <span class="pre">'y'</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.direction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.max_playback_fps">
+<span class="sig-name descname"><span class="pre">max_playback_fps</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.max_playback_fps" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
