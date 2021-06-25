@@ -26,12 +26,12 @@ import matplotlib.pyplot as plt
 @dataclass
 class FunscriptGeneratorParameter:
     """ Funscript Generator Parameter Dataclass with default values """
-    video_path: str
-    start_frame: int = 0
+    video_path: str # no default value
+    start_frame: int = 0 # default is video start
     skip_frames: int = HYPERPARAMETER['skip_frames']
-    max_playback_fps: int = 0
-    direction: str = 'y'
-    use_zoom: bool = False
+    max_playback_fps: int = HYPERPARAMETER['max_playback_fps']
+    direction: str = HYPERPARAMETER['tracking_direction']
+    use_zoom: bool = HYPERPARAMETER['use_zoom']
     track_men: bool = True
 
 

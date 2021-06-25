@@ -1,3 +1,6 @@
 skip_frames: 1
 avg_sec_for_local_min_max_extraction: 1.9
 min_frames: 120
+use_zoom: False
+tracking_direction: 'y'
+max_playback_fps: 0
