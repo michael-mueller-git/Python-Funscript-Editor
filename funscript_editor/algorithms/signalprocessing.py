@@ -17,6 +17,33 @@ def scale_signal(signal :list, lower: float = 0, upper: float = 99) -> list:
     return [(upper - lower) * (x - min(signal)) / (max(signal) - min(signal)) + lower for x in signal]
 
 
+def scale_signal_with_anomalies(
+        signal :list,
+        lower: float = 0,
+        upper: float = 99,
+        lower_quantile: float = 0.0005,
+        upper_quantile: float = 0.9995) -> list:
+    """ Scale an signal (list of float or int) between given lower and upper value
+
+    Args:
+        signal (list): list with float or int signal values to scale
+        lower (float): lower scale value
+        upper (float): upper scale value
+        lower_quantile (float): lower quantile value to filter [0,1]
+        upper_quantile (float): upper quantile value to filter [0,1]
+
+    Returns:
+        list: list with scaled signal
+    """
+    a1 = np.quantile(signal, lower_quantile)
+    a2 = np.quantile(signal, upper_quantile)
+    anomaly_free = np.array([x for x in signal if a1 < x < a2])
+    anomaly_free_min = min(anomaly_free)
+    anomaly_free_max = max(anomaly_free)
+    scaled = [(upper - lower) * (x - anomaly_free_min) / (anomaly_free_max - anomaly_free_min) + lower for x in signal]
+    return [min((anomaly_free_max, max((anomaly_free_min, x)) )) for x in scaled]
+
+
 def moving_average(x :list, w: int) -> list:
     """ Calculate moving average for given signal x with window size w
 

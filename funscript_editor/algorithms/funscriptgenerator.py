@@ -240,6 +240,10 @@ class FunscriptGenerator(QtCore.QThread):
             self.score_x = [max([x[0] for x in self.bboxes['Woman']]) - w[0] for w in self.bboxes['Woman']]
             self.score_y = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
 
+        # NOTE: Scaling with the anomaly function sometimes makes the result even worse
+        # self.score_x = sp.scale_signal_with_anomalies(self.score_x, 0, 100, lower_quantile=0.05, upper_quantile=0.99999)
+        # self.score_y = sp.scale_signal_with_anomalies(self.score_y, 0, 100, lower_quantile=0.05, upper_quantile=0.99999)
+
         self.score_x = sp.scale_signal(self.score_x, 0, 100)
         self.score_y = sp.scale_signal(self.score_y, 0, 100)
 
@@ -504,6 +508,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         video.stop()
         self.__logger.info(status)
+        self.calculate_score()
         return status
 
 
@@ -562,7 +567,6 @@ class FunscriptGenerator(QtCore.QThread):
         # NOTE: score_y and score_x should have the same number of elements so it should be enouth to check one score length
         with Listener(on_press=self.on_key_press) as listener:
             status = self.tracking()
-            self.calculate_score()
             if len(self.score_y) >= HYPERPARAMETER['min_frames']:
                 if self.params.direction != 'x':
                     self.scale_score(status, direction='y')
