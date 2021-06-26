@@ -1,4 +1,6 @@
-# Build
+# Build from Source
+
+For Windows user i recommend to use the release version from [github release page](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases)
 
 ## Windows
 
