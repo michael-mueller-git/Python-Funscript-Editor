@@ -1,0 +1,3 @@
+use_zoom: False
+tracking_direction: 'y'
+max_playback_fps: 0

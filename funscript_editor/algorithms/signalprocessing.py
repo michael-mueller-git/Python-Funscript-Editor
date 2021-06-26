@@ -62,30 +62,39 @@ def moving_average(x :list, w: int) -> list:
             +[avg[-1] for _ in range(len(avg)+w,len(x))]
 
 
-def get_local_max_and_min_idx(score :list, fps: int) -> list:
+def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_max :int = 0) -> dict:
     """ Get the local max and min positions in given signal
 
     Args:
         score (list): list with float or int signal values
         fps (int): rounded fps of the video
+        shift_min (int): shift the local min indexes by given value (default is 0)
+        shift_max (int): shift the local max indexes by given value (default is 0)
 
     Returns:
-        list: list with all local max and min indexes
+        dict: dict with 2 lists with all local max and min indexes ({'min':[], 'max':[]})
     """
     avg = moving_average(score, w=round(fps * HYPERPARAMETER['avg_sec_for_local_min_max_extraction']))
-    tmp_min_idx, tmp_max_idx, idx_list = -1, -1, []
+    result = {'min': [], 'max': []}
+    tmp_min_idx, tmp_max_idx = -1, -1
     for pos in range(len(score)):
         if score[pos] < avg[pos]:
             if tmp_min_idx < 0: tmp_min_idx = pos
             elif score[tmp_min_idx] > score[pos]: tmp_min_idx = pos
         elif tmp_min_idx >= 0:
-            idx_list.append(tmp_min_idx)
+            if tmp_min_idx >= -1*shift_min and tmp_min_idx + shift_min < len(score):
+                result['min'].append(tmp_min_idx + shift_min)
+            else:
+                result['min'].append(tmp_min_idx)
             tmp_min_idx = -1
 
         if score[pos] > avg[pos]:
             if tmp_max_idx < 0: tmp_max_idx = pos
             elif score[tmp_max_idx] < score[pos]: tmp_max_idx = pos
         elif tmp_max_idx >= 0:
-            idx_list.append(tmp_max_idx)
+            if tmp_max_idx >= -1*shift_max and tmp_max_idx + shift_max < len(score):
+                result['max'].append(tmp_max_idx + shift_max)
+            else:
+                result['max'].append(tmp_max_idx)
             tmp_max_idx = -1
-    return idx_list
+    return result

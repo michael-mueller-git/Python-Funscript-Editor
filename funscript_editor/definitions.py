@@ -38,6 +38,7 @@ UI_CONFIG_FILE = os.path.join(CONFIG_DIR, 'ui.yaml')
 WINDOWS_LOG_CONFIG_FILE = os.path.join(CONFIG_DIR, 'logging_windows.yaml')
 LINUX_LOG_CONFIG_FILE = os.path.join(CONFIG_DIR, 'logging_linux.yaml')
 HYPERPARAMETER_CONFIG_FILE = os.path.join(CONFIG_DIR, 'hyperparameter.yaml')
+SETTINGS_CONFIG_FILE = os.path.join(CONFIG_DIR, 'settings.yaml')
 
 
 ##########

@@ -15,7 +15,7 @@ from funscript_editor.algorithms.videotracker import StaticVideoTracker
 from PyQt5 import QtGui, QtCore, QtWidgets
 from matplotlib.figure import Figure
 from funscript_editor.definitions import VIDEO_SCALING_CONFIG_FILE
-from funscript_editor.utils.config import HYPERPARAMETER
+from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
 from datetime import datetime
 
 import funscript_editor.algorithms.signalprocessing as sp
@@ -29,9 +29,11 @@ class FunscriptGeneratorParameter:
     video_path: str # no default value
     start_frame: int = 0 # default is video start
     skip_frames: int = HYPERPARAMETER['skip_frames']
-    max_playback_fps: int = HYPERPARAMETER['max_playback_fps']
-    direction: str = HYPERPARAMETER['tracking_direction']
-    use_zoom: bool = HYPERPARAMETER['use_zoom']
+    max_playback_fps: int = SETTINGS['max_playback_fps']
+    direction: str = SETTINGS['tracking_direction']
+    use_zoom: bool = SETTINGS['use_zoom']
+    shift_bottom_points :int = HYPERPARAMETER['shift_bottom_points']
+    shift_top_points :int = HYPERPARAMETER['shift_top_points']
     track_men: bool = True
 
 
@@ -324,7 +326,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         Args:
             name (str): file name for the figure
-            idx_list (list): list with funscript action points
+            idx_list (list): list with all frame numbers with funscript action points
             dpi (int): picture output dpi
         """
         if len(self.score_y) < 2: return
@@ -432,6 +434,9 @@ class FunscriptGenerator(QtCore.QThread):
         if first_frame is None:
             return
 
+        if self.params.skip_frames < 0:
+            self.params.skip_frames = 0
+
         bboxWoman = self.get_bbox(first_frame, "Select Woman Feature")
         trackerWoman = StaticVideoTracker(first_frame, bboxWoman)
         self.bboxes['Woman'].append(bboxWoman)
@@ -441,7 +446,7 @@ class FunscriptGenerator(QtCore.QThread):
             trackerMen = StaticVideoTracker(first_frame, bboxMen)
             self.bboxes['Men'].append(bboxMen)
 
-        if self.params.max_playback_fps > 2:
+        if self.params.max_playback_fps > (self.params.skip_frames+1):
             cycle_time_in_ms = (float(1000) / float(self.params.max_playback_fps)) * (self.params.skip_frames+1)
         else:
             cycle_time_in_ms = 0
@@ -562,6 +567,23 @@ class FunscriptGenerator(QtCore.QThread):
         self.stopped = True
 
 
+    def apply_shift(self, frame_number, position: str) -> int:
+        """ Apply shift to predicted frame positions
+
+        Args:
+            position (str): is max or min
+        """
+        if position in ['max', 'top'] and self.params.direction != 'x':
+            if frame_number >= -1*self.params.shift_top_points and frame_number + self.params.shift_top_points < len(self.score_y):
+                return self.params.start_frame + frame_number + self.params.shift_top_points
+
+        if position in ['min', 'bottom'] and self.params.direction != 'x':
+            if frame_number >= -1*self.params.shift_bottom_points and frame_number + self.params.shift_bottom_points < len(self.score_y):
+                return self.params.start_frame + frame_number + self.params.shift_bottom_points
+
+        return self.params.start_frame + frame_number
+
+
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
         # NOTE: score_y and score_x should have the same number of elements so it should be enouth to check one score length
@@ -578,18 +600,28 @@ class FunscriptGenerator(QtCore.QThread):
             return
 
         if self.params.direction != 'x':
-            idx_list = sp.get_local_max_and_min_idx(self.score_y, self.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score_y, self.fps)
         else:
-            idx_list = sp.get_local_max_and_min_idx(self.score_x, self.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score_x, self.fps)
+
+        idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
+        idx_list.sort()
 
         if False:
-            if self.params.direction != 'x': self.plot_y_score('debug_001.png', idx_list)
-            self.plot_scores('debug_002.png')
+            self.plot_scores('debug_001.png')
+            if self.params.direction != 'x':
+                self.plot_y_score('debug_002.png', idx_list)
 
-        for idx in idx_list:
+        for idx in idx_dict['min']:
             self.funscript.add_action(
                     self.score_y[idx],
-                    self.frame_to_millisec(idx+self.params.start_frame, self.fps)
+                    self.frame_to_millisec(self.apply_shift(idx, 'min'), self.fps)
+                )
+
+        for idx in idx_dict['max']:
+            self.funscript.add_action(
+                    self.score_y[idx],
+                    self.frame_to_millisec(self.apply_shift(idx, 'max'), self.fps)
                 )
 
         self.finished(status, True)

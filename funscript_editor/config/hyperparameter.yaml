@@ -1,6 +1,13 @@
+# interpolate given frames to increase the processing speed
 skip_frames: 1
+
+# specify the window size for the calculation of the reference value for the local min and max search.
 avg_sec_for_local_min_max_extraction: 1.9
+
+# specify the minimum required frames for the tracking.
 min_frames: 120
-use_zoom: False
-tracking_direction: 'y'
-max_playback_fps: 0
+
+# shift predicted points by given frame number.
+# positive values delay the position and negative values result in an earlier position.
+shift_top_points: 0
+shift_bottom_points: 0

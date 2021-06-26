@@ -3,7 +3,8 @@
 import os
 import yaml
 
-from funscript_editor.definitions import ROOT_DIR, UI_CONFIG_FILE, HYPERPARAMETER_CONFIG_FILE
+from funscript_editor.definitions import ROOT_DIR, UI_CONFIG_FILE, \
+        HYPERPARAMETER_CONFIG_FILE, SETTINGS_CONFIG_FILE
 
 def read_yaml_config(config_file: str) -> dict:
     """ Parse a yaml config file
@@ -37,3 +38,6 @@ VERSION = read_version()
 
 #: hyperparameter for the algorithms
 HYPERPARAMETER = read_yaml_config(HYPERPARAMETER_CONFIG_FILE)
+
+#: settings
+SETTINGS = read_yaml_config(SETTINGS_CONFIG_FILE)

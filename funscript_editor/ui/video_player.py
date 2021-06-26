@@ -291,7 +291,7 @@ class VideoPlayer(QtCore.QThread):
 
     def decrease_speed(self) -> None:
         """ Decrease the playback speed """
-        self.player.speed -= 0.2
+        if self.player.speed > 0.21: self.player.speed -= 0.2
         if 0.9 < self.player.speed < 1.1: self.player.speed = 1.0
         self.show_message('Speed: ' + str(self.player.speed))
 
