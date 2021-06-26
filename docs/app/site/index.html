@@ -24,9 +24,36 @@
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
                 <a class="navbar-brand" href=".">Funscript Editor</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
                 <!-- Expanded navigation -->
                 <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem active">
+                                <a href="." class="nav-link">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="user-guide/ofs-integration/" class="dropdown-item">OFS Integration</a>
+</li>
+                                    
+<li>
+    <a href="user-guide/ui/" class="dropdown-item">UI</a>
+</li>
+                                    
+<li>
+    <a href="user-guide/algorithms/" class="dropdown-item">Algorithms</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
 
                     <ul class="nav navbar-nav ml-auto">
                         <li class="nav-item">
@@ -34,6 +61,16 @@
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
+                            <li class="nav-item">
+                                <a rel="prev" class="nav-link disabled">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="user-guide/ofs-integration/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
                     </ul>
                 </div>
             </div>
@@ -54,11 +91,7 @@
             
             <li class="nav-item" data-level="1"><a href="#python-funscript-editor" class="nav-link">Python Funscript Editor</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#ui" class="nav-link">UI</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#algorithms" class="nav-link">Algorithms</a>
+            <li class="nav-item" data-level="2"><a href="#user-guide" class="nav-link">User-Guide</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -72,170 +105,11 @@
 <h1 id="python-funscript-editor">Python Funscript Editor</h1>
 <p>A Python program to quickly create prototype algorithms to partially automate the generation of funscripts.</p>
 <p><strong>NOTE:</strong> The program is currently not intended for productive use. But you can do whatever you want with this tool.</p>
-<h2 id="ui">UI</h2>
-<p>The UI use an embedded mpv video player and matplotlib to draw the actions timeseries at the bottom.</p>
-<h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
-<table>
-<thead>
-<tr>
-<th>Key</th>
-<th>Function</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>P</td>
-<td>Pause / Playback</td>
-</tr>
-<tr>
-<td>.</td>
-<td>Next frame</td>
-</tr>
-<tr>
-<td>,</td>
-<td>Previous frame</td>
-</tr>
-<tr>
-<td>[</td>
-<td>Decrease speed</td>
-</tr>
-<tr>
-<td>]</td>
-<td>Increase speed</td>
-</tr>
-<tr>
-<td>Ctrl + Shift + Left</td>
-<td>Previous Action Point</td>
-</tr>
-<tr>
-<td>Ctrl + Shift + Right</td>
-<td>Next Action Point</td>
-</tr>
-<tr>
-<td>Shift + L</td>
-<td>Loop Video</td>
-</tr>
-<tr>
-<td>W</td>
-<td>Move Stroke Indicator Up</td>
-</tr>
-<tr>
-<td>A</td>
-<td>Move Stroke Indicator Left</td>
-</tr>
-<tr>
-<td>S</td>
-<td>Move Stroke Indicator Down</td>
-</tr>
-<tr>
-<td>D</td>
-<td>Move Stroke Indicator Right</td>
-</tr>
-<tr>
-<td>Ctrl + I</td>
-<td>Invert Stroke Indicator</td>
-</tr>
-<tr>
-<td>Ctrl + Plus</td>
-<td>Increase Stroke Indicator</td>
-</tr>
-<tr>
-<td>Ctrl + Minus</td>
-<td>Decrease Stroke Indicator</td>
-</tr>
-<tr>
-<td>Gtrl + G</td>
-<td>Start Funscript Generator</td>
-</tr>
-<tr>
-<td>Shift + Pos1</td>
-<td>First Action Point</td>
-</tr>
-<tr>
-<td>Shift + End</td>
-<td>Last Action Point</td>
-</tr>
-<tr>
-<td>Pos1</td>
-<td>Jump to Video Start</td>
-</tr>
-<tr>
-<td>End</td>
-<td>Jump to Video End</td>
-</tr>
-<tr>
-<td>0</td>
-<td>Add Action Point at 0%</td>
-</tr>
-<tr>
-<td>1</td>
-<td>Add Action Point at 10%</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Add Action Point at 20%</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Add Action Point at 30%</td>
-</tr>
-<tr>
-<td>4</td>
-<td>Add Action Point at 40%</td>
-</tr>
-<tr>
-<td>5</td>
-<td>Add Action Point at 50%</td>
-</tr>
-<tr>
-<td>6</td>
-<td>Add Action Point at 60%</td>
-</tr>
-<tr>
-<td>7</td>
-<td>Add Action Point at 70%</td>
-</tr>
-<tr>
-<td>8</td>
-<td>Add Action Point at 80%</td>
-</tr>
-<tr>
-<td>9</td>
-<td>Add Action Point at 90%</td>
-</tr>
-</tbody>
-</table>
-<h2 id="algorithms">Algorithms</h2>
-<h3 id="create-funscript-action-using-opencv-tracker">Create Funscript Action using OpenCV Tracker</h3>
-<p>Idea: By using <a href="https://learnopencv.com/object-tracking-using-opencv-cpp-python/">OpenCV Tracker</a>, we can determine the relative movements in a static camera setup and map them into Funscript actions using simple signal processing.</p>
-<p>The Algorithm is implemented for 3D Side-By-Side VR Videos. Some parameter are currently hard coded. It should be possible to expand the functionality to 2D Videos by changing the code, with the following limitations.</p>
-<h4 id="limitations">Limitations</h4>
+<h2 id="user-guide">User-Guide</h2>
 <ul>
-<li>Static camera setup</li>
-<li>Fixed reference point of relative movement in video required</li>
-<li>No video cuts within a tracking sequence allowed</li>
-<li>No change of position of the performers</li>
-<li>Features in the video which are visible in all following frames of the tracking sequence required.</li>
-</ul>
-<h4 id="process">Process</h4>
-<ol>
-<li>Selection of the features for the Woman and Men in the video, which should be tracked.</li>
-<li>Predict the feature positions in the following video frames by OpenCV Tracker.</li>
-<li>Calculate the difference between the predicted tracking boxes.</li>
-<li>Map the relative difference to an absolute difference score by user input.</li>
-<li>Filter all local min and max points to get the final action positions for the Funscript.</li>
-</ol>
-<h4 id="improvements">Improvements</h4>
-<ul>
-<li>
-<p>You can change the OpenCV tracker in the source code which predicts the position. OpenCV offers several trackers which differ in prediction accuracy and processing speed. See also <a href="https://learnopencv.com/object-tracking-using-opencv-cpp-python/">OpenCV Tracker</a>.</p>
-</li>
-<li>
-<p>You can set the number of frames that are interpolated by the <code>skip_frames</code> parameter. 0 means that the OpenCV tracker delivers a prediction for each frame. This is slower but more accurate. Or if greater than zero, the individual frames are skipped and then the tracking boxes are interpolated, which increases the processing speed but decreases the accuracy. I have set the value to 1, i.e. every 2nd frame is skipped and interpolated. Which provides a good mix of accuracy and speed.</p>
-</li>
-<li>
-<p>It is recommended to use a low resolution video e.g. 4K for generating the funscript actions, as the processing speed is higher.</p>
-</li>
+<li><a href="user-guide/algorithms/index.html">Algorithms</a></li>
+<li><a href="user-guide/ofs-integration/index.html">OFS Integration</a></li>
+<li><a href="user-guide/ui/index.html">UI</a></li>
 </ul></div>
             </div>
         </div>
@@ -320,5 +194,5 @@
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2021-06-25 17:42:41.799080+00:00
+Build Date UTC : 2021-06-26 06:43:36.336324+00:00
 -->

@@ -7,15 +7,15 @@
         
         
         
-        <link rel="shortcut icon" href="/img/favicon.ico">
-        <title>Funscript Editor</title>
-        <link href="/css/bootstrap.min.css" rel="stylesheet">
-        <link href="/css/font-awesome.min.css" rel="stylesheet">
-        <link href="/css/base.css" rel="stylesheet">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>UI - Funscript Editor</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
 
-        <script src="/js/jquery-1.10.2.min.js" defer></script>
-        <script src="/js/bootstrap.min.js" defer></script>
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
@@ -23,7 +23,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href="/.">Funscript Editor</a>
+                <a class="navbar-brand" href="../..">Funscript Editor</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -34,22 +34,22 @@
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
                             <li class="navitem">
-                                <a href="/." class="nav-link">Home</a>
+                                <a href="../.." class="nav-link">Home</a>
                             </li>
-                            <li class="dropdown">
+                            <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="/user-guide/ofs-integration/" class="dropdown-item">OFS Integration</a>
+    <a href="../ofs-integration/" class="dropdown-item">OFS Integration</a>
 </li>
                                     
 <li>
-    <a href="/user-guide/ui/" class="dropdown-item">UI</a>
+    <a href="./" class="dropdown-item active">UI</a>
 </li>
                                     
 <li>
-    <a href="/user-guide/algorithms/" class="dropdown-item">Algorithms</a>
+    <a href="../algorithms/" class="dropdown-item">Algorithms</a>
 </li>
                                 </ul>
                             </li>
@@ -61,6 +61,16 @@
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../ofs-integration/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../algorithms/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
                     </ul>
                 </div>
             </div>
@@ -68,15 +78,163 @@
 
         <div class="container">
             <div class="row">
-
-    <div class="row-fluid">
-      <div id="main-content" class="span12">
-        <h1 id="404-page-not-found" style="text-align: center">404</h1>
-        <p style="text-align: center"><strong>Page not found</strong></p>
-      </div>
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
     </div>
 
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#ui" class="nav-link">UI</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#ui-keyboard-shortcuts" class="nav-link">UI Keyboard Shortcuts</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
 
+<h1 id="ui">UI</h1>
+<p>The UI use an embedded mpv video player and matplotlib to draw the actions timeseries at the bottom.</p>
+<h2 id="ui-keyboard-shortcuts">UI Keyboard Shortcuts</h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P</td>
+<td>Pause / Playback</td>
+</tr>
+<tr>
+<td>.</td>
+<td>Next frame</td>
+</tr>
+<tr>
+<td>,</td>
+<td>Previous frame</td>
+</tr>
+<tr>
+<td>[</td>
+<td>Decrease speed</td>
+</tr>
+<tr>
+<td>]</td>
+<td>Increase speed</td>
+</tr>
+<tr>
+<td>Ctrl + Shift + Left</td>
+<td>Previous Action Point</td>
+</tr>
+<tr>
+<td>Ctrl + Shift + Right</td>
+<td>Next Action Point</td>
+</tr>
+<tr>
+<td>Shift + L</td>
+<td>Loop Video</td>
+</tr>
+<tr>
+<td>W</td>
+<td>Move Stroke Indicator Up</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Move Stroke Indicator Left</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Move Stroke Indicator Down</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Move Stroke Indicator Right</td>
+</tr>
+<tr>
+<td>Ctrl + I</td>
+<td>Invert Stroke Indicator</td>
+</tr>
+<tr>
+<td>Ctrl + Plus</td>
+<td>Increase Stroke Indicator</td>
+</tr>
+<tr>
+<td>Ctrl + Minus</td>
+<td>Decrease Stroke Indicator</td>
+</tr>
+<tr>
+<td>Gtrl + G</td>
+<td>Start Funscript Generator</td>
+</tr>
+<tr>
+<td>Shift + Pos1</td>
+<td>First Action Point</td>
+</tr>
+<tr>
+<td>Shift + End</td>
+<td>Last Action Point</td>
+</tr>
+<tr>
+<td>Pos1</td>
+<td>Jump to Video Start</td>
+</tr>
+<tr>
+<td>End</td>
+<td>Jump to Video End</td>
+</tr>
+<tr>
+<td>0</td>
+<td>Add Action Point at 0%</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Add Action Point at 10%</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Add Action Point at 20%</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Add Action Point at 30%</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Add Action Point at 40%</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Add Action Point at 50%</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Add Action Point at 60%</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Add Action Point at 70%</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Add Action Point at 80%</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Add Action Point at 90%</td>
+</tr>
+</tbody>
+</table></div>
             </div>
         </div>
 
@@ -85,11 +243,11 @@
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = "/",
+            var base_url = "../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="/js/base.js" defer></script>
-        <script src="/search/main.js" defer></script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

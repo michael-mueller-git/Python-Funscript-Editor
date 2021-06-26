@@ -1,1 +1,7 @@
 site_name: Funscript Editor
+pages:
+  - Home: 'index.md'
+  - User Guide:
+    - 'OFS Integration': 'user-guide/ofs-integration.md'
+    - 'UI': 'user-guide/ui.md'
+    - 'Algorithms': 'user-guide/algorithms.md'
