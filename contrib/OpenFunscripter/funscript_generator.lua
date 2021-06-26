@@ -1,12 +1,12 @@
 Settings = {}
-Settings.FunscriptGenerator = "C:\\Users\\win10\\Desktop\\funscript-editor\\funscript-editor.exe"
-Settings.TmpFile = "C:\\Users\\win10\\AppData\\Local\\Temp\\funscript_actions.csv" -- file where to temporary store the result (must be a file not a directory!)
+Settings.FunscriptGenerator = 'C:/Users/win10/Desktop/funscript editor/funscript-editor.exe' -- Path to your Python Funscript Editor installation
+Settings.TmpFile = 'C:/Users/win10/AppData/Local/Temp/funscript_actions.csv' -- file where to temporary store the result (must be a file not a directory!)
 SetSettings(Settings)
 
 function GetActions(video)
     local at = {}
     local pos = {}
-    local command = Settings.FunscriptGenerator..' --generator -s '..tostring(CurrentTimeMs)..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
+    local command = '""'..Settings.FunscriptGenerator..'" --generator -s '..tostring(CurrentTimeMs)..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
     print(command)
     os.execute(command)
     local f = io.open(Settings.TmpFile)
