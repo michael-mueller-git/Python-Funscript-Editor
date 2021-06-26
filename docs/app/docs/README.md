@@ -6,6 +6,6 @@ A Python program to quickly create prototype algorithms to partially automate th
 
 ## User-Guide
 
-- [Algorithms](user-guide/algorithms/index.md)
-- [OFS Integration](user-guide/ofs-integration/index.md)
-- [UI](user-guide/ui/index.md)
+- [Algorithms](user-guide/algorithms.md)
+- [OFS Integration](user-guide/ofs-integration.md)
+- [UI](user-guide/ui.md)
