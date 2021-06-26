@@ -25,6 +25,11 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
     def __init__(self, video_file, start_time, output_file):
         super(MinimalFunscriptGenerator, self).__init__()
 
+        if os.path.isdir(output_file):
+            self.__logger.error("The output TempFile path must be a file not a folder")
+            self.__show_message("The output TempFile path must be a file not a folder")
+            sys.exit()
+
         if os.path.exists(output_file):
             os.remove(output_file)
 
@@ -43,13 +48,12 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
                 logging.info('abort')
                 sys.exit()
 
-        if video_file is None:
+        if video_file is None or video_file == "":
             self.__logger.error("Video file was not specified!")
             self.__show_message("Video file was not specified!")
             sys.exit()
 
         if not os.path.exists(video_file):
-            if video_file == "": video_file = "EMPTY"
             self.__logger.error("Video file not found: %s", video_file)
             self.__show_message("Video file not found ({})".format(video_file))
             sys.exit()
