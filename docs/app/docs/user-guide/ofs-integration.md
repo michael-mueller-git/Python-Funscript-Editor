@@ -6,7 +6,7 @@ Currently we use a hacky lua script to communicate between the Python Funscript 
 
 1. Download the latest packed Python Funscript Editor from [github release page](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases).
 2. Extract the Archiv to an Path without special character or spaces.
-3. Copy the `funscript_generator.lua` script ([`Repositor/contrib/OpenFunscripter`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/OpenFunscripter)) to `data/lua` in your OFS directory.
+3. Copy the `funscript_generator.lua` script ([`Repository/contrib/OpenFunscripter`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/OpenFunscripter)) to `data/lua` in your OFS directory.
 4. Open the `funscript_generator.lua` file and adjust the `Settings.FunscriptGenerator` and `Settings.TmpFile` variable.
    - `Settings.FunscriptGenerator`: point to the extracted Python Funscript Editor program
    - `Settings.TmpFile`: specifies a temporary file where to store the result (must be a file not a directory!). The file will be overwritten automatically the next time the generator is started!
