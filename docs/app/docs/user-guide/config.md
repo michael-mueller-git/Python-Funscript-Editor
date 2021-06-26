@@ -28,6 +28,7 @@ Config Files:
 #### `settings.yaml`
 
 - `use_zoom` (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.
+- `use_equirectangular` (bool): Convert video in normal perspective view before apply tracking. This should improve the tracking at the border of videos, because there is the distortion very high.
 - `tracking_direction` (str): Specify the tracking direction. Allowed values are `'x'` and `'y'`.
 - `max_playback_fps` (int): Limit the max player speed in the tracking preview window (0 = disable limit)
 

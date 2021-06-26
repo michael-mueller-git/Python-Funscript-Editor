@@ -158,6 +158,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         QtWidgets.QShortcut('CTRL+i', self).activated.connect(self.video_player.toogle_stroke_indicator_inversion)
         QtWidgets.QShortcut('CTRL+s', self).activated.connect(self.__save_funscript)
         QtWidgets.QShortcut('CTRL+Shift+Delete', self).activated.connect(self.__delete_folowing)
+        QtWidgets.QShortcut('CTRL+n', self).activated.connect(self.__new_funscript)
 
     def __delete_folowing(self):
         reply = QtWidgets.QMessageBox.question(None, 'Delete Folowing Actions', 'Delete all folowing actions? ',
@@ -233,6 +234,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         if key == 'delete': self.__delete_current_action()
         if key == 'shift+end': self.__seek_to_last_action()
         if key == 'shift+home': self.__seek_to_first_action()
+        if key == 'ctrl+n': self.__new_funscript()
 
     def __show_message(self, message):
         msg = QtWidgets.QMessageBox()

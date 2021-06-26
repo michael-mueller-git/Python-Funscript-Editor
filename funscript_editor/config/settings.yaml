@@ -4,6 +4,10 @@
 # feature for the Woman or Men.
 use_zoom: False
 
+# Convert video in normal perspective view before apply tracking. This should improve the
+# tracking at the border of videos, because there is the distortion very high.
+use_equirectangular: False
+
 # Specify the tracking direction. Allowed values are `'x'` and `'y'`.
 tracking_direction: 'y'
 

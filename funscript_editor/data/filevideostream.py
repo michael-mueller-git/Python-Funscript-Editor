@@ -96,6 +96,7 @@ class FileVideoStream:
 
                 self.Q.put(frame)
 
+        self.stopped = True
         self.stream.release()
 
 

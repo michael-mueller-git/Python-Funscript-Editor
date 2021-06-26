@@ -17,6 +17,7 @@ from matplotlib.figure import Figure
 from funscript_editor.definitions import VIDEO_SCALING_CONFIG_FILE
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
 from datetime import datetime
+from funscript_editor.algorithms.equirectangular import Equirectangular
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -34,6 +35,7 @@ class FunscriptGeneratorParameter:
     use_zoom: bool = SETTINGS['use_zoom']
     shift_bottom_points :int = HYPERPARAMETER['shift_bottom_points']
     shift_top_points :int = HYPERPARAMETER['shift_top_points']
+    use_equirectangular :bool = SETTINGS['use_equirectangular']
     track_men: bool = True
 
 
@@ -63,6 +65,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         self.keypress_queue = Queue(maxsize=32)
         self.stopped = False
+        self.perspective_params = {}
         self.x_text_start = 50
         self.scone_x = []
         self.scone_y = []
@@ -123,7 +126,8 @@ class FunscriptGenerator(QtCore.QThread):
         annotated_img = img.copy()
         fps = (self.params.skip_frames+1)*cv2.getTickFrequency()/(cv2.getTickCount()-self.timer)
         self.tracking_fps.append(fps)
-        cv2.putText(annotated_img, str(int(fps)) + ' fps', (self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
+        cv2.putText(annotated_img, str(int(fps)) + ' fps', (self.x_text_start, 50),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
         self.timer = cv2.getTickCount()
         return annotated_img
 
@@ -205,7 +209,8 @@ class FunscriptGenerator(QtCore.QThread):
             cv2.putText(image, title_min, (self.x_text_start, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
 
         if title_max != "":
-            cv2.putText(image, title_max, (image_min.shape[1] + self.x_text_start, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+            cv2.putText(image, title_max, (image_min.shape[1] + self.x_text_start, 25),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
 
         cv2.putText(image, "Use 'space' to quit and set the trackbar values",
             (self.x_text_start, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
@@ -380,6 +385,54 @@ class FunscriptGenerator(QtCore.QThread):
                 if self.params.track_men: del self.bboxes['Men'][i]
 
 
+    def get_perspective_roi(self, image :np.ndarray) -> None:
+        """ Get the perspective ROI parameters form user input
+
+        Args:
+            image (np.ndarray): opencv vr 180 or 360 image
+        """
+        perspective = {
+                'FOV': 100,
+                'THETA': -90,
+                'PHI': -45,
+                'height': 720,
+                'width': 1240
+            }
+
+        selected = False
+        while not selected:
+            preview = Equirectangular.get_perspective(
+                    image,
+                    perspective['FOV'],
+                    perspective['THETA'],
+                    perspective['PHI'],
+                    perspective['height'],
+                    perspective['width']
+                )
+
+            preview = self.drawText(preview, "Press 'q' to use current selected region of interest)", y = 50, color = (255, 0, 0))
+            preview = self.drawText(preview, "Use 'w', 'a', 's', 'd' to move the region of interest", y = 75, color = (0, 255, 0))
+
+            cv2.imshow(self.window_name, preview)
+            while self.keypress_queue.qsize() > 0:
+                pressed_key = '{0}'.format(self.keypress_queue.get())
+                if pressed_key == "'q'":
+                    selected = True
+                elif pressed_key == "'w'":
+                    perspective['PHI'] += 5
+                elif pressed_key == "'s'":
+                    perspective['PHI'] -= 5
+                elif pressed_key == "'a'":
+                    perspective['THETA'] -= 5
+                elif pressed_key == "'d'":
+                    perspective['THETA'] += 5
+
+            if cv2.waitKey(1) in [ord('q')]:
+                selected = True
+
+        self.perspective_params = perspective
+
+
     def get_bbox(self, image: np.ndarray, txt: str) -> tuple:
         """ Window to get an initial tracking box (ROI)
 
@@ -390,7 +443,8 @@ class FunscriptGenerator(QtCore.QThread):
         Returns:
             tuple: the entered box tuple (x,y,w,h)
         """
-        image = self.drawText(image, "Press 'space' or 'enter' to continue (sometimes not very responsive)", y = 75, color = (255, 0, 0))
+        image = self.drawText(image, "Press 'space' or 'enter' to continue (sometimes not very responsive)",
+                y = 75, color = (255, 0, 0))
         # cv2.namedWindow(self.window_name)
         # cv2.createTrackbar("Scale", self.window_name, 1, 10, lambda x: None)
 
@@ -432,10 +486,29 @@ class FunscriptGenerator(QtCore.QThread):
 
         first_frame = video.read()
         if first_frame is None:
-            return
+            return 'Video file is corrupt'
 
         if self.params.skip_frames < 0:
             self.params.skip_frames = 0
+
+        if self.params.use_equirectangular:
+            self.get_perspective_roi(first_frame)
+            first_frame = Equirectangular.get_perspective(
+                    first_frame,
+                    self.perspective_params['FOV'],
+                    self.perspective_params['THETA'],
+                    self.perspective_params['PHI'],
+                    self.perspective_params['height'],
+                    self.perspective_params['width']
+                )
+            video = Equirectangular(
+                    video,
+                    self.perspective_params['FOV'],
+                    self.perspective_params['THETA'],
+                    self.perspective_params['PHI'],
+                    self.perspective_params['height'],
+                    self.perspective_params['width']
+                )
 
         bboxWoman = self.get_bbox(first_frame, "Select Woman Feature")
         trackerWoman = StaticVideoTracker(first_frame, bboxWoman)
@@ -486,7 +559,7 @@ class FunscriptGenerator(QtCore.QThread):
                         (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
                 cv2.imshow(self.window_name, last_frame)
 
-                if self.was_q_pressed() or cv2.waitKey(1) == ord('q'):
+                if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
                     self.delete_last_tracking_predictions(int(self.get_average_tracking_fps()+1)*3)
                     break
@@ -523,14 +596,18 @@ class FunscriptGenerator(QtCore.QThread):
             self.keypress_queue.get()
 
 
-    def was_q_pressed(self) -> bool:
-        """ Check if 'q' was presssed
+    def was_key_pressed(self, key: str) -> bool:
+        """ Check if key was presssed
+
+        Args:
+            key (str): the key to check
 
         Returns:
             bool: True if 'q' was pressed else False
         """
+        if key is None or len(key) == 0: return False
         while self.keypress_queue.qsize() > 0:
-            if '{0}'.format(self.keypress_queue.get()) == "'q'": return True
+            if '{0}'.format(self.keypress_queue.get()) == "'"+key[0]+"'": return True
         return False
 
 
@@ -574,19 +651,21 @@ class FunscriptGenerator(QtCore.QThread):
             position (str): is max or min
         """
         if position in ['max', 'top'] and self.params.direction != 'x':
-            if frame_number >= -1*self.params.shift_top_points and frame_number + self.params.shift_top_points < len(self.score_y):
-                return self.params.start_frame + frame_number + self.params.shift_top_points
+            if frame_number >= -1*self.params.shift_top_points \
+                    and frame_number + self.params.shift_top_points < len(self.score_y): \
+                    return self.params.start_frame + frame_number + self.params.shift_top_points
 
         if position in ['min', 'bottom'] and self.params.direction != 'x':
-            if frame_number >= -1*self.params.shift_bottom_points and frame_number + self.params.shift_bottom_points < len(self.score_y):
-                return self.params.start_frame + frame_number + self.params.shift_bottom_points
+            if frame_number >= -1*self.params.shift_bottom_points \
+                    and frame_number + self.params.shift_bottom_points < len(self.score_y): \
+                    return self.params.start_frame + frame_number + self.params.shift_bottom_points
 
         return self.params.start_frame + frame_number
 
 
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
-        # NOTE: score_y and score_x should have the same number of elements so it should be enouth to check one score length
+        # NOTE: score_y and score_x should have the same number size so it should be enouth to check one score length
         with Listener(on_press=self.on_key_press) as listener:
             status = self.tracking()
             if len(self.score_y) >= HYPERPARAMETER['min_frames']:

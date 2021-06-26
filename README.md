@@ -7,3 +7,7 @@ A Python program that use Computer Vision to predict the funscript actions. Most
 ## Documentation
 
 The application documentation is located in [`./docs/app/docs`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs)
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
