@@ -1,6 +1,6 @@
 # UI
 
-The UI use an embedded mpv video player and matplotlib to draw the actions timeseries at the bottom.
+The build in UI use an embedded mpv video player and matplotlib to draw the actions timeseries at the bottom.
 
 ## UI Keyboard Shortcuts
 

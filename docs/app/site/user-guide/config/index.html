@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>OFS Integration - Funscript Editor</title>
+        <title>Config - Funscript Editor</title>
         <link href="../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
@@ -41,7 +41,7 @@
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="./" class="dropdown-item active">OFS Integration</a>
+    <a href="../ofs-integration/" class="dropdown-item">OFS Integration</a>
 </li>
                                     
 <li>
@@ -53,7 +53,7 @@
 </li>
                                     
 <li>
-    <a href="../config/" class="dropdown-item">Config</a>
+    <a href="./" class="dropdown-item active">Config</a>
 </li>
                                     
 <li>
@@ -70,12 +70,12 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" href="../.." class="nav-link">
+                                <a rel="prev" href="../algorithms/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" href="../ui/" class="nav-link">
+                                <a rel="next" href="../build/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -97,9 +97,9 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#open-funscripter-integration" class="nav-link">Open Funscripter Integration</a>
+            <li class="nav-item" data-level="1"><a href="#python-funscript-editor-config" class="nav-link">Python Funscript Editor Config</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#installation-windows" class="nav-link">Installation (Windows)</a>
+            <li class="nav-item" data-level="2"><a href="#config-files" class="nav-link">Config Files</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -110,21 +110,42 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="open-funscripter-integration">Open Funscripter Integration</h1>
-<p>Currently we use a hacky lua script to communicate between the Python Funscript Generator and the Open Funscripter.</p>
-<h2 id="installation-windows">Installation (Windows)</h2>
-<ol>
-<li>Download the latest packed Python Funscript Editor from <a href="https://github.com/michael-mueller-git/Python-Funscript-Editor/releases">github release page</a>.</li>
-<li>Extract the Archiv to an Path without special character or spaces.</li>
-<li>Copy the <code>funscript_generator.lua</code> script (<a href="https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/OpenFunscripter"><code>Repository/contrib/OpenFunscripter</code></a>) to <code>data/lua</code> in your OFS directory.</li>
-<li>Open the <code>funscript_generator.lua</code> file and adjust the <code>Settings.FunscriptGenerator</code> and <code>Settings.TmpFile</code> variable.</li>
-<li><code>Settings.FunscriptGenerator</code>: point to the extracted Python Funscript Editor program. Use <code>\\</code> instead of <code>/</code> symbols in the path string!</li>
-<li><code>Settings.TmpFile</code>: specifies a temporary file where to store the result (must be a file not a directory!). The file will be overwritten automatically the next time the generator is started!</li>
-<li>Now launch OFS.</li>
-<li>Navigate to <code>View : Special functions : Custom Functions</code> and select the <code>funscript_generator.lua</code> entry. Click the Button <code>Bind Script</code> (This may trigger the funscript generator, just ignore it for now).</li>
-<li>Navigate to <code>Options : Keys : Dynamic</code> and insert a shortcut for the funscript generator.</li>
-<li>Now you can use the shortcut at any position in the video to start the funscript generator.</li>
-</ol></div>
+<h1 id="python-funscript-editor-config">Python Funscript Editor Config</h1>
+<p>The configuration files for the Windows release version are located in the <code>funscript-editor/funscript_editor/config</code> directory since release <code>v0.0.3</code>. If you use the python source code directly they are located in <a href="https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/funscript_editor/config"><code>funscript_editor/config</code></a>.</p>
+<h2 id="config-files">Config Files</h2>
+<p>The directory contains several config files. The most interesting are <code>video_scaling.json</code>, <code>settings.yaml</code> and <code>hyperparameter.yaml</code>. When editing the <code>*.yaml</code> configuration files, pay attention to the formatting, otherwise the program will not work later.</p>
+<p>Config Files:</p>
+<ul>
+<li><code>hyperparameter.yaml</code>: hyperparameter for the prediction algorithms</li>
+<li><code>logging_linux.yaml</code>: the logging configuration for linx</li>
+<li><code>logging_windows.yaml</code>: the logging configuration for windows</li>
+<li><code>settings.yaml</code>: application settings</li>
+<li><code>ui.yaml</code>: user interface settings</li>
+<li><code>video_scaling.json</code>: scaling for the preview window</li>
+</ul>
+<h3 id="config-parameter">Config Parameter</h3>
+<h4 id="hyperparameteryaml"><code>hyperparameter.yaml</code></h4>
+<ul>
+<li><code>skip_frames</code> (int): This parameter specifies how many frames are skipped and interpolated during tracking. Increase this parameter to improve the processing speed on slow hardware. But higher values result in poorer predictions!</li>
+<li><code>avg_sec_for_local_min_max_extraction</code> (float): Specify the window size for the calculation of the reference value for the local min and max search.</li>
+<li><code>min_frames</code> (int): Specify the minimum required frames for the tracking. Wee need this parameter to ensure there is at leas two strokes in the tracking result.</li>
+<li><code>shift_top_points</code> (int): Shift predicted top points by given frame number. Positive values delay the position and negative values result in an earlier position.</li>
+<li><code>shift_bottom_points</code> (int): Shift predicted bottom points by given frame number. Positive values delay the position and negative values result in an earlier position.</li>
+</ul>
+<h4 id="settingsyaml"><code>settings.yaml</code></h4>
+<ul>
+<li><code>use_zoom</code> (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.</li>
+<li><code>tracking_direction</code> (str): Specify the tracking direction. Allowed values are <code>'x'</code> and <code>'y'</code>.</li>
+<li><code>max_playback_fps</code> (int): Limit the max player speed in the tracking preview window (0 = disable limit)</li>
+</ul>
+<h4 id="video_scalingjson"><code>video_scaling.json</code></h4>
+<p>The <code>video_scaling.json</code> config file specifies how the video get scaled bevor the tracking. The scaling also apply tho the preview size. If the preview to select the tracking feature is to small or to large you have to adjust this config file.</p>
+<p>The entries in this config file consist of a pair of values.</p>
+<p>Example config:</p>
+<pre><code class="language-json">{ &quot;1920&quot;: 1.0, &quot;3500&quot;: 0.5, &quot;5000&quot;: 0.25 }
+</code></pre>
+<p>One pair in the example config is e.g. <code>"1920": 1.0</code>. Each pair of values defines which scaling should be used for which video resolution. The first value, refers to the video width in pixels. Videos with size larger than 1920 pixels horizontally use a scaling of <code>1.0</code>. Videos with 3500 pixel and more are scaled with <code>0.5</code> and from 5000 with <code>0.25</code>. All videos which are smaller than the smallest value (in this case 1920) are scaled always with <code>1.0</code> (original size). You can enter as many values as you want and change the existing scaling.</p>
+<p>It’s best to look at your screen resolution and calculate which scaling you need for which video size so that the window fits on the monitor. e.g. You have <code>1920x1080</code> screen and <code>5400x2700</code> Video, you can divide <code>1920 / 5400 = 0.36</code> → add <code>"5300": 0.35</code> to the config (the key value have to be a little bit smaller than the Video resolution to apply the correct scaling).</p></div>
             </div>
         </div>
 

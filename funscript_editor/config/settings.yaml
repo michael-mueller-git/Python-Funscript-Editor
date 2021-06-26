@@ -1,9 +1,11 @@
+# Python Funscript Editor settings
 
-# do you want to select first a region to zoom in to select a tracker position?
+# Enable or disable an additional step to zoom in the Video before selecting a tracking
+# feature for the Woman or Men.
 use_zoom: False
 
-# do you want to track the 'y' or 'x' Movement?
+# Specify the tracking direction. Allowed values are `'x'` and `'y'`.
 tracking_direction: 'y'
 
-# limit the max player speed when tracking (0 = disable limit)
+# Limit the max player speed in the tracking preview window (0 = disable limit)
 max_playback_fps: 0

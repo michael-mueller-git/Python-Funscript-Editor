@@ -206,6 +206,16 @@ target (str): the target where to save the interpolated tracking boxes</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.apply_shift">
+<span class="sig-name descname"><span class="pre">apply_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.apply_shift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply shift to predicted frame positions</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>position (str): is max or min</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.calculate_score">
 <span class="sig-name descname"><span class="pre">calculate_score</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.calculate_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the score for the predicted tracking boxes</p>
@@ -381,7 +391,7 @@ dpi (int): picture output dpi</p>
 <dd><p>Plot the score to an figure</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>name (str): file name for the figure
-idx_list (list): list with funscript action points
+idx_list (list): list with all frame numbers with funscript action points
 dpi (int): picture output dpi</p>
 </dd>
 </dl>
@@ -446,7 +456,7 @@ direction (str): scale the ‘y’ or ‘x’ score</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.funscriptgenerator.</span></span><span class="sig-name descname"><span class="pre">FunscriptGeneratorParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_frames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_playback_fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_zoom</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_men</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.funscriptgenerator.</span></span><span class="sig-name descname"><span class="pre">FunscriptGeneratorParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_frames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_playback_fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_zoom</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_bottom_points</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_top_points</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_men</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Funscript Generator Parameter Dataclass with default values</p>
 <dl class="py attribute">
@@ -457,6 +467,16 @@ direction (str): scale the ‘y’ or ‘x’ score</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.max_playback_fps">
 <span class="sig-name descname"><span class="pre">max_playback_fps</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.max_playback_fps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.shift_bottom_points">
+<span class="sig-name descname"><span class="pre">shift_bottom_points</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.shift_bottom_points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.shift_top_points">
+<span class="sig-name descname"><span class="pre">shift_top_points</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.shift_top_points" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -492,13 +512,15 @@ direction (str): scale the ‘y’ or ‘x’ score</p>
 <p>Signal Processing Algorithms</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.signalprocessing.get_local_max_and_min_idx">
-<span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.signalprocessing.</span></span><span class="sig-name descname"><span class="pre">get_local_max_and_min_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">list</span><a class="headerlink" href="#funscript_editor.algorithms.signalprocessing.get_local_max_and_min_idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.signalprocessing.</span></span><span class="sig-name descname"><span class="pre">get_local_max_and_min_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_max</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="headerlink" href="#funscript_editor.algorithms.signalprocessing.get_local_max_and_min_idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the local max and min positions in given signal</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>score (list): list with float or int signal values
-fps (int): rounded fps of the video</p>
+fps (int): rounded fps of the video
+shift_min (int): shift the local min indexes by given value (default is 0)
+shift_max (int): shift the local max indexes by given value (default is 0)</p>
 </dd>
-<dt>Returns:</dt><dd><p>list: list with all local max and min indexes</p>
+<dt>Returns:</dt><dd><p>dict: dict with 2 lists with all local max and min indexes ({‘min’:[], ‘max’:[]})</p>
 </dd>
 </dl>
 </dd></dl>
