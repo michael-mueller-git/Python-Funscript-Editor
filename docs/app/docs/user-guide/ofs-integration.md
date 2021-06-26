@@ -5,9 +5,10 @@ Currently we use a hacky lua script to communicate between the Python Funscript 
 ## Installation (Windows)
 
 1. Download the latest packed Python Funscript Editor from [github release page](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases).
-2. Extract the Archiv to an Path without special character or spaces.
+2. Extract the Archiv.
 3. Copy the `funscript_generator.lua` script ([`Repository/contrib/OpenFunscripter`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/OpenFunscripter)) to `data/lua` in your OFS directory.
 4. Open the `funscript_generator.lua` file and adjust the `Settings.FunscriptGenerator` and `Settings.TmpFile` variable.
+   - NOTE: Since release `v0.0.4` you should use `/` instead of `\\` for the path.
    - `Settings.FunscriptGenerator`: Point to the extracted Python Funscript Editor program.
    - `Settings.TmpFile`: Specifies a temporary file location where to store the result (must be a file not a directory!). The file does not have to exist at the moment. The specified file will be generated from the Python Funscript Editor and will be overwritten automatically at the next time the generator is started!
 5. Now launch OFS.
