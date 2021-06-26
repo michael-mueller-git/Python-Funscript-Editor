@@ -1,3 +1,9 @@
+
+# do you want to select first a region to zoom in to select a tracker position?
 use_zoom: False
+
+# do you want to track the 'y' or 'x' Movement?
 tracking_direction: 'y'
+
+# limit the max player speed when tracking (0 = disable limit)
 max_playback_fps: 0
