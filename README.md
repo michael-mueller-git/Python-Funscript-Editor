@@ -6,7 +6,7 @@ A Python program to quickly create prototype algorithms to partially automate th
 
 ## Documentation
 
-The application documentation is located in [`./docs/app/docs/index.md`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/index.md)
+The application documentation is located in [`./docs/app/docs`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs)
 
 ## Build
 
