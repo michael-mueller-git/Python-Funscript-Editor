@@ -29,6 +29,8 @@ Config Files:
 
 - `use_zoom` (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.
 - `use_equirectangular` (bool): Convert video in normal perspective view before apply tracking. This should improve the tracking at the border of videos, because there is the distortion very high.
+- `equirectangular_scaling` (float): scaling parameter for the equirectangular preview window. `1.0` is `1240x720`, `1.5` would be `1860x1080`, ... (Do not use to high scaling values, the perspective calculation need a lot of computer resources!)
+
 - `tracking_direction` (str): Specify the tracking direction. Allowed values are `'x'` and `'y'`.
 - `max_playback_fps` (int): Limit the max player speed in the tracking preview window (0 = disable limit)
 

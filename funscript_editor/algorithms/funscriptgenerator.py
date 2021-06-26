@@ -36,6 +36,7 @@ class FunscriptGeneratorParameter:
     shift_bottom_points :int = HYPERPARAMETER['shift_bottom_points']
     shift_top_points :int = HYPERPARAMETER['shift_top_points']
     use_equirectangular :bool = SETTINGS['use_equirectangular']
+    equirectangular_scaling :float = SETTINGS['equirectangular_scaling']
     track_men: bool = True
 
 
@@ -395,8 +396,8 @@ class FunscriptGenerator(QtCore.QThread):
                 'FOV': 100,
                 'THETA': -90,
                 'PHI': -45,
-                'height': 720,
-                'width': 1240
+                'height': int(720*self.params.equirectangular_scaling),
+                'width': int(1240*self.params.equirectangular_scaling)
             }
 
         selected = False
@@ -511,12 +512,12 @@ class FunscriptGenerator(QtCore.QThread):
                 )
 
         bboxWoman = self.get_bbox(first_frame, "Select Woman Feature")
-        trackerWoman = StaticVideoTracker(first_frame, bboxWoman)
+        trackerWoman = StaticVideoTracker(first_frame, bboxWoman, limit_searchspace = not self.params.use_equirectangular)
         self.bboxes['Woman'].append(bboxWoman)
 
         if self.params.track_men:
             bboxMen = self.get_bbox(self.drawBox(first_frame, bboxWoman), "Select Men Feature")
-            trackerMen = StaticVideoTracker(first_frame, bboxMen)
+            trackerMen = StaticVideoTracker(first_frame, bboxMen, limit_searchspace = not self.params.use_equirectangular)
             self.bboxes['Men'].append(bboxMen)
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):

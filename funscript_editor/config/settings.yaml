@@ -8,6 +8,9 @@ use_zoom: False
 # tracking at the border of videos, because there is the distortion very high.
 use_equirectangular: False
 
+# Scaling for the equirectangular preview window
+equirectangular_scaling: 1.0
+
 # Specify the tracking direction. Allowed values are `'x'` and `'y'`.
 tracking_direction: 'y'
 

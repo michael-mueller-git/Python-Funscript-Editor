@@ -181,6 +181,129 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-funscript_editor.algorithms.equirectangular">
+<span id="funscript-editor-algorithms-equirectangular-module"></span><h2>funscript_editor.algorithms.equirectangular module<a class="headerlink" href="#module-funscript_editor.algorithms.equirectangular" title="Permalink to this headline">¶</a></h2>
+<p>Methods to split equirectangular panorama into normal perspective view.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.equirectangular.</span></span><span class="sig-name descname"><span class="pre">Equirectangular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_stream</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="funscript_editor.data.html#funscript_editor.data.filevideostream.FileVideoStream" title="funscript_editor.data.filevideostream.FileVideoStream"><span class="pre">funscript_editor.data.filevideostream.FileVideoStream</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">FOV</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">THETA</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PHI</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Python Class to split equirectangular panorama into normal perspective view.</p>
+<dl class="simple">
+<dt>NOTE:</dt><dd><p>We use the same api as the FileVideoStream to allow MITM</p>
+</dd>
+<dt>Args:</dt><dd><p>video_stream (FileVideoStream): the file video stream instance
+FOV (int): perspective FOV
+THETA (int): left/right angle in degree (right direction is positive, left direction is negative)
+PHI (int) up/down angle in degree (up direction positive, down direction negative)
+height (int): output image height
+width (int): output image width
+RADIUS (int, optional): sphere radius</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.current_frame_pos">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">current_frame_pos</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.current_frame_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get current frame position</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: current frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.fps">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">fps</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.fps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Video FPS</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>float: Video FPS</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.frame_height">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">frame_height</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.frame_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Video Frame Height</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: video frame height</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.frame_width">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">frame_width</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.frame_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Video Frame Width</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: video frame width</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.get_perspective">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_perspective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FOV</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">THETA</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PHI</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RADIUS</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.get_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a normal perspective view from a panorama view.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>img (str, or opencv image object): path to image or opencv image data
+FOV (int): perspective FOV
+THETA (int): left/right angle in degree (right direction is positive, left direction is negative)
+PHI (int) up/down angle in degree (up direction positive, down direction negative)
+height (int): output image height
+width (int): output image width
+RADIUS (int, optional): sphere radius</p>
+</dd>
+<dt>Returns:</dt><dd><p>array: opencv image data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.isOpen">
+<span class="sig-name descname"><span class="pre">isOpen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.isOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if equirectangular stream is open or a frame is still available in the buffer</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>bool: True if equirectangular strem is open or a frame is still available in the buffer else False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.number_of_frames">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">number_of_frames</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.number_of_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get number of frames in video</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: number of frames in video</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get next frame from equirectangular stream</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>np.ndarray: opencv image data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to transform the frames from the file video stream into a queue</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.equirectangular.Equirectangular.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.equirectangular.Equirectangular.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop equirectangular stream</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-funscript_editor.algorithms.funscriptgenerator">
 <span id="funscript-editor-algorithms-funscriptgenerator-module"></span><h2>funscript_editor.algorithms.funscriptgenerator module<a class="headerlink" href="#module-funscript_editor.algorithms.funscriptgenerator" title="Permalink to this headline">¶</a></h2>
 <p>Top level process to generate the funscript actions by tracking selected features in the video</p>
@@ -335,6 +458,16 @@ txt (str): additional text to display on the selection window</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.get_perspective_roi">
+<span class="sig-name descname"><span class="pre">get_perspective_roi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.get_perspective_roi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the perspective ROI parameters form user input</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>image (np.ndarray): opencv vr 180 or 360 image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.get_scaling">
 <span class="sig-name descname"><span class="pre">get_scaling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.get_scaling" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the scaling parameter for current video</p>
@@ -433,10 +566,12 @@ direction (str): scale the ‘y’ or ‘x’ score</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.was_q_pressed">
-<span class="sig-name descname"><span class="pre">was_q_pressed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.was_q_pressed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if ‘q’ was presssed</p>
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.was_key_pressed">
+<span class="sig-name descname"><span class="pre">was_key_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.was_key_pressed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if key was presssed</p>
 <dl class="simple">
+<dt>Args:</dt><dd><p>key (str): the key to check</p>
+</dd>
 <dt>Returns:</dt><dd><p>bool: True if ‘q’ was pressed else False</p>
 </dd>
 </dl>
@@ -456,12 +591,17 @@ direction (str): scale the ‘y’ or ‘x’ score</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.funscriptgenerator.</span></span><span class="sig-name descname"><span class="pre">FunscriptGeneratorParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_frames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_playback_fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_zoom</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_bottom_points</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_top_points</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_men</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.funscriptgenerator.</span></span><span class="sig-name descname"><span class="pre">FunscriptGeneratorParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_frames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_playback_fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_zoom</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_bottom_points</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_top_points</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_equirectangular</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equirectangular_scaling</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_men</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Funscript Generator Parameter Dataclass with default values</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.direction">
 <span class="sig-name descname"><span class="pre">direction</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><em class="property"> <span class="pre">=</span> <span class="pre">'y'</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.direction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.equirectangular_scaling">
+<span class="sig-name descname"><span class="pre">equirectangular_scaling</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">1.0</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.equirectangular_scaling" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -492,6 +632,11 @@ direction (str): scale the ‘y’ or ‘x’ score</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.track_men">
 <span class="sig-name descname"><span class="pre">track_men</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.track_men" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.use_equirectangular">
+<span class="sig-name descname"><span class="pre">use_equirectangular</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGeneratorParameter.use_equirectangular" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -574,13 +719,14 @@ upper_quantile (float): upper quantile value to filter [0,1]</p>
 <p>Video Tracker</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.videotracker.StaticVideoTracker">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.videotracker.</span></span><span class="sig-name descname"><span class="pre">StaticVideoTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_bbox</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.videotracker.StaticVideoTracker" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.algorithms.videotracker.</span></span><span class="sig-name descname"><span class="pre">StaticVideoTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_bbox</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_searchspace</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.algorithms.videotracker.StaticVideoTracker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Video tracker for static feature tracking. We assume that the tracked feature is always in
 the neighborhood fo the first tracking box. This allows an accelerated prediction.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>first_frame (np.ndarray): open cv image representing the start frame
 tracking_bbox (tuple): tuple with (x,y,w,h) of the init tracking box
+limit_searchspace (bool) : only insert the region of init tracking box into the tracker
 queue_size (int): in (work) and out (result) queue size</p>
 </dd>
 </dl>

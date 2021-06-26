@@ -18,14 +18,17 @@ class StaticVideoTracker:
     Args:
         first_frame (np.ndarray): open cv image representing the start frame
         tracking_bbox (tuple): tuple with (x,y,w,h) of the init tracking box
+        limit_searchspace (bool) : only insert the region of init tracking box into the tracker
         queue_size (int): in (work) and out (result) queue size
     """
 
     def __init__(self,
             first_frame: np.ndarray,
             tracking_bbox: tuple,
+            limit_searchspace : bool = True,
             queue_size : int = 2):
         self.first_frame = first_frame
+        self.limit_searchspace = limit_searchspace
         self.first_tracking_bbox = tracking_bbox
         self.stopped = False
         self.sleep_time = 0.001
@@ -68,9 +71,12 @@ class StaticVideoTracker:
         self.tracker = cv2.TrackerCSRT_create() # NOTE: you can change this to your favorite tracker
         frame_heigt, frame_width = self.first_frame.shape[:2]
 
-        # Determine the tracking ROI, assume we have 3d Side by Side static VR video
-        # The movement is mostly up-down, so we can restrict left and right more than up and down
-        dh, dw = int(frame_heigt/12), int(frame_width/38)
+        if self.limit_searchspace:
+            # Determine the tracking ROI, assume we have 3d Side by Side static VR video
+            # The movement is mostly up-down, so we can restrict left and right more than up and down
+            dh, dw = int(frame_heigt/12), int(frame_width/38)
+        else:
+            dh, dw = int(frame_heigt/2), int(frame_width/2)
         x0, y0 = max([0, self.first_tracking_bbox[0] - dw]), max([0, self.first_tracking_bbox[1] - dh])
         y1 = min([frame_heigt, self.first_tracking_bbox[1] + self.first_tracking_bbox[3] + dh])
         x1 = min([frame_width, self.first_tracking_bbox[0] + self.first_tracking_bbox[2] + dw])
