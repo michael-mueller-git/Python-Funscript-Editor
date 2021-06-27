@@ -5,6 +5,7 @@ import json
 import time
 import logging
 
+from screeninfo import get_monitors
 from threading import Thread
 from queue import Queue
 from pynput.keyboard import Key, Listener
@@ -39,6 +40,7 @@ class FunscriptGeneratorParameter:
     use_equirectangular :bool = SETTINGS['use_equirectangular']
     equirectangular_scaling :float = max((0.2, float(SETTINGS['equirectangular_scaling'])))
     zoom_factor :float = max((1.0, float(SETTINGS['zoom_factor'])))
+    scaling_method :str = SETTINGS['scaling_method']
 
 
 class FunscriptGenerator(QtCore.QThread):
@@ -81,7 +83,7 @@ class FunscriptGenerator(QtCore.QThread):
         self.tracking_fps = []
         cap.release()
 
-    #: funscript completed event with reference to the funscript object with the predicted actionsm, a status message and success flag
+    #: completed event with reference to the funscript with the predicted actions, status message and success flag
     funscriptCompleted = QtCore.pyqtSignal(object, str, bool)
 
     #: processing event with current processed frame number
@@ -89,17 +91,35 @@ class FunscriptGenerator(QtCore.QThread):
 
     __logger = logging.getLogger(__name__)
 
-    def get_scaling(self, frame_width: int) -> float:
+    def get_scaling(self, frame_width: int, frame_height: int) -> float:
         """ Get the scaling parameter for current video
 
         Args:
             frame_width (int): frame width of current video
+            frame_height (int): frame height of current video
 
         Returns:
             float: scaling parameter from scaling config
         """
-        return max([0.1, min([1.0]+[self.scale[k] for k in self.scale.keys() if k < frame_width])])
+        if self.params.scaling_method == 'auto':
+            scale = []
+            try:
+                for monitor in get_monitors():
+                    scale.append( min((monitor.width / (frame_width*1.1), monitor.height / (frame_height*1.1) )) )
+            except: pass
 
+            if len(scale) == 0:
+                self.__logger.error("Monitor info not found, please switch to scaling_method: 'config'")
+                scale = 1.0
+            else:
+                # asume we use the largest monitor for scipting
+                scale = max(scale)
+        else:
+            # assume scaling_method is 'config' (fallback)
+            scale = max([0.05, min([8.0]+[self.scale[k] for k in self.scale.keys() if k < frame_width])])
+
+        self.__logger.info("Use scaling of %f for preview window and tracking", scale)
+        return scale
 
     def drawBox(self, img: np.ndarray, bbox: tuple) -> np.ndarray:
         """ Draw an tracking box on the image/frame
@@ -412,8 +432,10 @@ class FunscriptGenerator(QtCore.QThread):
                     perspective['width']
                 )
 
-            preview = self.drawText(preview, "Press 'q' to use current selected region of interest)", y = 50, color = (255, 0, 0))
-            preview = self.drawText(preview, "Use 'w', 'a', 's', 'd' to move the region of interest", y = 75, color = (0, 255, 0))
+            preview = self.drawText(preview, "Press 'q' to use current selected region of interest)",
+                    y = 50, color = (255, 0, 0))
+            preview = self.drawText(preview, "Use 'w', 'a', 's', 'd' to move the region of interest",
+                    y = 75, color = (0, 255, 0))
 
             cv2.imshow(self.window_name, preview)
             while self.keypress_queue.qsize() > 0:

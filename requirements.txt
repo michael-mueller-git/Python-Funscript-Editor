@@ -17,4 +17,5 @@ pyserial
 python-dateutil
 python-mpv
 PyYAML
+screeninfo
 six

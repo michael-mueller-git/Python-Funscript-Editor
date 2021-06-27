@@ -17,14 +17,14 @@ class FileVideoStream:
 
     Args:
         video_path (str): path to video file
-        scale_determiner (Callable[[int], float]): function dat determine the scale factor by given frame_width
+        scale_determiner (Callable[[int, int], float]): function dat determine the scale factor by given frame_width and frame_height
         start_frame (int): start frame number
         queue_size (int): size of frame buffer
     """
 
     def __init__(self,
             video_path :str,
-            scale_determiner :Callable[[int], float] = None,
+            scale_determiner :Callable[[int,int], float] = None,
             start_frame :int = 0,
             queue_size :int = 256):
 
@@ -78,7 +78,10 @@ class FileVideoStream:
         if self.start_frame > 0: self.stream.set(cv2.CAP_PROP_POS_FRAMES, self.start_frame)
 
         if self.scale_determiner is not None:
-            self.scale = self.scale_determiner(int(self.stream.get(cv2.CAP_PROP_FRAME_WIDTH)))
+            self.scale = self.scale_determiner(
+                    int(self.stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                    int(self.stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                )
 
         self.initialized = True
         while not self.stopped:
