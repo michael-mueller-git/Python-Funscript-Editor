@@ -200,7 +200,7 @@ class FunscriptGenerator(QtCore.QThread):
             tuple: with selected (min: flaot, max float)
         """
         cv2.createTrackbar("Min", self.window_name, lower_limit, upper_limit, lambda x: None)
-        cv2.createTrackbar("Max", self.window_name, lower_limit+1, upper_limit, lambda x: None)
+        cv2.createTrackbar("Max", self.window_name, upper_limit, upper_limit, lambda x: None)
         image = np.concatenate((image_min, image_max), axis=1)
 
         if info != "":
@@ -218,7 +218,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         self.clear_keypress_queue()
         trackbarValueMin = lower_limit
-        trackbarValueMax = lower_limit+1
+        trackbarValueMax = upper_limit
         while True:
             try:
                 preview = image.copy()
