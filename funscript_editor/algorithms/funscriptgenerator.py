@@ -18,7 +18,7 @@ from matplotlib.figure import Figure
 from funscript_editor.definitions import VIDEO_SCALING_CONFIG_FILE
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
 from datetime import datetime
-from funscript_editor.algorithms.equirectangular import Equirectangular
+from funscript_editor.data.equirectangularvideostream import EquirectangularVideoStream
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -426,7 +426,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         selected = False
         while not selected:
-            preview = Equirectangular.get_perspective(
+            preview = EquirectangularVideoStream.get_perspective(
                     image,
                     perspective['FOV'],
                     perspective['THETA'],
@@ -437,7 +437,7 @@ class FunscriptGenerator(QtCore.QThread):
 
             preview = self.drawText(preview, "Press 'q' to use current selected region of interest)",
                     y = 50, color = (255, 0, 0))
-            preview = self.drawText(preview, "Use 'w', 'a', 's', 'd' to move the region of interest",
+            preview = self.drawText(preview, "Use 'w', 's' to move up/down to the region of interest",
                     y = 75, color = (0, 255, 0))
 
             cv2.imshow(self.window_name, preview)
@@ -446,13 +446,13 @@ class FunscriptGenerator(QtCore.QThread):
                 if pressed_key == "'q'":
                     selected = True
                 elif pressed_key == "'w'":
-                    perspective['PHI'] += 5
+                    perspective['PHI'] = min((80, perspective['PHI'] + 5))
                 elif pressed_key == "'s'":
-                    perspective['PHI'] -= 5
-                elif pressed_key == "'a'":
-                    perspective['THETA'] -= 5
-                elif pressed_key == "'d'":
-                    perspective['THETA'] += 5
+                    perspective['PHI'] = max((-80, perspective['PHI'] - 5))
+                # elif pressed_key == "'a'":
+                #     perspective['THETA'] -= 5
+                # elif pressed_key == "'d'":
+                #     perspective['THETA'] += 5
 
             if cv2.waitKey(1) in [ord('q')]:
                 selected = True
@@ -503,40 +503,48 @@ class FunscriptGenerator(QtCore.QThread):
         return bbox
 
 
+    def get_first_frame(self) -> np.ndarray:
+        """ Get the first frame image
+
+        Returns:
+            np.ndarray: opencv image
+        """
+        cap = cv2.VideoCapture(str(self.params.video_path))
+        if self.params.start_frame > 0: self.stream.set(cv2.CAP_PROP_POS_FRAMES, self.params.start_frame)
+        success, first_frame = cap.read()
+        cap.release()
+        return first_frame
+
+
     def tracking(self) -> str:
         """ Tracking function to track the features in the video
 
         Returns:
             str: a process status message e.g. 'end of video reached'
         """
-        video = FileVideoStream(
-            video_path=self.params.video_path,
-            scale_determiner=self.get_scaling,
-            start_frame=self.params.start_frame)
-
-        first_frame = video.read()
+        first_frame = self.get_first_frame()
         if first_frame is None:
             return 'Video file is corrupt'
 
         if self.params.use_equirectangular:
             self.get_perspective_roi(first_frame)
-            first_frame = Equirectangular.get_perspective(
-                    first_frame,
-                    self.perspective_params['FOV'],
-                    self.perspective_params['THETA'],
-                    self.perspective_params['PHI'],
-                    self.perspective_params['height'],
-                    self.perspective_params['width']
-                )
-            video = Equirectangular(
-                    video,
-                    self.perspective_params['FOV'],
-                    self.perspective_params['THETA'],
-                    self.perspective_params['PHI'],
-                    self.perspective_params['height'],
-                    self.perspective_params['width']
-                )
 
+            video = EquirectangularVideoStream(
+                    self.params.video_path,
+                    self.perspective_params['FOV'],
+                    self.perspective_params['THETA'],
+                    self.perspective_params['PHI'],
+                    self.perspective_params['height'],
+                    self.perspective_params['width'],
+                    self.params.start_frame
+                )
+        else:
+            video = FileVideoStream(
+                video_path=self.params.video_path,
+                scale_determiner=self.get_scaling,
+                start_frame=self.params.start_frame)
+
+        first_frame = video.read()
         bboxWoman = self.get_bbox(first_frame, "Select Woman Feature")
         trackerWoman = StaticVideoTracker(first_frame, bboxWoman, limit_searchspace = not self.params.use_equirectangular)
         self.bboxes['Woman'].append(bboxWoman)

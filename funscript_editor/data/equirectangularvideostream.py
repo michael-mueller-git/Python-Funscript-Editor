@@ -1,4 +1,4 @@
-""" Methods to split equirectangular panorama into normal perspective view. """
+""" Methods to get equirectangular panorama video stream in normal perspective view."""
 
 import os
 import sys
@@ -8,45 +8,54 @@ import logging
 
 from threading import Thread
 from queue import Queue
+from fractions import Fraction
 
 import numpy as np
+import subprocess as sp
 
-from funscript_editor.data.filevideostream import FileVideoStream
 
 
-class Equirectangular:
-    """ Python Class to split equirectangular panorama into normal perspective view.
+class EquirectangularVideoStream:
+    """ Python Class to read equirectangular panorama video stream in normal perspective view.
 
     NOTE:
-        We use the same api as the FileVideoStream to allow MITM
+        We use the same api as the FileVideoStream to allow replacement
 
     Args:
-        video_stream (FileVideoStream): the file video stream instance
+        video_path (str): path to video file
         FOV (int): perspective FOV
         THETA (int): left/right angle in degree (right direction is positive, left direction is negative)
         PHI (int) up/down angle in degree (up direction positive, down direction negative)
         height (int): output image height
         width (int): output image width
+        start_frame (int): start frame number
         queue_size (int): size of frame buffer
     """
 
     def __init__(self,
-            video_stream :FileVideoStream,
+            video_path :str,
             FOV: int,
             THETA: int,
             PHI :int,
             height :int,
             width :int,
+            start_frame :int = 0,
             queue_size :int = 256):
-        self.video_stream = video_stream
+        self.video_path = video_path
+        self.start_frame = start_frame
         self.FOV = FOV
         self.THETA = THETA
         self.PHI = PHI
         self.height = height
         self.width = width
         self.stopped = False
+        self.current_frame = 0
         self.sleep_time = 0.001
 
+        (self.w, self.h) = self.get_resolution()
+        self.fps = self.get_fps
+        self.start_time_in_ms = self.frame_to_millisec(start_frame)
+        self.start_timestamp = self.millisec_to_timestamp(self.start_time_in_ms)
         self.Q = Queue(maxsize=queue_size)
         self.thread = Thread(target=self.run, args=())
         self.thread.daemon = True
@@ -140,9 +149,42 @@ class Equirectangular:
                 borderMode=cv2.BORDER_WRAP)
 
 
+    def frame_to_millisec(self, frame) -> int:
+        """Get timestamp for given frame number
+
+        Args:
+            frame (int): frame number
+
+        Returns:
+            int: timestamp in video
+        """
+        if frame <= 0: return 0
+        return int(round(float(frame)*float(1000)/self.fps))
+
+
+    def millisec_to_timestamp(self, millis :int)->str:
+        """ Convert milliseconds to timestamp
+
+        Args:
+            millis (int): position in video in milliseconds
+
+        Returns:
+            str: position in video as timestamp with H:M:S.XXX
+        """
+        millis = int(millis)
+        seconds = int((millis/1000)%60)
+        minutes = int((millis/(1000*60))%60)
+        hours = int((millis/(1000*60*60))%24)
+        millis = int(millis % 1000)
+
+        return str(hours).zfill(2) + ':' \
+            + str(minutes).zfill(2) + ':' \
+            + str(seconds).zfill(2) + '.' \
+            + str(millis).zfill(3)
+
+
     def stop(self) -> None:
         """ Stop equirectangular stream """
-        self.video_stream.stop()
         self.stopped = True
         # wait until stream resources are released
         self.thread.join()
@@ -181,23 +223,68 @@ class Equirectangular:
 
 
     def run(self) -> None:
-        """ Function to transform the frames from the file video stream into a queue """
-        while not self.stopped and self.video_stream.isOpen():
-            if self.Q.full():
-                time.sleep(self.sleep_time)
-            else:
-                frame = self.video_stream.read()
-                frame = Equirectangular.get_perspective(
-                        frame,
-                        self.FOV,
-                        self.THETA,
-                        self.PHI,
-                        self.height,
-                        self.width
-                    )
-                self.Q.put(frame)
+        """ Function to read transformed frames from ffmpeg video stream into a queue """
 
+        command = ['ffmpeg',
+                        '-hide_banner', '-loglevel', 'warning',
+                        '-ss', str(self.start_timestamp),
+                        '-i', self.video_path,
+                        '-f', 'image2pipe',
+                        '-pix_fmt', 'bgr24',
+                        '-vsync', '0',
+                        '-vcodec', 'rawvideo',
+                        '-an','-sn', # disable audio processing
+                        '-vf', 'v360=input=he:in_stereo=sbs:pitch=' + str(self.PHI) + ':output=flat:d_fov=' \
+                                + str(self.FOV) + ':w=' + str(self.width) + ':h=' + str(self.height),
+                        '-']
+
+        pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=4*self.height*self.width)
+
+        while True:
+            data = pipe.stdout.read(self.width*self.height*3)
+            if not data: break
+            frame = np.frombuffer(data, dtype='uint8').reshape((self.height, self.width, 3))
+            if frame is None: break
+
+            while self.Q.full() and not self.stopped:
+                time.sleep(self.sleep_time)
+
+            if self.stopped: break
+            self.Q.put(frame)
+            self.current_frame += 1
+
+        # TODO add log entry
         self.stopped = True
+
+
+    def get_resolution(self) -> tuple:
+        """Get Resolution of given video
+
+        Returns:
+            tuple: (width, height)
+        """
+        command = ['ffprobe', '-v', 'error', '-select_streams', 'v:0',
+                   '-show_entries', 'stream=width,height', '-of', 'csv=p=0', self.video_path]
+        pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=-1)
+        for line in pipe.stdout:
+            w, h = line.decode().strip().split(',')
+            return int(w), int(h)
+
+
+    @property
+    def get_fps(self) -> float:
+        """Get FPS of given video
+
+        Returns:
+            float: fps
+        """
+        command = ['ffprobe', '-v', 'error', '-select_streams', 'v:0',
+                   '-show_entries', 'stream=r_frame_rate', '-of', 'csv=p=0', self.video_path]
+        pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=-1)
+        for line in pipe.stdout:
+            fps = line.decode().strip()
+            if '/' in str(fps): return float(Fraction(fps))
+            else: return float(fps)
 
 
     @property
@@ -207,7 +294,7 @@ class Equirectangular:
         Returns:
             int: current frame
         """
-        return self.video_stream.current_frame_pos
+        return self.current_frame
 
 
     @property
@@ -217,17 +304,8 @@ class Equirectangular:
         Returns:
             int: number of frames in video
         """
-        return self.video_stream.number_of_frames
-
-
-    @property
-    def fps(self) -> float:
-        """ Get Video FPS
-
-        Returns:
-            float: Video FPS
-        """
-        return self.video_stream.fps
+        raise Exception("Not Implemented")
+        return -1
 
 
     @property
@@ -237,7 +315,7 @@ class Equirectangular:
         Returns:
             int: video frame width
         """
-        return self.video_stream.frame_width
+        return self.get_resolution()[0]
 
 
     @property
@@ -247,4 +325,4 @@ class Equirectangular:
         Returns:
             int: video frame height
         """
-        return self.video_stream.frame_heigt
+        return self.get_resolution()[1]

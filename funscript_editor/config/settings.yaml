@@ -9,7 +9,7 @@ zoom_factor: 4.0
 
 # Convert video in normal perspective view before apply tracking. This should improve the
 # tracking at the border of videos, because there is the distortion very high.
-use_equirectangular: False
+use_equirectangular: True
 
 # Scaling for the equirectangular preview window
 equirectangular_scaling: 1.0
