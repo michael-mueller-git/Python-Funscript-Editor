@@ -329,7 +329,8 @@ class FunscriptGenerator(QtCore.QThread):
 
         if successMin and successMax:
             if self.params.use_equirectangular:
-                dim =  (int(self.params.equirectangular_width*self.params.equirectangular_scaling), int(self.params.equirectangular_height*self.params.equirectangular_scaling))
+                dim =  (int(self.params.equirectangular_width*self.params.equirectangular_scaling), \
+                        int(self.params.equirectangular_height*self.params.equirectangular_scaling))
                 imgMin = cv2.resize(imgMin, dim)
                 imgMax = cv2.resize(imgMax, dim)
             else:
@@ -431,6 +432,12 @@ class FunscriptGenerator(QtCore.QThread):
                 'height': int(self.params.equirectangular_height*self.params.equirectangular_scaling),
                 'width': int(self.params.equirectangular_width*self.params.equirectangular_scaling)
             }
+
+        if image.shape[0] > 6000 or image.shape[1] > 6000:
+            image = cv2.resize(image, None, fx=0.25, fy=0.25)
+
+        if image.shape[0] > 3000 or image.shape[1] > 3000:
+            image = cv2.resize(image, None, fx=0.5, fy=0.5)
 
         selected = False
         while not selected:

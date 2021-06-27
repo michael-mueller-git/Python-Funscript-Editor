@@ -27,4 +27,4 @@ top_threshold: 5.0
 
 # Define the bottom threshold. All bottom points lower than (min + threshold) will be set to
 # the specified min value. Set 0.0 to disable this function.
-bottom_threshold: 5.0
+bottom_threshold: 10.0
