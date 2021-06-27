@@ -4,6 +4,14 @@ funscript\_editor.data namespace
 Submodules
 ----------
 
+funscript\_editor.data.equirectangularvideostream module
+--------------------------------------------------------
+
+.. automodule:: funscript_editor.data.equirectangularvideostream
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 funscript\_editor.data.filevideostream module
 ---------------------------------------------
 

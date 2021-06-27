@@ -4,14 +4,6 @@ funscript\_editor.algorithms namespace
 Submodules
 ----------
 
-funscript\_editor.algorithms.equirectangular module
----------------------------------------------------
-
-.. automodule:: funscript_editor.algorithms.equirectangular
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 funscript\_editor.algorithms.funscriptgenerator module
 ------------------------------------------------------
 

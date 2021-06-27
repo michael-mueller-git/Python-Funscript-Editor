@@ -181,6 +181,164 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-funscript_editor.data.equirectangularvideostream">
+<span id="funscript-editor-data-equirectangularvideostream-module"></span><h2>funscript_editor.data.equirectangularvideostream module<a class="headerlink" href="#module-funscript_editor.data.equirectangularvideostream" title="Permalink to this headline">¶</a></h2>
+<p>Methods to get equirectangular panorama video stream in normal perspective view.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.data.equirectangularvideostream.</span></span><span class="sig-name descname"><span class="pre">EquirectangularVideoStream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FOV</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">THETA</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PHI</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Python Class to read equirectangular panorama video stream in normal perspective view.</p>
+<dl class="simple">
+<dt>NOTE:</dt><dd><p>We use the same api as the FileVideoStream to allow replacement</p>
+</dd>
+<dt>Args:</dt><dd><p>video_path (str): path to video file
+FOV (int): perspective FOV
+THETA (int): left/right angle in degree (right direction is positive, left direction is negative)
+PHI (int) up/down angle in degree (up direction positive, down direction negative)
+height (int): output image height
+width (int): output image width
+start_frame (int): start frame number
+queue_size (int): size of frame buffer</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.current_frame_pos">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">current_frame_pos</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.current_frame_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get current frame position</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: current frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.frame_height">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">frame_height</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.frame_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Video Frame Height</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: video frame height</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.frame_to_millisec">
+<span class="sig-name descname"><span class="pre">frame_to_millisec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.frame_to_millisec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get timestamp for given frame number</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>frame (int): frame number</p>
+</dd>
+<dt>Returns:</dt><dd><p>int: timestamp in video</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.frame_width">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">frame_width</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.frame_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Video Frame Width</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: video frame width</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.get_fps">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">get_fps</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.get_fps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get FPS of given video</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>float: fps</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.get_perspective">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_perspective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FOV</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">THETA</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PHI</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RADIUS</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.get_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a normal perspective view from a panorama view.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>img (str, or opencv image object): path to image or opencv image data
+FOV (int): perspective FOV
+THETA (int): left/right angle in degree (right direction is positive, left direction is negative)
+PHI (int) up/down angle in degree (up direction positive, down direction negative)
+height (int): output image height
+width (int): output image width
+RADIUS (int, optional): sphere radius</p>
+</dd>
+<dt>Returns:</dt><dd><p>array: opencv image data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.get_resolution">
+<span class="sig-name descname"><span class="pre">get_resolution</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.get_resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Resolution of given video</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>tuple: (width, height)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.isOpen">
+<span class="sig-name descname"><span class="pre">isOpen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.isOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if equirectangular stream is open or a frame is still available in the buffer</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>bool: True if equirectangular strem is open or a frame is still available in the buffer else False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.millisec_to_timestamp">
+<span class="sig-name descname"><span class="pre">millisec_to_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">millis</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.millisec_to_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert milliseconds to timestamp</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>millis (int): position in video in milliseconds</p>
+</dd>
+<dt>Returns:</dt><dd><p>str: position in video as timestamp with H:M:S.XXX</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.number_of_frames">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">number_of_frames</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.number_of_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get number of frames in video</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>int: number of frames in video</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get next frame from equirectangular stream</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>np.ndarray: opencv image data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to read transformed frames from ffmpeg video stream into a queue</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.data.equirectangularvideostream.EquirectangularVideoStream.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop equirectangular stream</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-funscript_editor.data.filevideostream">
 <span id="funscript-editor-data-filevideostream-module"></span><h2>funscript_editor.data.filevideostream module<a class="headerlink" href="#module-funscript_editor.data.filevideostream" title="Permalink to this headline">¶</a></h2>
 <p>Video Stream</p>

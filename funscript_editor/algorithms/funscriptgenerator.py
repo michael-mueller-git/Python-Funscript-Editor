@@ -518,7 +518,7 @@ class FunscriptGenerator(QtCore.QThread):
             np.ndarray: opencv image
         """
         cap = cv2.VideoCapture(str(self.params.video_path))
-        if self.params.start_frame > 0: self.stream.set(cv2.CAP_PROP_POS_FRAMES, self.params.start_frame)
+        if self.params.start_frame > 0: cap.set(cv2.CAP_PROP_POS_FRAMES, self.params.start_frame)
         success, first_frame = cap.read()
         cap.release()
         return first_frame
