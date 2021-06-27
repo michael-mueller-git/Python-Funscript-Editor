@@ -76,7 +76,7 @@ class StaticVideoTracker:
             # The movement is mostly up-down, so we can restrict left and right more than up and down
             dh, dw = int(frame_heigt/12), int(frame_width/38)
         else:
-            dh, dw = int(frame_heigt/2), int(frame_width/2)
+            dh, dw = int(frame_heigt/2), int(frame_width/4)
         x0, y0 = max([0, self.first_tracking_bbox[0] - dw]), max([0, self.first_tracking_bbox[1] - dh])
         y1 = min([frame_heigt, self.first_tracking_bbox[1] + self.first_tracking_bbox[3] + dh])
         x1 = min([frame_width, self.first_tracking_bbox[0] + self.first_tracking_bbox[2] + dw])
