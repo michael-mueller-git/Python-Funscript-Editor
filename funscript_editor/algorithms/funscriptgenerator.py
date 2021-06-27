@@ -433,6 +433,7 @@ class FunscriptGenerator(QtCore.QThread):
                 'width': int(self.params.equirectangular_width*self.params.equirectangular_scaling)
             }
 
+        # NOTE: improve processing speed to make this menu more responsive
         if image.shape[0] > 6000 or image.shape[1] > 6000:
             image = cv2.resize(image, None, fx=0.25, fy=0.25)
 
