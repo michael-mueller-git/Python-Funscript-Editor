@@ -43,6 +43,9 @@ class FunscriptGeneratorParameter:
     scaling_method :str = SETTINGS['scaling_method']
     top_threshold :float = float(HYPERPARAMETER['top_threshold'])
     bottom_threshold :float = float(HYPERPARAMETER['bottom_threshold'])
+    equirectangular_height :int = 720
+    equirectangular_width :int = 1240
+    equirectangular_fov :int = 100
 
 
 class FunscriptGenerator(QtCore.QThread):
@@ -309,7 +312,6 @@ class FunscriptGenerator(QtCore.QThread):
         cap = cv2.VideoCapture(self.params.video_path)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        scale = self.get_scaling(width, height)
 
         if direction == 'x':
             min_frame = np.argmin(np.array(self.score_x)) + self.params.start_frame
@@ -326,8 +328,14 @@ class FunscriptGenerator(QtCore.QThread):
         cap.release()
 
         if successMin and successMax:
-            imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
-            imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
+            if self.params.use_equirectangular:
+                dim =  (int(self.params.equirectangular_width*self.params.equirectangular_scaling), int(self.params.equirectangular_height*self.params.equirectangular_scaling))
+                imgMin = cv2.resize(imgMin, dim)
+                imgMax = cv2.resize(imgMax, dim)
+            else:
+                scale = self.get_scaling(width, height)
+                imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
+                imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
 
             # Assume we have VR 3D Side by Side
             imgMin = imgMin[:, :int(imgMin.shape[1]/2)]
@@ -417,11 +425,11 @@ class FunscriptGenerator(QtCore.QThread):
             image (np.ndarray): opencv vr 180 or 360 image
         """
         perspective = {
-                'FOV': 100,
+                'FOV': self.params.equirectangular_fov,
                 'THETA': -90,
                 'PHI': -45,
-                'height': int(720*self.params.equirectangular_scaling),
-                'width': int(1240*self.params.equirectangular_scaling)
+                'height': int(self.params.equirectangular_height*self.params.equirectangular_scaling),
+                'width': int(self.params.equirectangular_width*self.params.equirectangular_scaling)
             }
 
         selected = False
@@ -522,11 +530,8 @@ class FunscriptGenerator(QtCore.QThread):
         Returns:
             str: a process status message e.g. 'end of video reached'
         """
-        first_frame = self.get_first_frame()
-        if first_frame is None:
-            return 'Video file is corrupt'
-
         if self.params.use_equirectangular:
+            first_frame = self.get_first_frame()
             self.get_perspective_roi(first_frame)
 
             video = EquirectangularVideoStream(
