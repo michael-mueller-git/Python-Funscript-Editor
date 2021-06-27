@@ -15,7 +15,7 @@ def main():
     args = parser.parse_args()
 
     if os.getcwd() not in os.environ['PATH']:
-        os.environ['PATH'] += os.getcwd() + os.sep
+        os.environ['PATH'] = os.getcwd() + os.sep + os.environ['PATH']
 
     if not args.generator: show_editor()
     else: generate_funscript(args.input, args.start, args.output)
