@@ -2,6 +2,7 @@
 
 import cv2
 import json
+import copy
 import time
 import logging
 
@@ -37,6 +38,8 @@ class FunscriptGeneratorParameter:
     use_zoom: bool = SETTINGS['use_zoom']
     shift_bottom_points :int = int(HYPERPARAMETER['shift_bottom_points'])
     shift_top_points :int = int(HYPERPARAMETER['shift_top_points'])
+    top_points_offset :float = float(HYPERPARAMETER['top_points_offset'])
+    bottom_points_offset :float = float(HYPERPARAMETER['bottom_points_offset'])
     use_equirectangular :bool = SETTINGS['use_equirectangular']
     equirectangular_scaling :float = max((0.2, float(SETTINGS['equirectangular_scaling'])))
     zoom_factor :float = max((1.0, float(SETTINGS['zoom_factor'])))
@@ -710,6 +713,28 @@ class FunscriptGenerator(QtCore.QThread):
 
         return self.params.start_frame + frame_number
 
+    def get_score_with_offset(self, idx_dict) -> list:
+        """ Apply the offsets form config file
+
+        Args:
+            idx_dict (dict): the idx dictionary with {'min':[], 'max':[]} idx lists
+
+        Returns:
+            list: score with offset
+        """
+        if self.params.direction == 'x':
+            return self.score_x
+
+        score = copy.deepcopy(self.score_y)
+        score_min, score_max = min(score), max(score)
+        for idx in idx_dict['min']:
+            score[idx] = max(( score_min, min((score_max, score[idx] + self.params.bottom_points_offset)) ))
+
+        for idx in idx_dict['max']:
+            score[idx] = max(( score_min, min((score_max, score[idx] + self.params.top_points_offset)) ))
+
+        return score
+
 
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
@@ -739,7 +764,7 @@ class FunscriptGenerator(QtCore.QThread):
             if self.params.direction != 'x':
                 self.plot_y_score('debug_002.png', idx_list)
 
-        output_score = self.score_y if self.params.direction != 'x' else self.score_x
+        output_score = self.get_score_with_offset(idx_dict)
         for idx in idx_dict['min']:
             self.funscript.add_action(
                     min(output_score) \

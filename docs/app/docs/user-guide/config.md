@@ -24,6 +24,8 @@ Config Files:
 - `min_frames` (int): Specify the minimum required frames for the tracking. Wee need this parameter to ensure there is at leas two strokes in the tracking result.
 - `shift_top_points` (int): Shift predicted top points by given frame number. Positive values delay the position and negative values result in an earlier position.
 - `shift_bottom_points` (int): Shift predicted bottom points by given frame number. Positive values delay the position and negative values result in an earlier position.
+- `top_points_offset` (float): An fix offset to the top points (positive values move the point up and negative values move the point down). The offset respect the user defined upper and lower limit.
+- `bottom_points_offset` (float): An fix offset to the bottom points (positive values move the point up and negative values move the point down). The offset respect the user defined upper and lower limit.
 - `top_threshold` (float): Define the top threshold. All top points greater than `(max - threshold)` will be set to the specified max value. Set 0.0 to disable this function.
 - `bottom_threshold` (float): Define the bottom threshold. All bottom points lower than `(min + threshold)` will be set to the specified min value. Set 0.0 to disable this function.
 
