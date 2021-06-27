@@ -306,7 +306,8 @@ class FunscriptGenerator(QtCore.QThread):
 
         cap = cv2.VideoCapture(self.params.video_path)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        scale = self.get_scaling(width)
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        scale = self.get_scaling(width, height)
 
         if direction == 'x':
             min_frame = np.argmin(np.array(self.score_x)) + self.params.start_frame

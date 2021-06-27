@@ -116,11 +116,10 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.ui.medianStrokesLabel.setText('{} ms'.format(self.funscript.get_median_stroke()))
 
     def __setup_ui_binding(self):
-        self.ui.menuFile.addAction('Open', self.__open_video)
-        self.ui.menuFile.addAction('New', self.__new_funscript)
-        self.ui.menuFile.addAction('Save', self.__save_funscript)
-        self.ui.menuFile.addAction('Clear History', self.__clear_funscript_history)
-        self.ui.menuFile.addAction('Ground Strokes', self.__ground_all)
+        self.ui.menuFile.addAction('Open (Ctrl+O)', self.__open_video)
+        self.ui.menuFile.addAction('New (Ctrl+N)', self.__new_funscript)
+        self.ui.menuFile.addAction('Save (Ctrl+S)', self.__save_funscript)
+        self.ui.menuFile.addAction('Clear History (Ctrl+C)', self.__clear_funscript_history)
 
         helpMenu = self.ui.menubar.addMenu("Help")
         # TODO we schold use an http server to show the documentation
@@ -154,6 +153,8 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         QtWidgets.QShortcut('8', self).activated.connect(lambda: self.__add_action(80))
         QtWidgets.QShortcut('9', self).activated.connect(lambda: self.__add_action(90))
 
+        QtWidgets.QShortcut('CTRL+o', self).activated.connect(self.__open_video)
+        QtWidgets.QShortcut('CTRL+c', self).activated.connect(self.__clear_funscript_history)
         QtWidgets.QShortcut('CTRL+g', self).activated.connect(lambda: self.__generateFunscript.emit())
         QtWidgets.QShortcut('CTRL+i', self).activated.connect(self.video_player.toogle_stroke_indicator_inversion)
         QtWidgets.QShortcut('CTRL+s', self).activated.connect(self.__save_funscript)
@@ -170,12 +171,16 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
             self.funscript_visualizer.update()
 
     def __clear_funscript_history(self):
+        if self.funscript is None: return
+        if self.video_player is None: return
+        if self.video_player.get_video_file is None: return
         self.__save_funscript()
         funscript_path = ''.join(self.video_player.get_video_file[:-4]) + '.funscript'
         num = 0
         while (os.path.exists(funscript_path + str(num))):
             os.remove(funscript_path + str(num))
             num += 1
+        self.video_player.show_message("The funscript history was cleaned")
 
     def __seek_to_first_action(self):
         if self.funscript is not None:
@@ -204,10 +209,6 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
                 max((0.0, self.video_player.get_current_timestamp_in_millis \
                 / float(1000) - UI_CONFIG['seek_prev_sec'])))
 
-    def __ground_all(self):
-        if self.funscript is None: return
-        self.funscript.ground_all()
-        self.funscript_visualizer.update()
 
     def __invert_actions(self):
         if self.funscript is None: return
@@ -235,6 +236,8 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         if key == 'shift+end': self.__seek_to_last_action()
         if key == 'shift+home': self.__seek_to_first_action()
         if key == 'ctrl+n': self.__new_funscript()
+        if key == 'ctrl+o': self.__open_video()
+        if key == 'ctrl+c': self.__clear_funscript_history()
 
     def __show_message(self, message):
         msg = QtWidgets.QMessageBox()
@@ -285,6 +288,9 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.statusBar().showMessage("{} ({})".format(current, datetime.now().strftime("%H:%M:%S")))
 
     def __generate_funscript(self):
+        if self.funscript is None: return
+        if self.video_player is None: return
+        if self.video_player.get_video_file is None: return
         start_frame = self.video_player.get_current_frame \
                 if self.funscript.get_last_action_time() < self.video_player.get_current_timestamp_in_millis \
                 else self.video_player.millisec_to_frame(self.funscript.get_last_action_time())

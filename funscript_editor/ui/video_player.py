@@ -192,6 +192,16 @@ class VideoPlayer(QtCore.QThread):
             if self.key_callback is not None:
                 self.key_callback('ctrl+n')
 
+        @self.player.on_key_press('ctrl+o')
+        def __ctrl_n_binding():
+            if self.key_callback is not None:
+                self.key_callback('ctrl+o')
+
+        @self.player.on_key_press('ctrl+c')
+        def __ctrl_n_binding():
+            if self.key_callback is not None:
+                self.key_callback('ctrl+c')
+
         @self.player.on_key_press('w')
         def __w_binding():
             self.move_stroke_indicator_relative(0,-1)
