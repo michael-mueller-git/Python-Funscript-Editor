@@ -131,7 +131,8 @@
 <li><code>min_frames</code> (int): Specify the minimum required frames for the tracking. Wee need this parameter to ensure there is at leas two strokes in the tracking result.</li>
 <li><code>shift_top_points</code> (int): Shift predicted top points by given frame number. Positive values delay the position and negative values result in an earlier position.</li>
 <li><code>shift_bottom_points</code> (int): Shift predicted bottom points by given frame number. Positive values delay the position and negative values result in an earlier position.</li>
-<li><code>bottom_threshold</code> (float): Define the bottom threshold. All bottom points lower than this threshold will be set to 0. Set <code>0.0</code> to disable this function.</li>
+<li><code>top_threshold</code> (float): Define the top threshold. All top points greater than <code>(max - threshold)</code> will be set to the specified max value. Set 0.0 to disable this function.</li>
+<li><code>bottom_threshold</code> (float): Define the bottom threshold. All bottom points lower than <code>(min + threshold)</code> will be set to the specified min value. Set 0.0 to disable this function.</li>
 </ul>
 <h4 id="settingsyaml"><code>settings.yaml</code></h4>
 <ul>
