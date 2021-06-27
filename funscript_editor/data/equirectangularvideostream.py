@@ -61,6 +61,7 @@ class EquirectangularVideoStream:
         self.thread.daemon = True
         self.thread.start()
 
+    __logger = logging.getLogger(__name__)
 
     @staticmethod
     def get_perspective(
@@ -226,17 +227,17 @@ class EquirectangularVideoStream:
         """ Function to read transformed frames from ffmpeg video stream into a queue """
 
         command = ['ffmpeg',
-                        '-hide_banner', '-loglevel', 'warning',
-                        '-ss', str(self.start_timestamp),
-                        '-i', self.video_path,
-                        '-f', 'image2pipe',
-                        '-pix_fmt', 'bgr24',
-                        '-vsync', '0',
-                        '-vcodec', 'rawvideo',
-                        '-an','-sn', # disable audio processing
-                        '-vf', 'v360=input=he:in_stereo=sbs:pitch=' + str(self.PHI) + ':output=flat:d_fov=' \
-                                + str(self.FOV) + ':w=' + str(self.width) + ':h=' + str(self.height),
-                        '-']
+                '-hide_banner', '-loglevel', 'warning',
+                '-ss', str(self.start_timestamp),
+                '-i', self.video_path,
+                '-f', 'image2pipe',
+                '-pix_fmt', 'bgr24',
+                '-vsync', '0',
+                '-vcodec', 'rawvideo',
+                '-an','-sn', # disable audio processing
+                '-vf', 'v360=input=he:in_stereo=sbs:pitch=' + str(self.PHI) + ':output=flat:d_fov=' \
+                        + str(self.FOV) + ':w=' + str(self.width) + ':h=' + str(self.height),
+                '-']
 
         pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=4*self.height*self.width)
 
@@ -253,8 +254,9 @@ class EquirectangularVideoStream:
             self.Q.put(frame)
             self.current_frame += 1
 
-        # TODO add log entry
+        pipe.terminate()
         self.stopped = True
+        self.__logger.info('close ffmpeg stream')
 
 
     def get_resolution(self) -> tuple:
