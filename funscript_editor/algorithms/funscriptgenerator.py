@@ -443,38 +443,42 @@ class FunscriptGenerator(QtCore.QThread):
         if image.shape[0] > 3000 or image.shape[1] > 3000:
             image = cv2.resize(image, None, fx=0.5, fy=0.5)
 
-        selected = False
+        parameter_changed, selected = True, False
         while not selected:
-            preview = EquirectangularVideoStream.get_perspective(
-                    image,
-                    perspective['FOV'],
-                    perspective['THETA'],
-                    perspective['PHI'],
-                    perspective['height'],
-                    perspective['width']
-                )
+            if parameter_changed:
+                parameter_changed = False
+                preview = EquirectangularVideoStream.get_perspective(
+                        image,
+                        perspective['FOV'],
+                        perspective['THETA'],
+                        perspective['PHI'],
+                        perspective['height'],
+                        perspective['width']
+                    )
 
-            preview = self.drawText(preview, "Press 'q' to use current selected region of interest)",
-                    y = 50, color = (255, 0, 0))
-            preview = self.drawText(preview, "Use 'w', 's' to move up/down to the region of interest",
-                    y = 75, color = (0, 255, 0))
+                preview = self.drawText(preview, "Press 'q' to use current selected region of interest)",
+                        y = 50, color = (255, 0, 0))
+                preview = self.drawText(preview, "Use 'w', 's' to move up/down to the region of interest",
+                        y = 75, color = (0, 255, 0))
 
             cv2.imshow(self.window_name, preview)
             while self.keypress_queue.qsize() > 0:
                 pressed_key = '{0}'.format(self.keypress_queue.get())
                 if pressed_key == "'q'":
                     selected = True
+                    break
                 elif pressed_key == "'w'":
                     perspective['PHI'] = min((80, perspective['PHI'] + 5))
+                    parameter_changed = True
                 elif pressed_key == "'s'":
                     perspective['PHI'] = max((-80, perspective['PHI'] - 5))
+                    parameter_changed = True
                 # elif pressed_key == "'a'":
                 #     perspective['THETA'] -= 5
                 # elif pressed_key == "'d'":
                 #     perspective['THETA'] += 5
 
-            if cv2.waitKey(1) in [ord('q')]:
-                selected = True
+            if cv2.waitKey(1) in [ord('q')]: break
 
         self.perspective_params = perspective
 

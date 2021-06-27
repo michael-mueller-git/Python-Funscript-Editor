@@ -31,8 +31,8 @@ bottom_points_offset: -15.0
 
 # Define the top threshold. All top points greater than (max - threshold) will be set to
 # the specified max value. Set 0.0 to disable this function.
-top_threshold: 5.0
+top_threshold: 2.5
 
 # Define the bottom threshold. All bottom points lower than (min + threshold) will be set to
 # the specified min value. Set 0.0 to disable this function.
-bottom_threshold: 5.0
+bottom_threshold: 2.5
