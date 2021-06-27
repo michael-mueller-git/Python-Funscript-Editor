@@ -19,15 +19,21 @@ Currently we use a hacky lua script to communicate between the Python Funscript 
 
 ## Troubleshot
 
+If you have problems with the OFS integration setup first test if the app work in standalone mode by starting the `funscript-editor.exe`. This allows the source of the error to be narrowed down more quickly!
+
+If the standalone application works, look for your problem in the issues listed below. If the standalone application not work or your issue was not solved by a point listed below, open an issue with a detailed problem description and the full terminal window output if available.
+
 ### After setting the min and max value after tracking no points are inserted in OFS
 
-If the points are missing in OFS then most likely the variable `Settings.TmpFile` in the `funscript_generator.lua` script is set incorrectly.
+If the points are missing in OFS then most likely the variable `Settings.TmpFile` in the `funscript_generator.lua` script is set incorrectly or the generator crashes. A crash could happen if your PC does not have enough memory. The amount of memory required depends heavily on the video resolution!
 
 ### Noting happens when i press the Shortcut for the Funscript Generator
 
 In most cases, the variable `Settings.FunscriptGenerator` in the `funscript_generator.lua` script was not set correctly.
 
 If you are using an older version of the `funscript_generator.lua` you should download the latest version of the script from the [github release page](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases). With older `funscript_generator.lua` scripts there were e.g. problems with blanks in the path.
+
+**Important:** You have to use use `/` or `\\` for the `\` symbols in your path!
 
 ### When calling the generator, only a message box is displayed with the message: "Video file was not specified!"
 
