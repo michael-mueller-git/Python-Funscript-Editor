@@ -6,6 +6,7 @@ import cv2
 from funscript_editor.utils.logging import setup_logging
 from funscript_editor.ui.funscript_editor_window import FunscriptEditorWindow
 from funscript_editor.ui.minimal import MinimalFunscriptGenerator
+from funscript_editor.utils.config import VERSION
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -13,6 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 def show_editor() -> None:
     """ Show the Funscript Editor Main Window """
     setup_logging()
+    logging.info("Python Funscript Editor %s", VERSION)
     app = QtWidgets.QApplication(sys.argv)
     widget = FunscriptEditorWindow()
     widget.show()
@@ -28,6 +30,7 @@ def generate_funscript(video_file: str, start_time: int, output_file: str) -> No
         output_file (str): path for the output file
     """
     setup_logging()
+    logging.info("Python Funscript Generator %s", VERSION)
     app = QtWidgets.QApplication(sys.argv)
     generator = MinimalFunscriptGenerator(video_file, start_time, output_file)
     generator.run()

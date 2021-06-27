@@ -27,7 +27,7 @@ def setup_logging(
     """ Logging Setup
 
     Args:
-        default_level (int): logging level from logging python module e.g. `logging.INFO` (default is `logging.INFO`).
+        default_level (int): logging level e.g. `logging.INFO` (default is `logging.DEBUG`).
         env_key (str, optional): env variable name to load a configuration file via environment variable (default is `LOG_CFG`).
     """
     config_path = WINDOWS_LOG_CONFIG_FILE if platform.system() == 'Windows' else LINUX_LOG_CONFIG_FILE
@@ -39,7 +39,8 @@ def setup_logging(
                 config = yaml.safe_load(f.read())
                 create_log_directories(config)
                 logging.config.dictConfig(config)
-                coloredlogs.install()
+                coloredlogs.install(level=default_level)
+                logging.debug('Loging setup completed')
             except Exception as e:
                 print(e)
                 print('Error in Logging Configuration. Using default configs')
