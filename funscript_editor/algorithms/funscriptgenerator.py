@@ -41,6 +41,7 @@ class FunscriptGeneratorParameter:
     equirectangular_scaling :float = max((0.2, float(SETTINGS['equirectangular_scaling'])))
     zoom_factor :float = max((1.0, float(SETTINGS['zoom_factor'])))
     scaling_method :str = SETTINGS['scaling_method']
+    bottom_threshold :float = float(HYPERPARAMETER['bottom_threshold'])
 
 
 class FunscriptGenerator(QtCore.QThread):
@@ -718,7 +719,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         for idx in idx_dict['min']:
             self.funscript.add_action(
-                    self.score_y[idx],
+                    0 if self.score_y[idx] < self.params.bottom_threshold else round(self.score_y[idx]),
                     self.frame_to_millisec(self.apply_shift(idx, 'min'), self.fps)
                 )
 

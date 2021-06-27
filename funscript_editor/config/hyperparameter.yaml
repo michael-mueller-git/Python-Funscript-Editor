@@ -20,3 +20,7 @@ shift_top_points: 0
 # Shift predicted bottom points by given frame number. Positive values delay the position
 # and negative values result in an earlier position.
 shift_bottom_points: 0
+
+# Define the bottom threshold. All bottom points lower than this threshold will be set to 0
+# Set 0.0 to disable this function.
+bottom_threshold: 25.0

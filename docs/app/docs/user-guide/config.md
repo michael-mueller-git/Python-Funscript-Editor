@@ -24,6 +24,7 @@ Config Files:
 - `min_frames` (int): Specify the minimum required frames for the tracking. Wee need this parameter to ensure there is at leas two strokes in the tracking result.
 - `shift_top_points` (int): Shift predicted top points by given frame number. Positive values delay the position and negative values result in an earlier position.
 - `shift_bottom_points` (int): Shift predicted bottom points by given frame number. Positive values delay the position and negative values result in an earlier position.
+- `bottom_threshold` (float): Define the bottom threshold. All bottom points lower than this threshold will be set to 0. Set `0.0` to disable this function.
 
 #### `settings.yaml`
 

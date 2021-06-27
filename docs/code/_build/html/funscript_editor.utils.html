@@ -185,7 +185,7 @@
 <p>Configuration parser</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="funscript_editor.utils.config.HYPERPARAMETER">
-<span class="sig-prename descclassname"><span class="pre">funscript_editor.utils.config.</span></span><span class="sig-name descname"><span class="pre">HYPERPARAMETER</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'avg_sec_for_local_min_max_extraction':</span> <span class="pre">1.9,</span> <span class="pre">'min_frames':</span> <span class="pre">120,</span> <span class="pre">'shift_bottom_points':</span> <span class="pre">0,</span> <span class="pre">'shift_top_points':</span> <span class="pre">0,</span> <span class="pre">'skip_frames':</span> <span class="pre">1}</span></em><a class="headerlink" href="#funscript_editor.utils.config.HYPERPARAMETER" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">funscript_editor.utils.config.</span></span><span class="sig-name descname"><span class="pre">HYPERPARAMETER</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'avg_sec_for_local_min_max_extraction':</span> <span class="pre">1.9,</span> <span class="pre">'bottom_threshold':</span> <span class="pre">25.0,</span> <span class="pre">'min_frames':</span> <span class="pre">120,</span> <span class="pre">'shift_bottom_points':</span> <span class="pre">0,</span> <span class="pre">'shift_top_points':</span> <span class="pre">0,</span> <span class="pre">'skip_frames':</span> <span class="pre">1}</span></em><a class="headerlink" href="#funscript_editor.utils.config.HYPERPARAMETER" title="Permalink to this definition">¶</a></dt>
 <dd><p>hyperparameter for the algorithms</p>
 </dd></dl>
 
@@ -248,7 +248,7 @@
 <span class="sig-prename descclassname"><span class="pre">funscript_editor.utils.logging.</span></span><span class="sig-name descname"><span class="pre">setup_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'LOG_CFG'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.utils.logging.setup_logging" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logging Setup</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>default_level (int): logging level from logging python module e.g. <cite>logging.INFO</cite> (default is <cite>logging.INFO</cite>).
+<dt>Args:</dt><dd><p>default_level (int): logging level e.g. <cite>logging.INFO</cite> (default is <cite>logging.DEBUG</cite>).
 env_key (str, optional): env variable name to load a configuration file via environment variable (default is <cite>LOG_CFG</cite>).</p>
 </dd>
 </dl>
