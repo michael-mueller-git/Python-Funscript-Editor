@@ -1,5 +1,5 @@
 Settings = {}
-Settings.FunscriptGenerator = 'C:/Users/win10/Desktop/funscript editor/funscript-editor.exe' -- Path to your Python Funscript Editor installation
+Settings.FunscriptGenerator = 'C:/Users/win10/Desktop/funscript-editor/funscript-editor.exe' -- Path to your Python Funscript Editor installation
 Settings.TmpFile = 'C:/Users/win10/AppData/Local/Temp/funscript_actions.csv' -- file where to temporary store the result (must be a file not a directory!)
 SetSettings(Settings)
 
