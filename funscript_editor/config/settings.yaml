@@ -4,6 +4,9 @@
 # feature for the Woman or Men.
 use_zoom: False
 
+# Set the desired zoom value which will be used when the zoom function is activated.
+zoom_factor: 4.0
+
 # Convert video in normal perspective view before apply tracking. This should improve the
 # tracking at the border of videos, because there is the distortion very high.
 use_equirectangular: False

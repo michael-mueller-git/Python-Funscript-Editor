@@ -28,16 +28,17 @@ import matplotlib.pyplot as plt
 class FunscriptGeneratorParameter:
     """ Funscript Generator Parameter Dataclass with default values """
     video_path: str # no default value
-    start_frame: int = 0 # default is video start
-    skip_frames: int = HYPERPARAMETER['skip_frames']
-    max_playback_fps: int = SETTINGS['max_playback_fps']
+    start_frame: int = 0 # default is video start (input: set current video position)
+    track_men: bool = True # set by userinput at start (message box)
+    skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
+    max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
     direction: str = SETTINGS['tracking_direction']
     use_zoom: bool = SETTINGS['use_zoom']
-    shift_bottom_points :int = HYPERPARAMETER['shift_bottom_points']
-    shift_top_points :int = HYPERPARAMETER['shift_top_points']
+    shift_bottom_points :int = int(HYPERPARAMETER['shift_bottom_points'])
+    shift_top_points :int = int(HYPERPARAMETER['shift_top_points'])
     use_equirectangular :bool = SETTINGS['use_equirectangular']
-    equirectangular_scaling :float = SETTINGS['equirectangular_scaling']
-    track_men: bool = True
+    equirectangular_scaling :float = max((0.2, float(SETTINGS['equirectangular_scaling'])))
+    zoom_factor :float = max((1.0, float(SETTINGS['zoom_factor'])))
 
 
 class FunscriptGenerator(QtCore.QThread):
@@ -453,13 +454,13 @@ class FunscriptGenerator(QtCore.QThread):
             while True:
                 zoom_bbox = cv2.selectROI(self.window_name, self.drawText(image, "Zoom selected area"), False)
                 if zoom_bbox is None or len(zoom_bbox) == 0: continue
-                if zoom_bbox[2] < 100 or zoom_bbox[3] < 100:
+                if zoom_bbox[2] < 75 or zoom_bbox[3] < 75:
                     self.__logger.error("The selected zoom area is to small")
                     continue
                 break
 
             image = image[zoom_bbox[1]:zoom_bbox[1]+zoom_bbox[3], zoom_bbox[0]:zoom_bbox[0]+zoom_bbox[2]]
-            image = cv2.resize(image, None, fx=2, fy=2)
+            image = cv2.resize(image, None, fx=self.params.zoom_factor, fy=self.params.zoom_factor)
 
         while True:
             bbox = cv2.selectROI(self.window_name, self.drawText(image, txt), False)
@@ -468,8 +469,11 @@ class FunscriptGenerator(QtCore.QThread):
             break
 
         if self.params.use_zoom:
-            # NOTE: we upscale the preview by 2
-            bbox = (round(bbox[0]/2)+zoom_bbox[0], round(bbox[1]/2)+zoom_bbox[1], round(bbox[2]/2), round(bbox[3]/2))
+            bbox = (round(bbox[0]/self.params.zoom_factor)+zoom_bbox[0],
+                    round(bbox[1]/self.params.zoom_factor)+zoom_bbox[1],
+                    round(bbox[2]/self.params.zoom_factor),
+                    round(bbox[3]/self.params.zoom_factor)
+                )
 
         return bbox
 
@@ -488,9 +492,6 @@ class FunscriptGenerator(QtCore.QThread):
         first_frame = video.read()
         if first_frame is None:
             return 'Video file is corrupt'
-
-        if self.params.skip_frames < 0:
-            self.params.skip_frames = 0
 
         if self.params.use_equirectangular:
             self.get_perspective_roi(first_frame)

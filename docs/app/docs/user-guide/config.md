@@ -28,6 +28,7 @@ Config Files:
 #### `settings.yaml`
 
 - `use_zoom` (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.
+- `zoom_factor:` (float): Set the desired zoom value which will be used when the zoom function is activated.
 - `use_equirectangular` (bool): Convert video in normal perspective view before apply tracking. This should improve the tracking at the border of videos, because there is the distortion very high.
 - `equirectangular_scaling` (float): scaling parameter for the equirectangular preview window. `1.0` is `1240x720`, `1.5` would be `1860x1080`, ... (Do not use to high scaling values, the perspective calculation need a lot of computer resources!)
 
