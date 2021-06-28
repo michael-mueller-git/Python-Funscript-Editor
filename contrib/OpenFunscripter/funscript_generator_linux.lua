@@ -8,7 +8,7 @@ function GetActions(video)
     local at = {}
     local pos = {}
     local next_action = CurrentScript:GetClosestActionAfter(CurrentTimeMs)
-    local command = 'python3 "'..Settings.PythonScript..'" --generator -s '..( next_action == nil and tostring(CurrentTimeMs) or tostring(CurrentTimeMs)..' -e '..tostring(next_action.at))..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
+    local command = 'python3 "'..Settings.PythonScript..'" --generator -s '..(next_action == nil and tostring(CurrentTimeMs) or tostring(CurrentTimeMs)..' -e '..tostring(next_action.at))..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
     print(command)
     os.execute(command)
     local f = io.open(Settings.TmpFile)

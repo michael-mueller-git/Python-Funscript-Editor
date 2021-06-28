@@ -7,7 +7,8 @@ SetSettings(Settings)
 function GetActions(video)
     local at = {}
     local pos = {}
-    local command = '""'..Settings.FunscriptGenerator..'" --generator -s '..tostring(CurrentTimeMs)..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
+    local next_action = CurrentScript:GetClosestActionAfter(CurrentTimeMs)
+    local command = '""'..Settings.FunscriptGenerator..'" --generator -s '..(next_action == nil and tostring(CurrentTimeMs) or tostring(CurrentTimeMs)..' -e '..tostring(next_action.at))..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
     print(command)
     os.execute(command)
     local f = io.open(Settings.TmpFile)
