@@ -474,15 +474,11 @@ class FunscriptGenerator(QtCore.QThread):
                 elif pressed_key == "'s'":
                     perspective['PHI'] = max((-80, perspective['PHI'] - 5))
                     parameter_changed = True
-                # elif pressed_key == "'a'":
-                #     perspective['THETA'] -= 5
-                # elif pressed_key == "'d'":
-                #     perspective['THETA'] += 5
 
             if cv2.waitKey(1) in [ord('q')]: break
 
         try:
-            background = np.full(preview.shape, 255, dtype=np.uint8)
+            background = np.full(preview.shape, 0, dtype=np.uint8)
             loading_screen = self.drawText(background, "Please wait ...")
             cv2.imshow(self.window_name, loading_screen)
         except: pass
@@ -601,6 +597,10 @@ class FunscriptGenerator(QtCore.QThread):
             # NOTE: Use != 1 to ensure that the first difference is equal to the folowing (reqired for the interpolation)
             if self.params.skip_frames > 0 and frame_num % (self.params.skip_frames + 1) != 1:
                 continue
+
+            if self.params.end_frame > 0 and frame_num + self.params.start_frame >= self.params.end_frame:
+                status = "Tracking stop at existing action point"
+                break
 
             trackerWoman.update(frame)
             if self.params.track_men: trackerMen.update(frame)

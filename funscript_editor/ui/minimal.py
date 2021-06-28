@@ -69,7 +69,7 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
         trackMen = True if reply == QtWidgets.QMessageBox.Yes else False
 
         start_frame = int(round(float(start_time)/(float(1000)/float(fps)))) if start_time > 0.0 else 0
-        end_frame = int(round(float(end_time)/(float(1000)/float(fps)))) if end_time > 0.0 else -1
+        end_frame = int(round(float(end_time)/(float(1000)/float(fps)))) if end_time > 0.0 and start_time < end_time else -1
 
         self.funscript_generator = FunscriptGenerator(
                 FunscriptGeneratorParameter(
