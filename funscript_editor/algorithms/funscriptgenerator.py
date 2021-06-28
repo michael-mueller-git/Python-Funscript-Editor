@@ -481,6 +481,12 @@ class FunscriptGenerator(QtCore.QThread):
 
             if cv2.waitKey(1) in [ord('q')]: break
 
+        try:
+            background = np.full(preview.shape, 255, dtype=np.uint8)
+            loading_screen = self.drawText(background, "Please wait ...")
+            cv2.imshow(self.window_name, loading_screen)
+        except: pass
+
         self.perspective_params = perspective
 
 
