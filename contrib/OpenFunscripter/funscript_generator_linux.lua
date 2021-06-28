@@ -1,13 +1,14 @@
 Settings = {}
-Settings.PythonScript = "/home/arch/repos/python-funscript-editor/funscript-editor.py"
+Settings.PythonScript = "/home/arch/Repos/public/Python-Funscript-Editor/funscript-editor.py"
 Settings.TmpFile = "/tmp/funscript_actions.csv"
 SetSettings(Settings)
 
--- Version: 1.0.0
+-- Version: 1.2.0
 function GetActions(video)
     local at = {}
     local pos = {}
-    local command = 'python3 "'..Settings.PythonScript..'" --generator -s '..tostring(CurrentTimeMs)..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
+    local next_action = CurrentScript:GetClosestActionAfter(CurrentTimeMs)
+    local command = 'python3 "'..Settings.PythonScript..'" --generator -s '..( next_action == nil and tostring(CurrentTimeMs) or tostring(CurrentTimeMs)..' -e '..tostring(next_action.at))..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
     print(command)
     os.execute(command)
     local f = io.open(Settings.TmpFile)

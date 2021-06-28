@@ -31,6 +31,7 @@ class FunscriptGeneratorParameter:
     """ Funscript Generator Parameter Dataclass with default values """
     video_path: str # no default value
     start_frame: int = 0 # default is video start (input: set current video position)
+    end_frame: int = -1 # default is video end (-1)
     track_men: bool = True # set by userinput at start (message box)
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))

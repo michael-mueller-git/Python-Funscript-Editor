@@ -19,10 +19,16 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
 
     Args:
         video_file (str): path to video file
-        start_time (int): start position in video (timestamp in milliseconds)
+        start_time (float): start position in video (timestamp in milliseconds)
+        end_time (float): end position in video (timestamp in milliseconds) use -1.0 for video end.
+        output_file (str): csv output file path
     """
 
-    def __init__(self, video_file, start_time, output_file):
+    def __init__(self,
+            video_file: str,
+            start_time: float,
+            end_time: float,
+            output_file: str):
         super(MinimalFunscriptGenerator, self).__init__()
 
         if os.path.isdir(output_file):
@@ -62,12 +68,14 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
         trackMen = True if reply == QtWidgets.QMessageBox.Yes else False
 
-        start_frame = int(round(float(start_time)/(float(1000)/float(fps))))
+        start_frame = int(round(float(start_time)/(float(1000)/float(fps)))) if start_time > 0.0 else 0
+        end_frame = int(round(float(end_time)/(float(1000)/float(fps)))) if end_time > 0.0 else -1
 
         self.funscript_generator = FunscriptGenerator(
                 FunscriptGeneratorParameter(
                     video_path = video_file,
                     start_frame = start_frame,
+                    end_frame = end_frame,
                     track_men = trackMen
                 ),
                 self.funscript)

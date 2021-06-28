@@ -21,17 +21,22 @@ def show_editor() -> None:
     sys.exit(app.exec_())
 
 
-def generate_funscript(video_file: str, start_time: int, output_file: str) -> None:
+def generate_funscript(
+        video_file: str,
+        start_time: float,
+        end_time :float,
+        output_file: str) -> None:
     """ Generate a funscript with minimal UI
 
     Args:
         video_file (str): path to video file
-        start_time (int): start time in milliseconds
+        start_time (float): start time in milliseconds
+        end_time (float): end time in milliseconds (set -1.0 to use video end)
         output_file (str): path for the output file
     """
     setup_logging()
     logging.info("Python Funscript Generator %s", VERSION)
     app = QtWidgets.QApplication(sys.argv)
-    generator = MinimalFunscriptGenerator(video_file, start_time, output_file)
+    generator = MinimalFunscriptGenerator(video_file, start_time, end_time, output_file)
     generator.run()
     sys.exit(app.exec_())
