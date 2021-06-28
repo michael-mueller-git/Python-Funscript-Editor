@@ -5,7 +5,6 @@ kiwisolver
 matplotlib
 numpy
 opencv-contrib-python
-opencv-python
 Pillow
 pynput
 pyparsing
@@ -13,7 +12,6 @@ PyQt5
 PyQt5-Qt5
 PyQt5-sip
 pyreadline
-pyserial
 python-dateutil
 python-mpv
 PyYAML
