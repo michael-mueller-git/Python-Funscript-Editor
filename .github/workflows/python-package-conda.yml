@@ -19,7 +19,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: build
-          environment-file: environment.yml
+          environment-file: environment.yaml
           python-version: 3.9
           auto-activate-base: false
       - shell: bash -l {0}
