@@ -1,0 +1,22 @@
+name: Create Windows executable using Conda
+
+on: [push]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        C:\Miniconda\condabin\conda.bat env update --file environment.yml --name build
+        C:\Miniconda\condabin\conda.bat init powershell
+    - name: Test with pytest
+      run: |
+        C:\Miniconda\condabin\conda.bat activate build
+        C:\Miniconda\condabin\conda.bat build.bat
