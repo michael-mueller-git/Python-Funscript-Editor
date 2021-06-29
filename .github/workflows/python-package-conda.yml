@@ -30,13 +30,4 @@ jobs:
       - name: Build
         shell: bash -l {0}
         run: |
-          pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py
-      - name: Add dependencies
-        shell: bash -l {0}
-        run: |
-          xcopy /s "assets" "dist/funscript-editor"
-      - name: Create Archive
-        shell: bash -l {0}
-        run: |
-          powershell Compress-Archive -LiteralPath "dist/funscript-editor" -DestinationPath "dist/funscript-editor.zip"
-
+          pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py
