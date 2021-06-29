@@ -20,4 +20,5 @@ jobs:
       run: |
         C:\Miniconda\condabin\conda.bat activate build
         C:\Miniconda\condabin\conda.bat list
-        C:\Miniconda\condabin\conda.bat pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py
+        pip list
+        pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py
