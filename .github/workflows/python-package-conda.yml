@@ -1,11 +1,10 @@
 name: Create Windows Executable using Conda
 
-on: [push]
-
-#on:
-#  push:
-#    tags:
-#      - '*'
+#n: [push]
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   miniconda:
@@ -30,4 +29,9 @@ jobs:
       - name: Build
         shell: bash -l {0}
         run: |
-          pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py
+          pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py   
+      - uses: papeloto/action-zip@v1
+        with:
+          files: dist/funscript-editor
+          recursive: true
+          dest: funscript-editor.zip
