@@ -1,10 +1,9 @@
 name: Create Windows Executable using Conda
 
-on: [push]
-#on:
-#  push:
-#    tags:
-#      - '*'
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   miniconda:
@@ -41,7 +40,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.sha }}
+          tag_name: ${{ github.ref }}
           release_name: Prerelease ${{ github.sha }}
           draft: true
           prerelease: true
