@@ -1,4 +1,4 @@
-name: Create Windows executable using Conda
+name: Create Windows Executable using Conda
 
 on: [push]
 
@@ -16,7 +16,7 @@ jobs:
       run: |
         C:\Miniconda\condabin\conda.bat env update --file environment.yml --name build
         C:\Miniconda\condabin\conda.bat init powershell
-    - name: Test with pytest
+    - name: Build Executable
       run: |
         C:\Miniconda\condabin\conda.bat activate build
-        C:\Miniconda\condabin\conda.bat build.bat
+        build.bat
