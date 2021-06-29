@@ -1,26 +1,29 @@
 name: Create Windows Executable using Conda
 
-on:
-  push:
-    tags:
-      - '*'
+on: [push]
+
+#on:
+#  push:
+#    tags:
+#      - '*'
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
-
+  miniconda:
+    name: Miniconda ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: ["windows-latest"]
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9.5
-    - name: Install dependencies
-      run: |
-        C:\Miniconda\condabin\conda.bat env create --file environment.yaml
-        C:\Miniconda\condabin\conda.bat init powershell
-    - name: Build Executable
-      run: |
-        C:\Miniconda\condabin\conda.bat activate build
-        C:\Miniconda\condabin\conda.bat env export
-        pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: build
+          environment-file: environment.yml
+          python-version: 3.9
+          auto-activate-base: false
+      - shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+          conda env export
