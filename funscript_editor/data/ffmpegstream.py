@@ -153,7 +153,7 @@ class FFmpegStream:
                 '-vf', video_filter,
                 '-'
             ]
-        print(command)
+
         pipe = sp.Popen(
                 command,
                 stdin = sp.PIPE,

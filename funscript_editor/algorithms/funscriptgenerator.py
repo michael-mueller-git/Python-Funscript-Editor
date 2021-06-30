@@ -12,14 +12,12 @@ from queue import Queue
 from pynput.keyboard import Key, Listener
 from dataclasses import dataclass
 from funscript_editor.data.funscript import Funscript
-from funscript_editor.data.filevideostream import FileVideoStream
 from funscript_editor.algorithms.videotracker import StaticVideoTracker
 from PyQt5 import QtGui, QtCore, QtWidgets
 from matplotlib.figure import Figure
-from funscript_editor.definitions import VIDEO_SCALING_CONFIG_FILE
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
 from datetime import datetime
-from funscript_editor.data.equirectangularvideostream import EquirectangularVideoStream
+from funscript_editor.data.ffmpegstream import FFmpegStream, FFmpegStreamParameter, VideoInfo
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -41,15 +39,10 @@ class FunscriptGeneratorParameter:
     shift_top_points :int = int(HYPERPARAMETER['shift_top_points'])
     top_points_offset :float = float(HYPERPARAMETER['top_points_offset'])
     bottom_points_offset :float = float(HYPERPARAMETER['bottom_points_offset'])
-    use_equirectangular :bool = SETTINGS['use_equirectangular']
-    equirectangular_scaling :float = max((0.2, float(SETTINGS['equirectangular_scaling'])))
     zoom_factor :float = max((1.0, float(SETTINGS['zoom_factor'])))
-    scaling_method :str = SETTINGS['scaling_method']
     top_threshold :float = float(HYPERPARAMETER['top_threshold'])
     bottom_threshold :float = float(HYPERPARAMETER['bottom_threshold'])
-    equirectangular_height :int = 720
-    equirectangular_width :int = 1240
-    equirectangular_fov :int = 100
+    preview_scaling :float = 1.0
 
 
 class FunscriptGenerator(QtCore.QThread):
@@ -70,11 +63,6 @@ class FunscriptGenerator(QtCore.QThread):
 
         # XXX destroyWindow(...) sems not to delete the trackbar. Workaround: we give the window each time a unique name
         self.window_name = "Funscript Generator ({})".format(datetime.now().strftime("%H:%M:%S"))
-
-        # scale config for the video
-        with open(VIDEO_SCALING_CONFIG_FILE, 'r') as config_file:
-            self.scale = json.load(config_file)
-            self.scale = {int(k) : float(v) for k,v in self.scale.items()}
 
         self.keypress_queue = Queue(maxsize=32)
         self.stopped = False
@@ -98,37 +86,8 @@ class FunscriptGenerator(QtCore.QThread):
     #: processing event with current processed frame number
     processStatus = QtCore.pyqtSignal(int)
 
-    __logger = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
 
-    def get_scaling(self, frame_width: int, frame_height: int) -> float:
-        """ Get the scaling parameter for current video
-
-        Args:
-            frame_width (int): frame width of current video
-            frame_height (int): frame height of current video
-
-        Returns:
-            float: scaling parameter from scaling config
-        """
-        if self.params.scaling_method == 'auto':
-            scale = []
-            try:
-                for monitor in get_monitors():
-                    scale.append( min((monitor.width / (frame_width*1.1), monitor.height / (frame_height*1.1) )) )
-            except: pass
-
-            if len(scale) == 0:
-                self.__logger.error("Monitor info not found, please switch to scaling_method: 'config'")
-                scale = 1.0
-            else:
-                # asume we use the largest monitor for scipting
-                scale = max(scale)
-        else:
-            # assume scaling_method is 'config' (fallback)
-            scale = max([0.05, min([8.0]+[self.scale[k] for k in self.scale.keys() if k < frame_width])])
-
-        self.__logger.info("Use scaling of %f for preview window and tracking", scale)
-        return scale
 
     def drawBox(self, img: np.ndarray, bbox: tuple) -> np.ndarray:
         """ Draw an tracking box on the image/frame
@@ -256,7 +215,7 @@ class FunscriptGenerator(QtCore.QThread):
                     (self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
                 cv2.putText(preview, "Set {} to {}".format('Max', trackbarValueMax),
                     (image_min.shape[1] + self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
-                cv2.imshow(self.window_name, preview)
+                cv2.imshow(self.window_name, self.preview_scaling(preview))
                 if self.was_space_pressed() or cv2.waitKey(25) == ord(' '): break
                 trackbarValueMin = cv2.getTrackbarPos("Min", self.window_name)
                 trackbarValueMax = cv2.getTrackbarPos("Max", self.window_name)
@@ -332,17 +291,7 @@ class FunscriptGenerator(QtCore.QThread):
         cap.release()
 
         if successMin and successMax:
-            if self.params.use_equirectangular:
-                dim =  (int(self.params.equirectangular_width*self.params.equirectangular_scaling), \
-                        int(self.params.equirectangular_height*self.params.equirectangular_scaling))
-                imgMin = cv2.resize(imgMin, dim)
-                imgMax = cv2.resize(imgMax, dim)
-            else:
-                scale = self.get_scaling(width, height)
-                imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
-                imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
-
-            # Assume we have VR 3D Side by Side
+            # TODO: Assume we have VR 3D Side by Side
             imgMin = imgMin[:, :int(imgMin.shape[1]/2)]
             imgMax = imgMax[:, :int(imgMax.shape[1]/2)]
 
@@ -354,7 +303,7 @@ class FunscriptGenerator(QtCore.QThread):
                     title_max = ("Top" if direction != "x" else "Right")
                 )
         else:
-            self.__logger.warning("Determine min and max failed")
+            self.logger.warning("Determine min and max failed")
             desired_min = 0
             desired_max = 99
 
@@ -423,19 +372,40 @@ class FunscriptGenerator(QtCore.QThread):
                 if self.params.track_men: del self.bboxes['Men'][i]
 
 
-    def get_perspective_roi(self, image :np.ndarray) -> None:
-        """ Get the perspective ROI parameters form user input
+    def preview_scaling(self, preview_image :np.ndarray) -> np.ndarray:
+        """ Scale image for preview
+
+        Args:
+            preview_image (np.ndarray): opencv image
+
+        Returns:
+            np.ndarray: scaled opencv image
+        """
+        """
+        frame_height, frame_width = preview_image.shape[:2]
+        scale = []
+        try:
+            for monitor in get_monitors():
+                scale.append( min((monitor.width / (frame_width*1.1), monitor.height / (frame_height*1.1) )) )
+        except: pass
+
+        if len(scale) == 0:
+            self.logger.error("Monitor resolution info not found")
+            scale = 1.0
+        else:
+            # asume we use the largest monitor for scipting
+            scale = max(scale)
+        """
+        return cv2.resize(preview_image, None, fx=self.params.preview_scaling, fy=self.params.preview_scaling)
+
+
+    def get_projection_parameter(self, image :np.ndarray) -> None:
+        """ Get the projection ROI parameters form user input
 
         Args:
             image (np.ndarray): opencv vr 180 or 360 image
         """
-        perspective = {
-                'FOV': self.params.equirectangular_fov,
-                'THETA': -90,
-                'PHI': -45,
-                'height': int(self.params.equirectangular_height*self.params.equirectangular_scaling),
-                'width': int(self.params.equirectangular_width*self.params.equirectangular_scaling)
-            }
+        parameter = FFmpegStreamParameter()
 
         # NOTE: improve processing speed to make this menu more responsive
         if image.shape[0] > 6000 or image.shape[1] > 6000:
@@ -448,31 +418,25 @@ class FunscriptGenerator(QtCore.QThread):
         while not selected:
             if parameter_changed:
                 parameter_changed = False
-                preview = EquirectangularVideoStream.get_perspective(
-                        image,
-                        perspective['FOV'],
-                        perspective['THETA'],
-                        perspective['PHI'],
-                        perspective['height'],
-                        perspective['width']
-                    )
+                preview = FFmpegStream.get_projection(image, parameter)
 
                 preview = self.drawText(preview, "Press 'q' to use current selected region of interest)",
                         y = 50, color = (255, 0, 0))
                 preview = self.drawText(preview, "Use 'w', 's' to move up/down to the region of interest",
                         y = 75, color = (0, 255, 0))
 
-            cv2.imshow(self.window_name, preview)
+            cv2.imshow(self.window_name, self.preview_scaling(preview))
+
             while self.keypress_queue.qsize() > 0:
                 pressed_key = '{0}'.format(self.keypress_queue.get())
                 if pressed_key == "'q'":
                     selected = True
                     break
                 elif pressed_key == "'w'":
-                    perspective['PHI'] = min((80, perspective['PHI'] + 5))
+                    parameter.phi = min((80, parameter.phi + 5))
                     parameter_changed = True
                 elif pressed_key == "'s'":
-                    perspective['PHI'] = max((-80, perspective['PHI'] - 5))
+                    parameter.phi = max((-80, parameter.phi - 5))
                     parameter_changed = True
 
             if cv2.waitKey(1) in [ord('q')]: break
@@ -480,10 +444,11 @@ class FunscriptGenerator(QtCore.QThread):
         try:
             background = np.full(preview.shape, 0, dtype=np.uint8)
             loading_screen = self.drawText(background, "Please wait ...")
-            cv2.imshow(self.window_name, loading_screen)
+            cv2.imshow(self.window_name, self.preview_scaling(loading_screen))
+            cv2.waitKey(1)
         except: pass
 
-        self.perspective_params = perspective
+        return parameter
 
 
     def get_bbox(self, image: np.ndarray, txt: str) -> tuple:
@@ -498,26 +463,33 @@ class FunscriptGenerator(QtCore.QThread):
         """
         image = self.drawText(image, "Press 'space' or 'enter' to continue (sometimes not very responsive)",
                 y = 75, color = (255, 0, 0))
-        # cv2.namedWindow(self.window_name)
-        # cv2.createTrackbar("Scale", self.window_name, 1, 10, lambda x: None)
 
         if self.params.use_zoom:
             while True:
                 zoom_bbox = cv2.selectROI(self.window_name, self.drawText(image, "Zoom selected area"), False)
                 if zoom_bbox is None or len(zoom_bbox) == 0: continue
                 if zoom_bbox[2] < 75 or zoom_bbox[3] < 75:
-                    self.__logger.error("The selected zoom area is to small")
+                    self.logger.error("The selected zoom area is to small")
                     continue
                 break
 
             image = image[zoom_bbox[1]:zoom_bbox[1]+zoom_bbox[3], zoom_bbox[0]:zoom_bbox[0]+zoom_bbox[2]]
             image = cv2.resize(image, None, fx=self.params.zoom_factor, fy=self.params.zoom_factor)
 
+        image = self.drawText(image, txt)
+        image = self.preview_scaling(image)
         while True:
-            bbox = cv2.selectROI(self.window_name, self.drawText(image, txt), False)
+            bbox = cv2.selectROI(self.window_name, image, False)
             if bbox is None or len(bbox) == 0: continue
             if bbox[0] == 0 or bbox[1] == 0 or bbox[2] < 9 or bbox[3] < 9: continue
             break
+
+        # revert the preview scaling
+        bbox = (round(bbox[0]/self.params.preview_scaling),
+                    round(bbox[1]/self.params.preview_scaling),
+                    round(bbox[2]/self.params.preview_scaling),
+                    round(bbox[3]/self.params.preview_scaling)
+                )
 
         if self.params.use_zoom:
             bbox = (round(bbox[0]/self.params.zoom_factor)+zoom_bbox[0],
@@ -548,33 +520,23 @@ class FunscriptGenerator(QtCore.QThread):
         Returns:
             str: a process status message e.g. 'end of video reached'
         """
-        if self.params.use_equirectangular:
-            first_frame = self.get_first_frame()
-            self.get_perspective_roi(first_frame)
+        first_frame = FFmpegStream.get_frame(self.params.video_path, self.params.start_frame)
+        projection_parameter = self.get_projection_parameter(first_frame)
 
-            video = EquirectangularVideoStream(
-                    self.params.video_path,
-                    self.perspective_params['FOV'],
-                    self.perspective_params['THETA'],
-                    self.perspective_params['PHI'],
-                    self.perspective_params['height'],
-                    self.perspective_params['width'],
-                    self.params.start_frame
-                )
-        else:
-            video = FileVideoStream(
-                video_path=self.params.video_path,
-                scale_determiner=self.get_scaling,
-                start_frame=self.params.start_frame)
+        video = FFmpegStream(
+                video_path = self.params.video_path,
+                parameter = projection_parameter,
+                start_frame = self.params.start_frame
+            )
 
         first_frame = video.read()
         bboxWoman = self.get_bbox(first_frame, "Select Woman Feature")
-        trackerWoman = StaticVideoTracker(first_frame, bboxWoman, limit_searchspace = not self.params.use_equirectangular)
+        trackerWoman = StaticVideoTracker(first_frame, bboxWoman, limit_searchspace = False) # TODO limit_searchspace for flat videos
         self.bboxes['Woman'].append(bboxWoman)
 
         if self.params.track_men:
             bboxMen = self.get_bbox(self.drawBox(first_frame, bboxWoman), "Select Men Feature")
-            trackerMen = StaticVideoTracker(first_frame, bboxMen, limit_searchspace = not self.params.use_equirectangular)
+            trackerMen = StaticVideoTracker(first_frame, bboxMen, limit_searchspace = False) # TODO limit_searchspace for flat videos
             self.bboxes['Men'].append(bboxMen)
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):
@@ -619,7 +581,7 @@ class FunscriptGenerator(QtCore.QThread):
                 last_frame = self.drawFPS(last_frame)
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
                         (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
-                cv2.imshow(self.window_name, last_frame)
+                cv2.imshow(self.window_name, self.preview_scaling(last_frame))
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
@@ -647,7 +609,7 @@ class FunscriptGenerator(QtCore.QThread):
 
 
         video.stop()
-        self.__logger.info(status)
+        self.logger.info(status)
         self.calculate_score()
         return status
 
