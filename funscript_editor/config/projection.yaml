@@ -1,0 +1,15 @@
+
+# 3D Side-By-Side VR Video
+vr_he_sbs:
+  video_filter: 'v360=input=he:in_stereo=sbs:pitch=${phi}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
+  parameter:
+    height: 720
+    width: 1240
+    fov: 100
+    phi: -45
+
+flat:
+  video_filter: 'scale=${width}:${height}'
+  parameter:
+    height: 720
+    width: -1

@@ -15,9 +15,9 @@ from funscript_editor.data.funscript import Funscript
 from funscript_editor.algorithms.videotracker import StaticVideoTracker
 from PyQt5 import QtGui, QtCore, QtWidgets
 from matplotlib.figure import Figure
-from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
+from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
 from datetime import datetime
-from funscript_editor.data.ffmpegstream import FFmpegStream, FFmpegStreamParameter, VideoInfo
+from funscript_editor.data.ffmpegstream import FFmpegStream, VideoInfo
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -42,7 +42,8 @@ class FunscriptGeneratorParameter:
     zoom_factor :float = max((1.0, float(SETTINGS['zoom_factor'])))
     top_threshold :float = float(HYPERPARAMETER['top_threshold'])
     bottom_threshold :float = float(HYPERPARAMETER['bottom_threshold'])
-    preview_scaling :float = 1.0
+    preview_scaling :float = float(SETTINGS['preview_scaling'])
+    projection :str = str(SETTINGS['projection']).lower()
 
 
 class FunscriptGenerator(QtCore.QThread):
@@ -87,6 +88,24 @@ class FunscriptGenerator(QtCore.QThread):
     processStatus = QtCore.pyqtSignal(int)
 
     logger = logging.getLogger(__name__)
+
+
+    def determine_monitor_scaling(self):
+        frame_width = PROJECTION[self.params.projection]['parameter']['width']
+        frame_height = PROJECTION[self.params.projection]['parameter']['height']
+
+        scale = []
+        try:
+            for monitor in get_monitors():
+                scale.append( min((monitor.width / float(frame_width), monitor.height / float(frame_height) )) )
+        except: pass
+
+        if len(scale) == 0:
+            self.logger.error("Monitor resolution info not found")
+            self.monitor_scale = 1.0
+        else:
+            # asume we use the largest monitor for scipting
+            self.mointor_scale = max(scale)
 
 
     def drawBox(self, img: np.ndarray, bbox: tuple) -> np.ndarray:
@@ -291,9 +310,20 @@ class FunscriptGenerator(QtCore.QThread):
         cap.release()
 
         if successMin and successMax:
-            # TODO: Assume we have VR 3D Side by Side
-            imgMin = imgMin[:, :int(imgMin.shape[1]/2)]
-            imgMax = imgMax[:, :int(imgMax.shape[1]/2)]
+            if 'vr' in self.params.projection.split('_'):
+                if 'sbs' in self.params.projection.split('_'):
+                    imgMin = imgMin[:, :int(imgMin.shape[1]/2)]
+                    imgMax = imgMax[:, :int(imgMax.shape[1]/2)]
+                elif 'ou' in self.params.projection.split('_'):
+                    imgMin = imgMin[:int(imgMin.shape[0]/2), :]
+                    imgMax = imgMax[:int(imgMax.shape[0]/2), :]
+
+            if PROJECTION[self.params.projection]['parameter']['width'] > 0:
+                scale = PROJECTION[self.params.projection]['parameter']['width'] / float(2*imgMax.shape[1])
+            else:
+                scale = PROJECTION[self.params.projection]['parameter']['height'] / float(2*imgMax.shape[1])
+            imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
+            imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
 
             (desired_min, desired_max) = self.min_max_selector(
                     image_min = imgMin,
@@ -381,31 +411,16 @@ class FunscriptGenerator(QtCore.QThread):
         Returns:
             np.ndarray: scaled opencv image
         """
-        """
-        frame_height, frame_width = preview_image.shape[:2]
-        scale = []
-        try:
-            for monitor in get_monitors():
-                scale.append( min((monitor.width / (frame_width*1.1), monitor.height / (frame_height*1.1) )) )
-        except: pass
-
-        if len(scale) == 0:
-            self.logger.error("Monitor resolution info not found")
-            scale = 1.0
-        else:
-            # asume we use the largest monitor for scipting
-            scale = max(scale)
-        """
         return cv2.resize(preview_image, None, fx=self.params.preview_scaling, fy=self.params.preview_scaling)
 
 
-    def get_projection_parameter(self, image :np.ndarray) -> None:
-        """ Get the projection ROI parameters form user input
+    def get_vr_projection_config(self, image :np.ndarray) -> None:
+        """ Get the projection ROI config form user input
 
         Args:
             image (np.ndarray): opencv vr 180 or 360 image
         """
-        parameter = FFmpegStreamParameter()
+        config = PROJECTION[self.params.projection]
 
         # NOTE: improve processing speed to make this menu more responsive
         if image.shape[0] > 6000 or image.shape[1] > 6000:
@@ -418,7 +433,7 @@ class FunscriptGenerator(QtCore.QThread):
         while not selected:
             if parameter_changed:
                 parameter_changed = False
-                preview = FFmpegStream.get_projection(image, parameter)
+                preview = FFmpegStream.get_projection(image, config)
 
                 preview = self.drawText(preview, "Press 'q' to use current selected region of interest)",
                         y = 50, color = (255, 0, 0))
@@ -433,10 +448,10 @@ class FunscriptGenerator(QtCore.QThread):
                     selected = True
                     break
                 elif pressed_key == "'w'":
-                    parameter.phi = min((80, parameter.phi + 5))
+                    config['parameter']['phi'] = min((80, config['parameter']['phi'] + 5))
                     parameter_changed = True
                 elif pressed_key == "'s'":
-                    parameter.phi = max((-80, parameter.phi - 5))
+                    config['parameter']['phi'] = max((-80, config['parameter']['phi'] - 5))
                     parameter_changed = True
 
             if cv2.waitKey(1) in [ord('q')]: break
@@ -448,7 +463,7 @@ class FunscriptGenerator(QtCore.QThread):
             cv2.waitKey(1)
         except: pass
 
-        return parameter
+        return config
 
 
     def get_bbox(self, image: np.ndarray, txt: str) -> tuple:
@@ -514,6 +529,29 @@ class FunscriptGenerator(QtCore.QThread):
         return first_frame
 
 
+    def get_flat_projection_config(self,
+            first_frame :np.ndarray) -> dict:
+        """ Get the flat config parameter
+
+        Args:
+            first_frame (np.ndarray): opencv image
+
+        Returns:
+            dict: config
+        """
+        h, w = first_frame.shape[:2]
+        config = PROJECTION[self.params.projection]
+
+        if config['parameter']['height'] == -1:
+            scaling = config['parameter']['width'] / float(w)
+            config['parameter']['height'] = round(h * scaling)
+        elif config['parameter']['width'] == -1:
+            scaling = config['parameter']['height'] / float(h)
+            config['parameter']['width'] = round(w * scaling)
+
+        return config
+
+
     def tracking(self) -> str:
         """ Tracking function to track the features in the video
 
@@ -521,11 +559,15 @@ class FunscriptGenerator(QtCore.QThread):
             str: a process status message e.g. 'end of video reached'
         """
         first_frame = FFmpegStream.get_frame(self.params.video_path, self.params.start_frame)
-        projection_parameter = self.get_projection_parameter(first_frame)
+
+        if 'vr' in self.params.projection.split('_'):
+            projection_config = self.get_vr_projection_config(first_frame)
+        else:
+            projection_config = self.get_flat_projection_config(first_frame)
 
         video = FFmpegStream(
                 video_path = self.params.video_path,
-                parameter = projection_parameter,
+                config = projection_config,
                 start_frame = self.params.start_frame
             )
 
@@ -553,7 +595,7 @@ class FunscriptGenerator(QtCore.QThread):
             frame_num += 1
 
             if frame is None:
-                status = 'Reach a corrupt video frame'
+                status = 'Reach a corrupt video frame' if video.isOpen() else 'End of video reached'
                 break
 
             # NOTE: Use != 1 to ensure that the first difference is equal to the folowing (reqired for the interpolation)
@@ -606,7 +648,6 @@ class FunscriptGenerator(QtCore.QThread):
             if cycle_time_in_ms > 0:
                 wait = cycle_time_in_ms - (time.time() - cycle_start)*float(1000)
                 if wait > 0: time.sleep(wait/float(1000))
-
 
         video.stop()
         self.logger.info(status)

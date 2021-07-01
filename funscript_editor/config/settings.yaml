@@ -7,23 +7,15 @@ use_zoom: False
 # Set the desired zoom value which will be used when the zoom function is activated.
 zoom_factor: 4.0
 
-# Convert video in normal perspective view before apply tracking. This should improve the
-# tracking at the border of videos, because there is the distortion very high.
-use_equirectangular: True
-
-# Scaling for the equirectangular preview window
-equirectangular_scaling: 1.0
-
 # Specify the tracking direction. Allowed values are `'x'` and `'y'`.
 tracking_direction: 'y'
 
-# Specify the scaling method for the video before apply tracking and the preview window size. Allowed
-# values are 'auto' and 'config'. 'auto': try to calculate the scaling depending on your screen
-# resolution. If you have a very high screen resolution e.g. 8K Monitor this option will strongly slow
-# down the tracking speed, because all videos are scaled up/down to 8K before tracking. If you set 'config'
-# the scaling form `video_scaling.json` will be used. You can adjust this config to your like as
-# described in the documentation on github.
-scaling_method: 'config'
-
 # Limit the max player speed in the tracking preview window (0 = disable limit)
 max_playback_fps: 0
+
+# TODO
+preview_scaling: 1.0
+
+# TODO
+# projection: 'vr_he_sbs'
+projection: 'flat'

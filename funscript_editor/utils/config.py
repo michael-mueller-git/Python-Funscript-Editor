@@ -4,7 +4,7 @@ import os
 import yaml
 
 from funscript_editor.definitions import ROOT_DIR, UI_CONFIG_FILE, \
-        HYPERPARAMETER_CONFIG_FILE, SETTINGS_CONFIG_FILE
+        HYPERPARAMETER_CONFIG_FILE, SETTINGS_CONFIG_FILE, PROJECTION_CONFIG_FILE
 
 def read_yaml_config(config_file: str) -> dict:
     """ Parse a yaml config file
@@ -30,14 +30,17 @@ def read_version() -> str:
             return f.read().replace('v', '').strip()
     return "0.0.0"
 
-#: the ui config
-UI_CONFIG = read_yaml_config(UI_CONFIG_FILE)
-
 #: the package version
 VERSION = read_version()
+
+#: the ui config
+UI_CONFIG = read_yaml_config(UI_CONFIG_FILE)
 
 #: hyperparameter for the algorithms
 HYPERPARAMETER = read_yaml_config(HYPERPARAMETER_CONFIG_FILE)
 
-#: settings
+#: application settings
 SETTINGS = read_yaml_config(SETTINGS_CONFIG_FILE)
+
+#: projection parameter
+PROJECTION = read_yaml_config(PROJECTION_CONFIG_FILE)

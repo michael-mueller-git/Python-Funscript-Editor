@@ -14,16 +14,6 @@ import numpy as np
 
 
 @dataclass
-class FFmpegStreamParameter:
-    """ FFmpeg Stream Parameter Dataclass with default values """
-    fov: int = 100
-    theta: int = -90
-    phi: int = -45
-    height: int = 720
-    width: int = 1240
-
-
-@dataclass
 class VideoInfo:
     """ Video Info Dataclass """
     fps :float
@@ -37,19 +27,19 @@ class FFmpegStream:
 
     Args:
         video_path (str): path to video file
-        parameter (FFmpegStreamParameter): conversion parameter
+        config (dict): conversion parameter
         start_frame (int): start frame number
         queue_size (int): size of frame buffer
     """
 
     def __init__(self,
             video_path :str,
-            parameter :FFmpegStreamParameter,
+            config :dict,
             start_frame :int = 0,
             queue_size :int = 256):
 
         self.video_path = video_path
-        self.parameter = parameter
+        self.config = config
         self.start_frame = start_frame
         self.queue_size = queue_size
 
@@ -114,25 +104,21 @@ class FFmpegStream:
     @staticmethod
     def get_projection(
             frame :np.ndarray,
-            parameter: FFmpegStreamParameter) -> np.ndarray:
+            config: dict) -> np.ndarray:
         """ Get projection of frame
 
         Args:
             frame (np.ndarray): opencv image
-            parameter (FFmpegStreamParameter): conversion parameter
+            config (dict): conversion parameter
 
         Returns:
             np.ndarray: projected opencv image
         """
         dimension = '{}x{}'.format(frame.shape[1], frame.shape[0])
 
-        video_filter = 'v360=input=he' \
-                        + ':in_stereo=sbs' \
-                        + ':pitch=' + str(parameter.phi) \
-                        + ':output=flat' \
-                        + ':d_fov=' + str(parameter.fov) \
-                        + ':w=' + str(parameter.width) \
-                        + ':h=' + str(parameter.height)
+        video_filter = config['video_filter']
+        for k, v in config['parameter'].items():
+            video_filter = video_filter.replace('${' + k + '}', str(v))
 
         command = [
                 'ffmpeg',
@@ -158,15 +144,15 @@ class FFmpegStream:
                 command,
                 stdin = sp.PIPE,
                 stdout = sp.PIPE,
-                bufsize = 3 * parameter.width * parameter.height
+                bufsize = 3 * config['parameter']['width'] * config['parameter']['height']
             )
 
         pipe.stdin.write(frame.tobytes())
         projection = np.frombuffer(
-                pipe.stdout.read(parameter.width * parameter.height * 3),
+                pipe.stdout.read(config['parameter']['width'] * config['parameter']['height'] * 3),
                 dtype='uint8'
             ).reshape(
-                    (parameter.height, parameter.width, 3)
+                    (config['parameter']['height'], config['parameter']['width'], 3)
                 )
 
         pipe.stdin.close()
@@ -222,7 +208,9 @@ class FFmpegStream:
         Returns:
             np.ndarray: opencv image data
         """
-        return self.frame_buffer.get()
+        while self.frame_buffer.qsize() == 0 and not self.stopped:
+            time.sleep(self.sleep_time)
+        return self.frame_buffer.get() if self.more() else None
 
 
     def isOpen(self) -> bool:
@@ -251,13 +239,9 @@ class FFmpegStream:
     def run(self) -> None:
         """ Function to read transformed frames from ffmpeg video stream into a queue """
 
-        video_filter = 'v360=input=he' \
-                        + ':in_stereo=sbs' \
-                        + ':pitch=' + str(self.parameter.phi) \
-                        + ':output=flat' \
-                        + ':d_fov=' + str(self.parameter.fov) \
-                        + ':w=' + str(self.parameter.width) \
-                        + ':h=' + str(self.parameter.height)
+        video_filter = self.config['video_filter']
+        for k, v in self.config['parameter'].items():
+            video_filter = video_filter.replace('${' + k + '}', str(v))
 
         seek = self.millisec_to_timestamp(
                 self.frame_to_millisec(self.start_frame)
@@ -282,16 +266,16 @@ class FFmpegStream:
         pipe = sp.Popen(
                 command,
                 stdout = sp.PIPE,
-                bufsize= 3 * self.parameter.height * self.parameter.width
+                bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width']
             )
 
         while not self.stopped:
-            data = pipe.stdout.read(self.parameter.width * self.parameter.height * 3)
+            data = pipe.stdout.read(self.config['parameter']['width'] * self.config['parameter']['height'] * 3)
             if not data:
                 break
 
             frame = np.frombuffer(data, dtype='uint8').reshape(
-                    (self.parameter.height, self.parameter.width, 3)
+                    (self.config['parameter']['height'], self.config['parameter']['width'], 3)
                 )
             if frame is None:
                 break
@@ -302,7 +286,7 @@ class FFmpegStream:
             self.frame_buffer.put(frame)
             self.current_frame += 1
 
+        self.stopped = True
         self.logger.info('Close FFmpeg Stream')
         pipe.stdout.close()
         pipe.terminate()
-        self.stopped = True

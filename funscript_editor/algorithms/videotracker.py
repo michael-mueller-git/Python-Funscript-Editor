@@ -72,7 +72,7 @@ class StaticVideoTracker:
         frame_heigt, frame_width = self.first_frame.shape[:2]
 
         if self.limit_searchspace:
-            # Determine the tracking ROI, assume we have 3d Side by Side static VR video
+            # TODO Determine the tracking ROI, assume we have 3d Side by Side static VR video
             # The movement is mostly up-down, so we can restrict left and right more than up and down
             dh, dw = int(frame_heigt/12), int(frame_width/38)
         else:

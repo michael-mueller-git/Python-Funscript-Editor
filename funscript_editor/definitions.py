@@ -33,12 +33,12 @@ else:
 # CONFIG FILES #
 ################
 
-VIDEO_SCALING_CONFIG_FILE = os.path.join(CONFIG_DIR, 'video_scaling.json')
 UI_CONFIG_FILE = os.path.join(CONFIG_DIR, 'ui.yaml')
 WINDOWS_LOG_CONFIG_FILE = os.path.join(CONFIG_DIR, 'logging_windows.yaml')
 LINUX_LOG_CONFIG_FILE = os.path.join(CONFIG_DIR, 'logging_linux.yaml')
 HYPERPARAMETER_CONFIG_FILE = os.path.join(CONFIG_DIR, 'hyperparameter.yaml')
 SETTINGS_CONFIG_FILE = os.path.join(CONFIG_DIR, 'settings.yaml')
+PROJECTION_CONFIG_FILE = os.path.join(CONFIG_DIR, 'projection.yaml')
 
 
 ##########
