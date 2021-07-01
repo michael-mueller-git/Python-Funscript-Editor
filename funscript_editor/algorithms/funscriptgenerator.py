@@ -66,9 +66,9 @@ class FunscriptGenerator(QtCore.QThread):
         self.window_name = "Funscript Generator ({})".format(datetime.now().strftime("%H:%M:%S"))
 
         self.keypress_queue = Queue(maxsize=32)
-        self.stopped = False
-        self.perspective_params = {}
         self.x_text_start = 50
+        self.font_size = 0.6
+        self.tracking_fps = []
         self.scone_x = []
         self.scone_y = []
         self.bboxes = {
@@ -76,10 +76,8 @@ class FunscriptGenerator(QtCore.QThread):
                 'Woman': []
                 }
 
-        cap = cv2.VideoCapture(self.params.video_path)
-        self.fps = cap.get(cv2.CAP_PROP_FPS)
-        self.tracking_fps = []
-        cap.release()
+        self.video_info = FFmpegStream.get_video_info(self.params.video_path)
+
 
     #: completed event with reference to the funscript with the predicted actions, status message and success flag
     funscriptCompleted = QtCore.pyqtSignal(object, str, bool)
@@ -90,22 +88,25 @@ class FunscriptGenerator(QtCore.QThread):
     logger = logging.getLogger(__name__)
 
 
-    def determine_monitor_scaling(self):
-        frame_width = PROJECTION[self.params.projection]['parameter']['width']
-        frame_height = PROJECTION[self.params.projection]['parameter']['height']
+    def determine_monitor_scaling(self, frame_width, frame_height) -> float:
+        """ Determine the scaling for current monitor setup
 
+        Args:
+            frame_width (int): target frame width
+            frame_height (int): target frame height
+        """
         scale = []
         try:
             for monitor in get_monitors():
-                scale.append( min((monitor.width / float(frame_width), monitor.height / float(frame_height) )) )
+                if monitor.width > monitor.height:
+                    scale.append( min((monitor.width / float(frame_width), monitor.height / float(frame_height) )) )
         except: pass
 
         if len(scale) == 0:
             self.logger.error("Monitor resolution info not found")
-            self.monitor_scale = 1.0
         else:
             # asume we use the largest monitor for scipting
-            self.mointor_scale = max(scale)
+            self.params.preview_scaling *= max(scale)
 
 
     def drawBox(self, img: np.ndarray, bbox: tuple) -> np.ndarray:
@@ -136,7 +137,7 @@ class FunscriptGenerator(QtCore.QThread):
         fps = (self.params.skip_frames+1)*cv2.getTickFrequency()/(cv2.getTickCount()-self.timer)
         self.tracking_fps.append(fps)
         cv2.putText(annotated_img, str(int(fps)) + ' fps', (self.x_text_start, 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
+                cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (0,0,255), 2)
         self.timer = cv2.getTickCount()
         return annotated_img
 
@@ -154,7 +155,7 @@ class FunscriptGenerator(QtCore.QThread):
             np.ndarray: opencv image with text
         """
         annotated_img = img.copy()
-        cv2.putText(annotated_img, str(txt), (self.x_text_start, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+        cv2.putText(annotated_img, str(txt), (self.x_text_start, y), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, color, 2)
         return annotated_img
 
 
@@ -212,17 +213,17 @@ class FunscriptGenerator(QtCore.QThread):
         image = np.concatenate((image_min, image_max), axis=1)
 
         if info != "":
-            cv2.putText(image, "Info: "+info, (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+            cv2.putText(image, "Info: "+info, (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
 
         if title_min != "":
-            cv2.putText(image, title_min, (self.x_text_start, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+            cv2.putText(image, title_min, (self.x_text_start, 25), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
 
         if title_max != "":
             cv2.putText(image, title_max, (image_min.shape[1] + self.x_text_start, 25),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
 
         cv2.putText(image, "Use 'space' to quit and set the trackbar values",
-            (self.x_text_start, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+            (self.x_text_start, 100), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
 
         self.clear_keypress_queue()
         trackbarValueMin = lower_limit
@@ -231,9 +232,9 @@ class FunscriptGenerator(QtCore.QThread):
             try:
                 preview = image.copy()
                 cv2.putText(preview, "Set {} to {}".format('Min', trackbarValueMin),
-                    (self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
+                    (self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (0,0,255), 2)
                 cv2.putText(preview, "Set {} to {}".format('Max', trackbarValueMax),
-                    (image_min.shape[1] + self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
+                    (image_min.shape[1] + self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (0,0,255), 2)
                 cv2.imshow(self.window_name, self.preview_scaling(preview))
                 if self.was_space_pressed() or cv2.waitKey(25) == ord(' '): break
                 trackbarValueMin = cv2.getTrackbarPos("Min", self.window_name)
@@ -411,7 +412,12 @@ class FunscriptGenerator(QtCore.QThread):
         Returns:
             np.ndarray: scaled opencv image
         """
-        return cv2.resize(preview_image, None, fx=self.params.preview_scaling, fy=self.params.preview_scaling)
+        return cv2.resize(
+                preview_image,
+                None,
+                fx=self.params.preview_scaling,
+                fy=self.params.preview_scaling
+            )
 
 
     def get_vr_projection_config(self, image :np.ndarray) -> None:
@@ -421,6 +427,8 @@ class FunscriptGenerator(QtCore.QThread):
             image (np.ndarray): opencv vr 180 or 360 image
         """
         config = PROJECTION[self.params.projection]
+
+        self.mointor_scale = self.determine_monitor_scaling(config['parameter']['width'], config['parameter']['height'])
 
         # NOTE: improve processing speed to make this menu more responsive
         if image.shape[0] > 6000 or image.shape[1] > 6000:
@@ -549,6 +557,8 @@ class FunscriptGenerator(QtCore.QThread):
             scaling = config['parameter']['height'] / float(h)
             config['parameter']['width'] = round(w * scaling)
 
+        self.mointor_scale = self.determine_monitor_scaling(config['parameter']['width'], config['parameter']['height'])
+
         return config
 
 
@@ -622,7 +632,7 @@ class FunscriptGenerator(QtCore.QThread):
 
                 last_frame = self.drawFPS(last_frame)
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
-                        (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+                        (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
                 cv2.imshow(self.window_name, self.preview_scaling(last_frame))
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
@@ -706,7 +716,6 @@ class FunscriptGenerator(QtCore.QThread):
         """
         cv2.destroyWindow(self.window_name)
         self.funscriptCompleted.emit(self.funscript, status, success)
-        self.stopped = True
 
 
     def apply_shift(self, frame_number, position: str) -> int:
@@ -726,6 +735,7 @@ class FunscriptGenerator(QtCore.QThread):
                     return self.params.start_frame + frame_number + self.params.shift_bottom_points
 
         return self.params.start_frame + frame_number
+
 
     def get_score_with_offset(self, idx_dict) -> list:
         """ Apply the offsets form config file
@@ -766,9 +776,9 @@ class FunscriptGenerator(QtCore.QThread):
             return
 
         if self.params.direction != 'x':
-            idx_dict = sp.get_local_max_and_min_idx(self.score_y, self.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score_y, self.video_info.fps)
         else:
-            idx_dict = sp.get_local_max_and_min_idx(self.score_x, self.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score_x, self.video_info.fps)
 
         idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
         idx_list.sort()
@@ -784,7 +794,7 @@ class FunscriptGenerator(QtCore.QThread):
                     min(output_score) \
                             if output_score[idx] < min(output_score) + self.params.bottom_threshold \
                             else round(output_score[idx]),
-                    self.frame_to_millisec(self.apply_shift(idx, 'min'), self.fps)
+                    self.frame_to_millisec(self.apply_shift(idx, 'min'), self.video_info.fps)
                 )
 
         for idx in idx_dict['max']:
@@ -792,7 +802,7 @@ class FunscriptGenerator(QtCore.QThread):
                     max(output_score) \
                             if output_score[idx] > max(output_score) - self.params.top_threshold \
                             else round(output_score[idx]),
-                    self.frame_to_millisec(self.apply_shift(idx, 'max'), self.fps)
+                    self.frame_to_millisec(self.apply_shift(idx, 'max'), self.video_info.fps)
                 )
 
         self.finished(status, True)

@@ -13,9 +13,8 @@ tracking_direction: 'y'
 # Limit the max player speed in the tracking preview window (0 = disable limit)
 max_playback_fps: 0
 
-# TODO
-preview_scaling: 1.0
+# Set the preview image scaling factor 1.0 should match your monitor size
+preview_scaling: 0.66
 
-# TODO
-# projection: 'vr_he_sbs'
-projection: 'flat'
+# Set the video type
+projection: 'vr_he_sbs'
