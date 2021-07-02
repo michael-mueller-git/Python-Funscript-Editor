@@ -154,20 +154,14 @@ class FunscriptGenerator(QtCore.QThread):
             np.ndarray: opencv image with Time Text
         """
         annotated_img = img.copy()
-        current_timestamp = FFmpegStream.millisec_to_timestamp(
-                self.frame_to_millisec(frame_num, self.video_info.fps)
-            )
+        current_timestamp = FFmpegStream.frame_to_timestamp(frame_num, self.video_info.fps)
         current_timestamp = ''.join(current_timestamp[:-4])
 
         if self.params.end_frame < 1:
-            end_timestamp = FFmpegStream.millisec_to_timestamp(
-                    self.frame_to_millisec(self.video_info.length, self.video_info.fps)
-                )
+            end_timestamp = FFmpegStream.frame_to_timestamp(self.video_info.length, self.video_info.fps)
             end_timestamp = ''.join(end_timestamp[:-4])
         else:
-            end_timestamp = FFmpegStream.millisec_to_timestamp(
-                    self.frame_to_millisec(self.params.end_frame, self.video_info.fps)
-                )
+            end_timestamp = FFmpegStream.frame_to_timestamp(self.params.end_frame, self.video_info.fps)
             end_timestamp = ''.join(end_timestamp[:-4])
 
         txt = current_timestamp + ' / ' + end_timestamp
@@ -293,21 +287,6 @@ class FunscriptGenerator(QtCore.QThread):
 
         self.score['x'] = sp.scale_signal(self.score['x'], 0, 100)
         self.score['y'] = sp.scale_signal(self.score['y'], 0, 100)
-
-
-    @staticmethod
-    def frame_to_millisec(frame: int, fps: float) -> int:
-        """ Convert frame number to timestamp in video
-
-        Args:
-            frame (int): the framenumber to convert to an timestamp
-            fps (float): Video FPS
-
-        Returns:
-            int: the timestamp in milliseconds in video for the given framenumber
-        """
-        if frame < 0: return 0
-        return int(round(float(frame)*float(1000)/fps))
 
 
     def scale_score(self, status: str, direction : str = 'y') -> None:
@@ -814,7 +793,7 @@ class FunscriptGenerator(QtCore.QThread):
                     min(output_score) \
                             if output_score[idx] < min(output_score) + self.params.bottom_threshold \
                             else round(output_score[idx]),
-                    self.frame_to_millisec(self.apply_shift(idx, 'min'), self.video_info.fps)
+                    FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'min'), self.video_info.fps)
                 )
 
         for idx in idx_dict['max']:
@@ -822,7 +801,7 @@ class FunscriptGenerator(QtCore.QThread):
                     max(output_score) \
                             if output_score[idx] > max(output_score) - self.params.top_threshold \
                             else round(output_score[idx]),
-                    self.frame_to_millisec(self.apply_shift(idx, 'max'), self.video_info.fps)
+                    FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'max'), self.video_info.fps)
                 )
 
         self.finished(status, True)

@@ -162,17 +162,35 @@ class FFmpegStream:
         return projection
 
 
-    def frame_to_millisec(self, frame_number) -> int:
+    @staticmethod
+    def frame_to_timestamp(frame_number: int, fps: float) -> str:
         """Get timestamp for given frame number
 
         Args:
             frame_number (int): frame number
+            fps (float): frames per seconds
 
         Returns:
-            int: timestamp in video
+            str: position in video as timestamp with H:M:S.XXX
+        """
+        return FFmpegStream.millisec_to_timestamp(
+                FFmpegStream.frame_to_millisec(frame_number, fps)
+            )
+
+
+    @staticmethod
+    def frame_to_millisec(frame_number: int, fps: float) -> int:
+        """Get timestamp for given frame number
+
+        Args:
+            frame_number (int): frame number
+            fps (float): frames per seconds
+
+        Returns:
+            int: timestamp in milliseconds
         """
         if frame_number <= 0: return 0
-        return int(round(float(frame_number)*float(1000)/self.video_info.fps))
+        return int(round(float(frame_number)*float(1000)/fps))
 
 
     @staticmethod
@@ -244,9 +262,7 @@ class FFmpegStream:
         for k, v in self.config['parameter'].items():
             video_filter = video_filter.replace('${' + k + '}', str(v))
 
-        seek = self.millisec_to_timestamp(
-                self.frame_to_millisec(self.start_frame)
-            )
+        seek = FFmpegStream.frame_to_timestamp(self.start_frame, self.video_info.fps)
 
         command = [
                 'ffmpeg',
