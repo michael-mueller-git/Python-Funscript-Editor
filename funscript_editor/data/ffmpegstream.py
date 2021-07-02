@@ -175,7 +175,8 @@ class FFmpegStream:
         return int(round(float(frame_number)*float(1000)/self.video_info.fps))
 
 
-    def millisec_to_timestamp(self, millis :int)->str:
+    @staticmethod
+    def millisec_to_timestamp(millis :int)->str:
         """ Convert milliseconds to timestamp
 
         Args:

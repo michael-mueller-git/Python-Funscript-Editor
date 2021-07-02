@@ -143,6 +143,39 @@ class FunscriptGenerator(QtCore.QThread):
         return annotated_img
 
 
+    def drawTime(self, img: np.ndarray, frame_num: int) -> np.ndarray:
+        """ Draw Time on the image/frame
+
+        Args:
+            img (np.ndarray): opencv image
+            img (int): current absolute frame number
+
+        Returns:
+            np.ndarray: opencv image with Time Text
+        """
+        annotated_img = img.copy()
+        current_timestamp = FFmpegStream.millisec_to_timestamp(
+                self.frame_to_millisec(frame_num, self.video_info.fps)
+            )
+        current_timestamp = ''.join(current_timestamp[:-4])
+
+        if self.params.end_frame < 1:
+            end_timestamp = FFmpegStream.millisec_to_timestamp(
+                    self.frame_to_millisec(self.video_info.length, self.video_info.fps)
+                )
+            end_timestamp = ''.join(end_timestamp[:-4])
+        else:
+            end_timestamp = FFmpegStream.millisec_to_timestamp(
+                    self.frame_to_millisec(self.params.end_frame, self.video_info.fps)
+                )
+            end_timestamp = ''.join(end_timestamp[:-4])
+
+        txt = current_timestamp + ' / ' + end_timestamp
+        cv2.putText(annotated_img, txt, (max(( 0, img.shape[1] - self.x_text_start - round(len(txt)*17*self.font_size) )), 50),
+                cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (0,0,255), 2)
+        return annotated_img
+
+
     def drawText(self, img: np.ndarray, txt: str, y :int = 50, color :tuple = (0,0,255)) -> np.ndarray:
         """ Draw text to an image/frame
 
@@ -619,6 +652,7 @@ class FunscriptGenerator(QtCore.QThread):
                 last_frame = self.drawFPS(last_frame)
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
                         (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
+                last_frame = self.drawTime(last_frame, frame_num + self.params.start_frame)
                 cv2.imshow(self.window_name, self.preview_scaling(last_frame))
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
