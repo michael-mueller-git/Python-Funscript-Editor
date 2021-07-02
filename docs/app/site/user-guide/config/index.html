@@ -111,17 +111,17 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="python-funscript-editor-config">Python Funscript Editor Config</h1>
-<p>The configuration files for the Windows release version are located in the <code>funscript-editor/funscript_editor/config</code> directory since release <code>v0.0.3</code>. If you use the python source code directly they are located in <a href="https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/funscript_editor/config"><code>funscript_editor/config</code></a>.</p>
+<p>The configuration files for the Windows release version are located in the <code>funscript-editor/funscript_editor/config</code> directory. If you use the python source code directly they are located in <a href="https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/funscript_editor/config"><code>funscript_editor/config</code></a>.</p>
 <h2 id="config-files">Config Files</h2>
-<p>The directory contains several config files. The most interesting are <code>video_scaling.json</code>, <code>settings.yaml</code> and <code>hyperparameter.yaml</code>. When editing the <code>*.yaml</code> configuration files, pay attention to the formatting, otherwise the program will not work later.</p>
+<p>The directory contains several config files. The most interesting are <code>settings.yaml</code> and <code>hyperparameter.yaml</code>. When editing the <code>*.yaml</code> configuration files, pay attention to the formatting, otherwise the program will not work later.</p>
 <p>Config Files:</p>
 <ul>
-<li><code>hyperparameter.yaml</code>: hyperparameter for the prediction algorithms</li>
+<li><code>hyperparameter.yaml</code>: hyperparameter for the algorithms</li>
 <li><code>logging_linux.yaml</code>: the logging configuration for linx</li>
 <li><code>logging_windows.yaml</code>: the logging configuration for windows</li>
 <li><code>settings.yaml</code>: application settings</li>
 <li><code>ui.yaml</code>: user interface settings</li>
-<li><code>video_scaling.json</code>: scaling for the preview window</li>
+<li><code>projection.yaml</code>: the FFmpeg filter parameter for different video types</li>
 </ul>
 <h3 id="config-parameter">Config Parameter</h3>
 <h4 id="hyperparameteryaml"><code>hyperparameter.yaml</code></h4>
@@ -140,24 +140,11 @@
 <ul>
 <li><code>use_zoom</code> (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.</li>
 <li><code>zoom_factor:</code> (float): Set the desired zoom value which will be used when the zoom function is activated.</li>
-<li><code>use_equirectangular</code> (bool): Convert video in normal perspective view before apply tracking. This should improve the tracking at the border of videos, because there is the distortion very high.</li>
-<li>
-<p><code>equirectangular_scaling</code> (float): scaling parameter for the equirectangular preview window. <code>1.0</code> is <code>1240x720</code>, <code>1.5</code> would be <code>1860x1080</code>, ... (Do not use to high scaling values, the perspective calculation need a lot of computer resources!)</p>
-</li>
-<li>
-<p><code>tracking_direction</code> (str): Specify the tracking direction. Allowed values are <code>'x'</code> and <code>'y'</code>.</p>
-</li>
-<li><code>scaling_method</code> (str): Specify the scaling method for the video before apply tracking and the preview window size. Allowed values are <code>'auto'</code> and <code>'config'</code>. <code>'auto'</code>: try to calculate the scaling depending on your screen resolution. If you have a very high screen resolution e.g. 8K Monitor this option will strongly slow down the tracking speed, because all videos are scaled up/down to 8K before tracking. If you set <code>'config'</code> the scaling form <code>video_scaling.json</code> will be used. You can adjust this config to your like as described in the documentation on github.</li>
+<li><code>tracking_direction</code> (str): Specify the tracking direction. Allowed values are <code>'x'</code> and <code>'y'</code>.</li>
 <li><code>max_playback_fps</code> (int): Limit the max player speed in the tracking preview window (0 = disable limit)</li>
-</ul>
-<h4 id="video_scalingjson"><code>video_scaling.json</code></h4>
-<p>The <code>video_scaling.json</code> config file specifies how the video get scaled bevor the tracking. The scaling also apply tho the preview size. If the preview to select the tracking feature is to small or to large you have to adjust this config file.</p>
-<p>The entries in this config file consist of a pair of values.</p>
-<p>Example config:</p>
-<pre><code class="language-json">{ &quot;0&quot;: 2.0, &quot;1000&quot;: 1.0, &quot;3500&quot;: 0.5, &quot;5000&quot;: 0.25 }
-</code></pre>
-<p>One pair in the example config is e.g. <code>"0": 2.0</code>. Each pair of values defines which scaling should be used for which video resolution. The first value, refers to the video width in pixels. Videos with size larger than 0 pixels horizontally use a scaling of <code>2.0</code>. Videos with 1000 pixel and more are scaled with <code>1.0</code>, from 3500 with <code>0.5</code> and from 5000 with <code>0.25</code>. You can enter as many values as you want and change the existing scaling.</p>
-<p>It’s best to look at your screen resolution and calculate which scaling you need for which video size so that the window fits on the monitor. e.g. You have <code>1920x1080</code> screen and <code>5400x2700</code> Video, you can divide <code>1920 / 5400 = 0.36</code> → add <code>"5300": 0.35</code> to the config (the key value have to be a little bit smaller than the Video resolution to apply the correct scaling).</p></div>
+<li><code>preview_scaling</code> (float): Set the preview image scaling factor. With a value of <code>1.0</code>, the window should fill the height or width of the screen depending on the aspect ratio of the video.</li>
+<li><code>projection</code>: (str): Set the video type. All available options can be obtained from the <code>projection.yaml</code> file. Each root keys represent an option. Available Options: <code>'flat'</code> = 2D Videos, <code>'vr_he_sbs'</code> = 3D VR Side-By-Side Video</li>
+</ul></div>
             </div>
         </div>
 

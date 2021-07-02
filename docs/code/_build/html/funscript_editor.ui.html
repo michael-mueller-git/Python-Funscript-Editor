@@ -291,14 +291,16 @@ select_point_callback (Callable[[int], None]): select point callback handler</p>
 <span id="funscript-editor-ui-minimal-module"></span><h2>funscript_editor.ui.minimal module<a class="headerlink" href="#module-funscript_editor.ui.minimal" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="funscript_editor.ui.minimal.MinimalFunscriptGenerator">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.ui.minimal.</span></span><span class="sig-name descname"><span class="pre">MinimalFunscriptGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.ui.minimal.MinimalFunscriptGenerator" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">funscript_editor.ui.minimal.</span></span><span class="sig-name descname"><span class="pre">MinimalFunscriptGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#funscript_editor.ui.minimal.MinimalFunscriptGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QMainWindow</span></code></p>
 <p>Class to Generate a funscript with minimal UI</p>
 <dl class="simple">
 <dt>Note:</dt><dd><p>We us a hidden QMainWindow to get all Qt functions like QThread and QSignal.</p>
 </dd>
 <dt>Args:</dt><dd><p>video_file (str): path to video file
-start_time (int): start position in video (timestamp in milliseconds)</p>
+start_time (float): start position in video (timestamp in milliseconds)
+end_time (float): end position in video (timestamp in milliseconds) use -1.0 for video end.
+output_file (str): csv output file path</p>
 </dd>
 </dl>
 <dl class="py method">

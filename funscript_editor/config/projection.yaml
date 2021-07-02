@@ -1,5 +1,5 @@
 # projection config
-# do not change any parameter here!
+# NOTE: Do not change any parameters here unless you know exactly what you are doing!
 
 # 3D Side-By-Side 180 Dome VR Videos
 vr_he_sbs:

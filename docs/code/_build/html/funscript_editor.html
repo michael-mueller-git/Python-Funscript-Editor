@@ -189,8 +189,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="funscript_editor.data.html">funscript_editor.data namespace</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="funscript_editor.data.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="funscript_editor.data.html#module-funscript_editor.data.equirectangularvideostream">funscript_editor.data.equirectangularvideostream module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="funscript_editor.data.html#module-funscript_editor.data.filevideostream">funscript_editor.data.filevideostream module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="funscript_editor.data.html#module-funscript_editor.data.ffmpegstream">funscript_editor.data.ffmpegstream module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="funscript_editor.data.html#module-funscript_editor.data.funscript">funscript_editor.data.funscript module</a></li>
 </ul>
 </li>
@@ -219,11 +218,12 @@
 <span id="funscript-editor-api-module"></span><h2>funscript_editor.api module<a class="headerlink" href="#module-funscript_editor.api" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="funscript_editor.api.generate_funscript">
-<span class="sig-prename descclassname"><span class="pre">funscript_editor.api.</span></span><span class="sig-name descname"><span class="pre">generate_funscript</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.api.generate_funscript" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">funscript_editor.api.</span></span><span class="sig-name descname"><span class="pre">generate_funscript</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.api.generate_funscript" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a funscript with minimal UI</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>video_file (str): path to video file
-start_time (int): start time in milliseconds
+start_time (float): start time in milliseconds
+end_time (float): end time in milliseconds (set -1.0 to use video end)
 output_file (str): path for the output file</p>
 </dd>
 </dl>

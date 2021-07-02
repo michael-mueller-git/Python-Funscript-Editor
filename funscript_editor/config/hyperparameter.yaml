@@ -27,7 +27,7 @@ top_points_offset: 5.0
 
 # An fix offset to the bottom points (positive values move the point up and negative values
 # move the point down). The offset respect the user defined upper and lower limit.
-bottom_points_offset: -15.0
+bottom_points_offset: -16.0
 
 # Define the top threshold. All top points greater than (max - threshold) will be set to
 # the specified max value. Set 0.0 to disable this function.
