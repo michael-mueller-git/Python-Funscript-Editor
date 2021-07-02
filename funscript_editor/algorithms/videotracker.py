@@ -18,14 +18,14 @@ class StaticVideoTracker:
     Args:
         first_frame (np.ndarray): open cv image representing the start frame
         tracking_bbox (tuple): tuple with (x,y,w,h) of the init tracking box
-        limit_searchspace (bool) : only insert the region of init tracking box into the tracker
+        limit_searchspace (dict) : only insert the specified region around the init box
         queue_size (int): in (work) and out (result) queue size
     """
 
     def __init__(self,
             first_frame: np.ndarray,
             tracking_bbox: tuple,
-            limit_searchspace : bool = True,
+            limit_searchspace : dict = {'h': 0.45, 'w':0.2},
             queue_size : int = 2):
         self.first_frame = first_frame
         self.limit_searchspace = limit_searchspace
@@ -71,12 +71,7 @@ class StaticVideoTracker:
         self.tracker = cv2.TrackerCSRT_create() # NOTE: you can change this to your favorite tracker
         frame_heigt, frame_width = self.first_frame.shape[:2]
 
-        if self.limit_searchspace:
-            # TODO Determine the tracking ROI, assume we have 3d Side by Side static VR video
-            # The movement is mostly up-down, so we can restrict left and right more than up and down
-            dh, dw = int(frame_heigt/12), int(frame_width/38)
-        else:
-            dh, dw = int(frame_heigt/2), int(frame_width/4)
+        dh, dw = int(frame_heigt*self.limit_searchspace['h']), int(frame_width*self.limit_searchspace['w'])
         x0, y0 = max([0, self.first_tracking_bbox[0] - dw]), max([0, self.first_tracking_bbox[1] - dh])
         y1 = min([frame_heigt, self.first_tracking_bbox[1] + self.first_tracking_bbox[3] + dh])
         x1 = min([frame_width, self.first_tracking_bbox[0] + self.first_tracking_bbox[2] + dw])
@@ -99,7 +94,6 @@ class StaticVideoTracker:
             else:
                 frame = self.queue_in.get()
                 frame_roi = frame[y0:y1, x0:x1]
-                # cv2.imwrite('debug.png', frame_roi)
                 success, bbox = self.tracker.update(frame_roi)
                 if success: bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]))
                 self.queue_out.put((success, bbox))

@@ -56,7 +56,7 @@ def moving_average(x :list, w: int) -> list:
     """
     w = round(w)
     avg = np.convolve(x, np.ones(int(w*2)), 'valid') / int(w*2)
-    # XXX use extrapolation function
+    # TODO use extrapolation function
     return [avg[0] for _ in range(int(w))]\
             +list(avg)\
             +[avg[-1] for _ in range(len(avg)+w,len(x))]

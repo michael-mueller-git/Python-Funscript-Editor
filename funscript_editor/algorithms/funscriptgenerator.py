@@ -60,6 +60,7 @@ class FunscriptGenerator(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.params = params
         self.funscript = funscript
+        self.video_info = FFmpegStream.get_video_info(self.params.video_path)
         self.timer = cv2.getTickCount()
 
         # XXX destroyWindow(...) sems not to delete the trackbar. Workaround: we give the window each time a unique name
@@ -69,14 +70,14 @@ class FunscriptGenerator(QtCore.QThread):
         self.x_text_start = 50
         self.font_size = 0.6
         self.tracking_fps = []
-        self.scone_x = []
-        self.scone_y = []
+        self.score = {
+                'x': [],
+                'y': []
+            }
         self.bboxes = {
                 'Men': [],
                 'Woman': []
-                }
-
-        self.video_info = FFmpegStream.get_video_info(self.params.video_path)
+            }
 
 
     #: completed event with reference to the funscript with the predicted actions, status message and success flag
@@ -88,7 +89,7 @@ class FunscriptGenerator(QtCore.QThread):
     logger = logging.getLogger(__name__)
 
 
-    def determine_monitor_scaling(self, frame_width, frame_height) -> float:
+    def determine_preview_scaling(self, frame_width, frame_height) -> float:
         """ Determine the scaling for current monitor setup
 
         Args:
@@ -106,7 +107,7 @@ class FunscriptGenerator(QtCore.QThread):
             self.logger.error("Monitor resolution info not found")
         else:
             # asume we use the largest monitor for scipting
-            self.params.preview_scaling *= max(scale)
+            self.params.preview_scaling = float(SETTINGS['preview_scaling']) * max(scale)
 
 
     def drawBox(self, img: np.ndarray, bbox: tuple) -> np.ndarray:
@@ -251,18 +252,14 @@ class FunscriptGenerator(QtCore.QThread):
             We use x0,y0 from the predicted tracking boxes to create a diff score
         """
         if self.params.track_men:
-            self.score_x = [m[0] - w[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
-            self.score_y = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
+            self.score['x'] = [m[0] - w[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
+            self.score['y'] = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
         else:
-            self.score_x = [max([x[0] for x in self.bboxes['Woman']]) - w[0] for w in self.bboxes['Woman']]
-            self.score_y = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
+            self.score['x'] = [max([x[0] for x in self.bboxes['Woman']]) - w[0] for w in self.bboxes['Woman']]
+            self.score['y'] = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
 
-        # NOTE: Scaling with the anomaly function sometimes makes the result even worse
-        # self.score_x = sp.scale_signal_with_anomalies(self.score_x, 0, 100, lower_quantile=0.05, upper_quantile=0.99999)
-        # self.score_y = sp.scale_signal_with_anomalies(self.score_y, 0, 100, lower_quantile=0.05, upper_quantile=0.99999)
-
-        self.score_x = sp.scale_signal(self.score_x, 0, 100)
-        self.score_y = sp.scale_signal(self.score_y, 0, 100)
+        self.score['x'] = sp.scale_signal(self.score['x'], 0, 100)
+        self.score['y'] = sp.scale_signal(self.score['y'], 0, 100)
 
 
     @staticmethod
@@ -290,18 +287,18 @@ class FunscriptGenerator(QtCore.QThread):
             status (str): a status/info message to display in the window
             direction (str): scale the 'y' or 'x' score
         """
-        if len(self.score_y) < 2: return
+        if len(self.score['y']) < 2: return
 
         cap = cv2.VideoCapture(self.params.video_path)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         if direction == 'x':
-            min_frame = np.argmin(np.array(self.score_x)) + self.params.start_frame
-            max_frame = np.argmax(np.array(self.score_x)) + self.params.start_frame
+            min_frame = np.argmin(np.array(self.score['x'])) + self.params.start_frame
+            max_frame = np.argmax(np.array(self.score['x'])) + self.params.start_frame
         else:
-            min_frame = np.argmin(np.array(self.score_y)) + self.params.start_frame
-            max_frame = np.argmax(np.array(self.score_y)) + self.params.start_frame
+            min_frame = np.argmin(np.array(self.score['y'])) + self.params.start_frame
+            max_frame = np.argmax(np.array(self.score['y'])) + self.params.start_frame
 
         cap.set(cv2.CAP_PROP_POS_FRAMES, min_frame)
         successMin, imgMin = cap.read()
@@ -339,9 +336,9 @@ class FunscriptGenerator(QtCore.QThread):
             desired_max = 99
 
         if direction == 'x':
-            self.score_x = sp.scale_signal(self.score_x, desired_min, desired_max)
+            self.score['x'] = sp.scale_signal(self.score['x'], desired_min, desired_max)
         else:
-            self.score_y = sp.scale_signal(self.score_y, desired_min, desired_max)
+            self.score['y'] = sp.scale_signal(self.score['y'], desired_min, desired_max)
 
 
     def plot_y_score(self, name: str, idx_list: list, dpi : int = 300) -> None:
@@ -352,20 +349,20 @@ class FunscriptGenerator(QtCore.QThread):
             idx_list (list): list with all frame numbers with funscript action points
             dpi (int): picture output dpi
         """
-        if len(self.score_y) < 2: return
+        if len(self.score['y']) < 2: return
         if len(idx_list) < 2: return
         rows = 2
-        figure = Figure(figsize=(max([6,int(len(self.score_y)/50)]), rows*3+1), dpi=dpi)
+        figure = Figure(figsize=(max([6,int(len(self.score['y'])/50)]), rows*3+1), dpi=dpi)
         ax = figure.add_subplot(2,1,1) # Rows, Columns, Position
         ax.title.set_text('Motion in y direction')
         # TODO why is there an offset of 1 in the data?
-        ax.plot(self.score_y[max((0,idx_list[0]-1)):idx_list[-1]])
-        ax.plot(idx_list, [self.score_y[idx] for idx in idx_list], 'o')
+        ax.plot(self.score['y'][max((0,idx_list[0]-1)):idx_list[-1]])
+        ax.plot(idx_list, [self.score['y'][idx] for idx in idx_list], 'o')
         ax.legend(['Tracker Prediction','Local Max and Min'], loc='upper right')
         ax = figure.add_subplot(2,1,2)
         ax.title.set_text('Funscript')
-        ax.plot(idx_list, [self.score_y[idx] for idx in idx_list])
-        ax.plot(idx_list, [self.score_y[idx] for idx in idx_list], 'o')
+        ax.plot(idx_list, [self.score['y'][idx] for idx in idx_list])
+        ax.plot(idx_list, [self.score['y'][idx] for idx in idx_list], 'o')
         figure.savefig(fname=name, dpi=dpi, bbox_inches='tight')
 
 
@@ -376,15 +373,15 @@ class FunscriptGenerator(QtCore.QThread):
             name (str): file name for the figure
             dpi (int): picture output dpi
         """
-        if len(self.score_y) < 2: return
+        if len(self.score['y']) < 2: return
         rows = 2
-        figure = Figure(figsize=(max([6,int(len(self.score_y)/50)]), rows*3+1), dpi=dpi)
+        figure = Figure(figsize=(max([6,int(len(self.score['y'])/50)]), rows*3+1), dpi=dpi)
         ax = figure.add_subplot(2,1,1) # Rows, Columns, Position
         ax.title.set_text('Motion in x direction')
-        ax.plot(self.score_x)
+        ax.plot(self.score['x'])
         ax = figure.add_subplot(2,1,2)
         ax.title.set_text('Motion in y direction')
-        ax.plot(self.score_y)
+        ax.plot(self.score['y'])
         figure.savefig(fname=name, dpi=dpi, bbox_inches='tight')
 
 
@@ -428,7 +425,7 @@ class FunscriptGenerator(QtCore.QThread):
         """
         config = PROJECTION[self.params.projection]
 
-        self.mointor_scale = self.determine_monitor_scaling(config['parameter']['width'], config['parameter']['height'])
+        self.determine_preview_scaling(config['parameter']['width'], config['parameter']['height'])
 
         # NOTE: improve processing speed to make this menu more responsive
         if image.shape[0] > 6000 or image.shape[1] > 6000:
@@ -514,6 +511,7 @@ class FunscriptGenerator(QtCore.QThread):
                     round(bbox[3]/self.params.preview_scaling)
                 )
 
+        # revert the zoom
         if self.params.use_zoom:
             bbox = (round(bbox[0]/self.params.zoom_factor)+zoom_bbox[0],
                     round(bbox[1]/self.params.zoom_factor)+zoom_bbox[1],
@@ -523,18 +521,6 @@ class FunscriptGenerator(QtCore.QThread):
 
         return bbox
 
-
-    def get_first_frame(self) -> np.ndarray:
-        """ Get the first frame image
-
-        Returns:
-            np.ndarray: opencv image
-        """
-        cap = cv2.VideoCapture(str(self.params.video_path))
-        if self.params.start_frame > 0: cap.set(cv2.CAP_PROP_POS_FRAMES, self.params.start_frame)
-        success, first_frame = cap.read()
-        cap.release()
-        return first_frame
 
 
     def get_flat_projection_config(self,
@@ -548,16 +534,16 @@ class FunscriptGenerator(QtCore.QThread):
             dict: config
         """
         h, w = first_frame.shape[:2]
-        config = PROJECTION[self.params.projection]
+        config = copy.deepcopy(PROJECTION[self.params.projection])
 
-        if config['parameter']['height'] == -1:
+        if PROJECTION[self.params.projection]['parameter']['height'] == -1:
             scaling = config['parameter']['width'] / float(w)
             config['parameter']['height'] = round(h * scaling)
-        elif config['parameter']['width'] == -1:
+        elif PROJECTION[self.params.projection]['parameter']['width'] == -1:
             scaling = config['parameter']['height'] / float(h)
             config['parameter']['width'] = round(w * scaling)
 
-        self.mointor_scale = self.determine_monitor_scaling(config['parameter']['width'], config['parameter']['height'])
+        self.determine_preview_scaling(config['parameter']['width'], config['parameter']['height'])
 
         return config
 
@@ -583,12 +569,12 @@ class FunscriptGenerator(QtCore.QThread):
 
         first_frame = video.read()
         bboxWoman = self.get_bbox(first_frame, "Select Woman Feature")
-        trackerWoman = StaticVideoTracker(first_frame, bboxWoman, limit_searchspace = False) # TODO limit_searchspace for flat videos
+        trackerWoman = StaticVideoTracker(first_frame, bboxWoman)
         self.bboxes['Woman'].append(bboxWoman)
 
         if self.params.track_men:
             bboxMen = self.get_bbox(self.drawBox(first_frame, bboxWoman), "Select Men Feature")
-            trackerMen = StaticVideoTracker(first_frame, bboxMen, limit_searchspace = False) # TODO limit_searchspace for flat videos
+            trackerMen = StaticVideoTracker(first_frame, bboxMen)
             self.bboxes['Men'].append(bboxMen)
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):
@@ -598,7 +584,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         status = "End of video reached"
         self.clear_keypress_queue()
-        last_frame, frame_num = None, 1 # first frame is was init frame
+        last_frame, frame_num = None, 1 # first frame is init frame
         while video.isOpen():
             cycle_start = time.time()
             frame = video.read()
@@ -726,12 +712,12 @@ class FunscriptGenerator(QtCore.QThread):
         """
         if position in ['max', 'top'] and self.params.direction != 'x':
             if frame_number >= -1*self.params.shift_top_points \
-                    and frame_number + self.params.shift_top_points < len(self.score_y): \
+                    and frame_number + self.params.shift_top_points < len(self.score['y']): \
                     return self.params.start_frame + frame_number + self.params.shift_top_points
 
         if position in ['min', 'bottom'] and self.params.direction != 'x':
             if frame_number >= -1*self.params.shift_bottom_points \
-                    and frame_number + self.params.shift_bottom_points < len(self.score_y): \
+                    and frame_number + self.params.shift_bottom_points < len(self.score['y']): \
                     return self.params.start_frame + frame_number + self.params.shift_bottom_points
 
         return self.params.start_frame + frame_number
@@ -747,9 +733,9 @@ class FunscriptGenerator(QtCore.QThread):
             list: score with offset
         """
         if self.params.direction == 'x':
-            return self.score_x
+            return self.score['x']
 
-        score = copy.deepcopy(self.score_y)
+        score = copy.deepcopy(self.score['y'])
         score_min, score_max = min(score), max(score)
         for idx in idx_dict['min']:
             score[idx] = max(( score_min, min((score_max, score[idx] + self.params.bottom_points_offset)) ))
@@ -762,23 +748,23 @@ class FunscriptGenerator(QtCore.QThread):
 
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
-        # NOTE: score_y and score_x should have the same number size so it should be enouth to check one score length
+        # NOTE: score['y'] and score['x'] should have the same number size so it should be enouth to check one score length
         with Listener(on_press=self.on_key_press) as listener:
             status = self.tracking()
-            if len(self.score_y) >= HYPERPARAMETER['min_frames']:
+            if len(self.score['y']) >= HYPERPARAMETER['min_frames']:
                 if self.params.direction != 'x':
                     self.scale_score(status, direction='y')
                 else:
                     self.scale_score(status, direction='x')
 
-        if len(self.score_y) < HYPERPARAMETER['min_frames']:
+        if len(self.score['y']) < HYPERPARAMETER['min_frames']:
             self.finished(status + ' -> Tracking time insufficient', False)
             return
 
         if self.params.direction != 'x':
-            idx_dict = sp.get_local_max_and_min_idx(self.score_y, self.video_info.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score['y'], self.video_info.fps)
         else:
-            idx_dict = sp.get_local_max_and_min_idx(self.score_x, self.video_info.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score['x'], self.video_info.fps)
 
         idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
         idx_list.sort()

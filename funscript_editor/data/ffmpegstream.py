@@ -210,7 +210,7 @@ class FFmpegStream:
         """
         while self.frame_buffer.qsize() == 0 and not self.stopped:
             time.sleep(self.sleep_time)
-        return self.frame_buffer.get() if self.more() else None
+        return self.frame_buffer.get() if self.frame_buffer.qsize() > 0 else None
 
 
     def isOpen(self) -> bool:
