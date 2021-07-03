@@ -11,7 +11,7 @@ skip_frames: 1
 
 # Specify the window size for the calculation of the reference value for the local min
 # and max search.
-avg_sec_for_local_min_max_extraction: 1.9
+avg_sec_for_local_min_max_extraction: 2.0
 
 # Specify the minimum required frames for the tracking. Wee need this parameter to
 # ensure there is at leas two strokes in the tracking result.

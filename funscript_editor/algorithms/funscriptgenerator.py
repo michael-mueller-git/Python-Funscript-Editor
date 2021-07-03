@@ -280,7 +280,7 @@ class FunscriptGenerator(QtCore.QThread):
                     (self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (0,0,255), 2)
                 cv2.putText(preview, "Set {} to {}".format('Max', trackbarValueMax),
                     (image_min.shape[1] + self.x_text_start, 50), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (0,0,255), 2)
-                cv2.imshow(self.window_name, self.preview_scaling(preview))
+                cv2.imshow(self.window_name, self.preview_scaling(preview, 1.1))
                 if self.was_space_pressed() or cv2.waitKey(25) == ord(' '): break
                 trackbarValueMin = cv2.getTrackbarPos("Min", self.window_name)
                 trackbarValueMax = cv2.getTrackbarPos("Max", self.window_name)
@@ -352,9 +352,9 @@ class FunscriptGenerator(QtCore.QThread):
                     imgMax = imgMax[:int(imgMax.shape[0]/2), :]
 
             if PROJECTION[self.params.projection]['parameter']['width'] > 0:
-                scale = PROJECTION[self.params.projection]['parameter']['width'] / float(2*imgMax.shape[1])
+                scale = PROJECTION[self.params.projection]['parameter']['width'] / float(1.75*imgMax.shape[1])
             else:
-                scale = PROJECTION[self.params.projection]['parameter']['height'] / float(2*imgMax.shape[1])
+                scale = PROJECTION[self.params.projection]['parameter']['height'] / float(1.75*imgMax.shape[0])
             imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
             imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
 
@@ -451,11 +451,12 @@ class FunscriptGenerator(QtCore.QThread):
                 if self.params.track_men: del self.bboxes['Men'][-1]
 
 
-    def preview_scaling(self, preview_image :np.ndarray) -> np.ndarray:
+    def preview_scaling(self, preview_image :np.ndarray, post_scale :float = 1.0) -> np.ndarray:
         """ Scale image for preview
 
         Args:
             preview_image (np.ndarray): opencv image
+            post_scale (float, optional): additional scaling factor
 
         Returns:
             np.ndarray: scaled opencv image
@@ -463,8 +464,8 @@ class FunscriptGenerator(QtCore.QThread):
         return cv2.resize(
                 preview_image,
                 None,
-                fx=self.params.preview_scaling,
-                fy=self.params.preview_scaling
+                fx=self.params.preview_scaling*post_scale,
+                fy=self.params.preview_scaling*post_scale
             )
 
 
@@ -678,7 +679,7 @@ class FunscriptGenerator(QtCore.QThread):
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
-                    self.delete_last_tracking_predictions(int((self.get_average_tracking_fps()+1)*2.2))
+                    self.delete_last_tracking_predictions(int((self.get_average_tracking_fps()+1)*2.0))
                     break
 
             (successWoman, bboxWoman) = trackerWoman.result()
@@ -756,7 +757,8 @@ class FunscriptGenerator(QtCore.QThread):
             status (str): a process status/error message
             success (bool): True if funscript was generated else False
         """
-        cv2.destroyWindow(self.window_name)
+        try: cv2.destroyWindow(self.window_name)
+        except: pass
         self.funscriptCompleted.emit(self.funscript, status, success)
 
 
@@ -907,6 +909,10 @@ class FunscriptGenerator(QtCore.QThread):
 
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
+        if self.params.direction == 'd' and not self.params.track_men:
+                self.finished("Tracking with 'd' and no men tracker is not implemented!", False)
+                return
+
         # NOTE: score['y'] and score['x'] should have the same number size so it should be enouth to check one score length
         with Listener(on_press=self.on_key_press) as listener:
             status = self.tracking()
