@@ -1,6 +1,6 @@
 # ui configuration
 
-vertical_stretch_factor: [1, 8]
+vertical_stretch_factor: [1, 12]
 horizontal_stretch_factor: [40, 1]
 
 autosave_in_sec: 30

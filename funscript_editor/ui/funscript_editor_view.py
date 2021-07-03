@@ -14,7 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(959, 834)
+        MainWindow.resize(1600, 1000)
+        MainWindow.setMinimumSize(QtCore.QSize(1600, 1000))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -200,7 +201,7 @@ class Ui_MainWindow(object):
         self.mainLayout.addWidget(self.splitterVertical)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 959, 34))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1600, 34))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
