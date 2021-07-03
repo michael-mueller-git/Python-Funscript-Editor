@@ -37,7 +37,7 @@ jobs:
       - name: Build Application
         shell: bash -l {0}
         run: |
-          pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py   
+          pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py
       - name: Add Version to Build
         shell: bash -l {0}
         run: |
@@ -55,7 +55,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          release_name: Python Funscript Editor ${{ steps.get_version.outputs.version }}
+          release_name: ${{ steps.get_version.outputs.version }}
           draft: true
           prerelease: true
       - name: Upload Windows Build Asset
@@ -64,7 +64,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./funscript-editor_${{ steps.get_version.outputs.version }}.zip
           asset_name: funscript-editor_${{ steps.get_version.outputs.version }}.zip
           asset_content_type: application/zip
@@ -74,7 +74,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./contrib/OpenFunscripter/funscript_generator_windows.lua
           asset_name: funscript_generator_windows.lua
           asset_content_type: application/octet-stream
