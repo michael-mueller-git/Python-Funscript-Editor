@@ -47,7 +47,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          release_name: Python funscript Editor ${{ steps.get_version.outputs.version }}
+          release_name: Python Funscript Editor ${{ steps.get_version.outputs.version }}
           draft: true
           prerelease: true
       - name: Upload Release Asset
