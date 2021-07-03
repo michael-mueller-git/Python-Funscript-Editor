@@ -18,6 +18,7 @@ from matplotlib.figure import Figure
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
 from datetime import datetime
 from funscript_editor.data.ffmpegstream import FFmpegStream, VideoInfo
+from funscript_editor.algorithms.kalmanfilter import KalmanFilter2D
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -44,6 +45,7 @@ class FunscriptGeneratorParameter:
     bottom_threshold: float = float(HYPERPARAMETER['bottom_threshold'])
     preview_scaling: float = float(SETTINGS['preview_scaling'])
     projection: str = str(SETTINGS['projection']).lower()
+    use_kalman_filter: bool = SETTINGS['use_kalman_filter']
 
 
 class FunscriptGenerator(QtCore.QThread):
@@ -403,13 +405,13 @@ class FunscriptGenerator(QtCore.QThread):
         Args:
             num (int): number of frames to remove from predicted boxes
         """
-        if len(self.bboxes['Woman']) <= num-1:
+        if len(self.bboxes['Woman']) <= num:
             self.bboxes['Woman'] = []
             self.bboxes['Men'] = []
         else:
-            for i in range(len(self.bboxes['Woman'])-1,len(self.bboxes['Woman'])-num,-1):
-                del self.bboxes['Woman'][i]
-                if self.params.track_men: del self.bboxes['Men'][i]
+            for _ in range(num):
+                del self.bboxes['Woman'][-1]
+                if self.params.track_men: del self.bboxes['Men'][-1]
 
 
     def preview_scaling(self, preview_image :np.ndarray) -> np.ndarray:
@@ -438,7 +440,7 @@ class FunscriptGenerator(QtCore.QThread):
         Returns:
             dict: projection config
         """
-        config = PROJECTION[self.params.projection]
+        config = copy.deepcopy(PROJECTION[self.params.projection])
 
         self.determine_preview_scaling(config['parameter']['width'], config['parameter']['height'])
 
@@ -639,7 +641,7 @@ class FunscriptGenerator(QtCore.QThread):
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
-                    self.delete_last_tracking_predictions(int(self.get_average_tracking_fps()+1)*3)
+                    self.delete_last_tracking_predictions(int((self.get_average_tracking_fps()+1)*2.2))
                     break
 
             (successWoman, bboxWoman) = trackerWoman.result()
@@ -663,6 +665,7 @@ class FunscriptGenerator(QtCore.QThread):
 
         video.stop()
         self.logger.info(status)
+        self.logger.info('Calculate score')
         self.calculate_score()
         return status
 
@@ -762,12 +765,38 @@ class FunscriptGenerator(QtCore.QThread):
         return score
 
 
+    def apply_kalman_filter(self) -> None:
+        """ Apply Kalman Filter to the tracking prediction """
+        if len(self.bboxes['Woman']) < self.video_info.fps: return
+
+        # TODO: we should use the center of the tracking box not x0,y0 of the box
+
+        self.logger.info("Apply kalman filter")
+        kalman = KalmanFilter2D(self.video_info.fps)
+        kalman.init(self.bboxes['Woman'][0][0], self.bboxes['Woman'][0][1])
+        for idx, item in enumerate(self.bboxes['Woman']):
+            prediction = kalman.update(item[0], item[1])
+            self.bboxes['Woman'][idx] = (prediction[0], prediction[1], item[2], item[3])
+
+        if self.params.track_men:
+            kalman = KalmanFilter2D(self.video_info.fps)
+            kalman.init(self.bboxes['Men'][0][0], self.bboxes['Men'][0][1])
+            for idx, item in enumerate(self.bboxes['Men']):
+                prediction = kalman.update(item[0], item[1])
+                self.bboxes['Men'][idx] = (prediction[0], prediction[1], item[2], item[3])
+
+
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
         # NOTE: score['y'] and score['x'] should have the same number size so it should be enouth to check one score length
         with Listener(on_press=self.on_key_press) as listener:
             status = self.tracking()
+
+            if self.params.use_kalman_filter:
+                self.apply_kalman_filter()
+
             if len(self.score['y']) >= HYPERPARAMETER['min_frames']:
+                self.logger.info("Scale score")
                 if self.params.direction != 'x':
                     self.scale_score(status, direction='y')
                 else:
@@ -777,6 +806,7 @@ class FunscriptGenerator(QtCore.QThread):
             self.finished(status + ' -> Tracking time insufficient', False)
             return
 
+        self.logger.info("Determine local max and min")
         if self.params.direction != 'x':
             idx_dict = sp.get_local_max_and_min_idx(self.score['y'], self.video_info.fps)
         else:

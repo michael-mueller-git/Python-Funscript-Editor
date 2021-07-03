@@ -155,9 +155,9 @@ class FFmpegStream:
                     (config['parameter']['height'], config['parameter']['width'], 3)
                 )
 
+        pipe.terminate()
         pipe.stdin.close()
         pipe.stdout.close()
-        pipe.terminate()
 
         return projection
 
@@ -218,7 +218,6 @@ class FFmpegStream:
     def stop(self) -> None:
         """ Stop FFmpeg video stream """
         self.stopped = True
-        self.thread.join()
 
 
     def read(self) -> np.ndarray:
@@ -305,5 +304,5 @@ class FFmpegStream:
 
         self.stopped = True
         self.logger.info('Close FFmpeg Stream')
-        pipe.stdout.close()
         pipe.terminate()
+        pipe.stdout.close()

@@ -19,6 +19,7 @@ Config Files:
 
 #### `settings.yaml`
 
+- `use_kalman_filter`: Enable Kalman Filter
 - `use_zoom` (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.
 - `zoom_factor:` (float): Set the desired zoom value which will be used when the zoom function is activated.
 - `tracking_direction` (str): Specify the tracking direction. Allowed values are `'x'` and `'y'`.

@@ -11,7 +11,7 @@ avg_sec_for_local_min_max_extraction: 1.9
 
 # Specify the minimum required frames for the tracking. Wee need this parameter to
 # ensure there is at leas two strokes in the tracking result.
-min_frames: 120
+min_frames: 100
 
 # Shift predicted top points by given frame number. Positive values delay the position
 # and negative values result in an earlier position.

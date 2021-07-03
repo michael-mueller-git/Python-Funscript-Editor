@@ -1,5 +1,8 @@
 # Python Funscript Editor settings
 
+# Enable Kalman Filter
+use_kalman_filter: False
+
 # Enable or disable an additional step to zoom in the Video before selecting a tracking
 # feature for the Woman or Men.
 use_zoom: False
