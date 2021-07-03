@@ -12,6 +12,14 @@ funscript\_editor.algorithms.funscriptgenerator module
    :undoc-members:
    :show-inheritance:
 
+funscript\_editor.algorithms.kalmanfilter module
+------------------------------------------------
+
+.. automodule:: funscript_editor.algorithms.kalmanfilter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 funscript\_editor.algorithms.signalprocessing module
 ----------------------------------------------------
 

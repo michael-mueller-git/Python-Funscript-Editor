@@ -123,7 +123,7 @@
 <li>Download the <strong>latest</strong> <code>funscript_generator.lua</code> script from <a href="https://github.com/michael-mueller-git/Python-Funscript-Editor/releases">github release page</a>.</li>
 <li>Move the downloaded <code>funscript_generator.lua</code> script to <code>data/lua</code> in your OFS directory.</li>
 <li>Open the <code>funscript_generator.lua</code> file and adjust the <code>Settings.FunscriptGenerator</code> and <code>Settings.TmpFile</code> variable.</li>
-<li><strong>NOTE:</strong> You have to use use <code>/</code> or <code>\\</code> for the <code>\</code> symbols in your path!</li>
+<li><strong>NOTE:</strong> If you copy the path from Windows explorer to the variable in the lua script you have to escape the <code>\</code> symbol. This mean you have to put another <code>\</code> in front of each <code>\</code> so that there are always <code>\\</code> pairs. As an alternative, you can use a simple <code>/</code> instead of the single <code>\</code> Symbole that also work.</li>
 <li><code>Settings.FunscriptGenerator</code>: Point to the extracted Python Funscript Editor program (better double check the complete path string to avoid errors later on).</li>
 <li><code>Settings.TmpFile</code>: Specifies a temporary file location where to store the result (must be a file not a directory!). The file does not have to exist at the moment. The specified file will be generated from the Python Funscript Editor and will be overwritten automatically at the next time the generator is started!</li>
 <li>Now launch OFS.</li>
