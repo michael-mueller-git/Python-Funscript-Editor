@@ -198,12 +198,26 @@ queue_size (int): size of frame buffer</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.data.ffmpegstream.FFmpegStream.frame_to_millisec">
-<span class="sig-name descname"><span class="pre">frame_to_millisec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_number</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#funscript_editor.data.ffmpegstream.FFmpegStream.frame_to_millisec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get timestamp for given frame number</p>
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">frame_to_millisec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_number</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#funscript_editor.data.ffmpegstream.FFmpegStream.frame_to_millisec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get timestamp in milliseconds for given frame number</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>frame_number (int): frame number</p>
+<dt>Args:</dt><dd><p>frame_number (int): frame number
+fps (float): frames per seconds</p>
 </dd>
-<dt>Returns:</dt><dd><p>int: timestamp in video</p>
+<dt>Returns:</dt><dd><p>int: timestamp in milliseconds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.data.ffmpegstream.FFmpegStream.frame_to_timestamp">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">frame_to_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_number</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#funscript_editor.data.ffmpegstream.FFmpegStream.frame_to_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get timestamp H:M:S.XXX for given frame number</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>frame_number (int): frame number
+fps (float): frames per seconds</p>
+</dd>
+<dt>Returns:</dt><dd><p>str: position in video as timestamp with H:M:S.XXX</p>
 </dd>
 </dl>
 </dd></dl>
@@ -263,8 +277,8 @@ config (dict): conversion parameter</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.data.ffmpegstream.FFmpegStream.millisec_to_timestamp">
-<span class="sig-name descname"><span class="pre">millisec_to_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">millis</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#funscript_editor.data.ffmpegstream.FFmpegStream.millisec_to_timestamp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert milliseconds to timestamp</p>
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">millisec_to_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">millis</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#funscript_editor.data.ffmpegstream.FFmpegStream.millisec_to_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert milliseconds to timestamp H:M:S.XXX</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>millis (int): position in video in milliseconds</p>
 </dd>

@@ -293,25 +293,25 @@ colot (tuple): BGR Color tuple</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.drawTime">
+<span class="sig-name descname"><span class="pre">drawTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_num</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.drawTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw Time on the image/frame</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>img (np.ndarray): opencv image
+img (int): current absolute frame number</p>
+</dd>
+<dt>Returns:</dt><dd><p>np.ndarray: opencv image with Time Text</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.finished">
 <span class="sig-name descname"><span class="pre">finished</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">success</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.finished" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process necessary steps to complete the predicted funscript</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>status (str): a process status/error message
 success (bool): True if funscript was generated else False</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.frame_to_millisec">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">frame_to_millisec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.frame_to_millisec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert frame number to timestamp in video</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>frame (int): the framenumber to convert to an timestamp
-fps (float): Video FPS</p>
-</dd>
-<dt>Returns:</dt><dd><p>int: the timestamp in milliseconds in video for the given framenumber</p>
 </dd>
 </dl>
 </dd></dl>
@@ -371,10 +371,12 @@ txt (str): additional text to display on the selection window</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.get_vr_projection_config">
-<span class="sig-name descname"><span class="pre">get_vr_projection_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.get_vr_projection_config" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_vr_projection_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="headerlink" href="#funscript_editor.algorithms.funscriptgenerator.FunscriptGenerator.get_vr_projection_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the projection ROI config form user input</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>image (np.ndarray): opencv vr 180 or 360 image</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: projection config</p>
 </dd>
 </dl>
 </dd></dl>

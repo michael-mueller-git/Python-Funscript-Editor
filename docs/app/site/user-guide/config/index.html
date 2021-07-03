@@ -124,6 +124,15 @@
 <li><code>projection.yaml</code>: the FFmpeg filter parameter for different video types</li>
 </ul>
 <h3 id="config-parameter">Config Parameter</h3>
+<h4 id="settingsyaml"><code>settings.yaml</code></h4>
+<ul>
+<li><code>use_zoom</code> (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.</li>
+<li><code>zoom_factor:</code> (float): Set the desired zoom value which will be used when the zoom function is activated.</li>
+<li><code>tracking_direction</code> (str): Specify the tracking direction. Allowed values are <code>'x'</code> and <code>'y'</code>.</li>
+<li><code>max_playback_fps</code> (int): Limit the max player speed in the tracking preview window (0 = disable limit)</li>
+<li><code>preview_scaling</code> (float): Set the preview image scaling factor. With a value of <code>1.0</code>, the window should fill the height or width of the screen depending on the aspect ratio of the video.</li>
+<li><code>projection</code>: (str): Set the video type. All available options can be obtained from the <code>projection.yaml</code> file. Each root keys represent an option. Available Options: <code>'flat'</code> = 2D Videos, <code>'vr_he_sbs'</code> = 3D VR Side-By-Side Video</li>
+</ul>
 <h4 id="hyperparameteryaml"><code>hyperparameter.yaml</code></h4>
 <ul>
 <li><code>skip_frames</code> (int): This parameter specifies how many frames are skipped and interpolated during tracking. Increase this parameter to improve the processing speed on slow hardware. But higher values result in poorer predictions!</li>
@@ -135,15 +144,6 @@
 <li><code>bottom_points_offset</code> (float): An fix offset to the bottom points (positive values move the point up and negative values move the point down). The offset respect the user defined upper and lower limit.</li>
 <li><code>top_threshold</code> (float): Define the top threshold. All top points greater than <code>(max - threshold)</code> will be set to the specified max value. Set 0.0 to disable this function.</li>
 <li><code>bottom_threshold</code> (float): Define the bottom threshold. All bottom points lower than <code>(min + threshold)</code> will be set to the specified min value. Set 0.0 to disable this function.</li>
-</ul>
-<h4 id="settingsyaml"><code>settings.yaml</code></h4>
-<ul>
-<li><code>use_zoom</code> (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.</li>
-<li><code>zoom_factor:</code> (float): Set the desired zoom value which will be used when the zoom function is activated.</li>
-<li><code>tracking_direction</code> (str): Specify the tracking direction. Allowed values are <code>'x'</code> and <code>'y'</code>.</li>
-<li><code>max_playback_fps</code> (int): Limit the max player speed in the tracking preview window (0 = disable limit)</li>
-<li><code>preview_scaling</code> (float): Set the preview image scaling factor. With a value of <code>1.0</code>, the window should fill the height or width of the screen depending on the aspect ratio of the video.</li>
-<li><code>projection</code>: (str): Set the video type. All available options can be obtained from the <code>projection.yaml</code> file. Each root keys represent an option. Available Options: <code>'flat'</code> = 2D Videos, <code>'vr_he_sbs'</code> = 3D VR Side-By-Side Video</li>
 </ul></div>
             </div>
         </div>

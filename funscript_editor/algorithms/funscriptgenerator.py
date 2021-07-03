@@ -35,15 +35,15 @@ class FunscriptGeneratorParameter:
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
     direction: str = SETTINGS['tracking_direction']
     use_zoom: bool = SETTINGS['use_zoom']
-    shift_bottom_points :int = int(HYPERPARAMETER['shift_bottom_points'])
-    shift_top_points :int = int(HYPERPARAMETER['shift_top_points'])
-    top_points_offset :float = float(HYPERPARAMETER['top_points_offset'])
-    bottom_points_offset :float = float(HYPERPARAMETER['bottom_points_offset'])
-    zoom_factor :float = max((1.0, float(SETTINGS['zoom_factor'])))
-    top_threshold :float = float(HYPERPARAMETER['top_threshold'])
-    bottom_threshold :float = float(HYPERPARAMETER['bottom_threshold'])
-    preview_scaling :float = float(SETTINGS['preview_scaling'])
-    projection :str = str(SETTINGS['projection']).lower()
+    shift_bottom_points: int = int(HYPERPARAMETER['shift_bottom_points'])
+    shift_top_points: int = int(HYPERPARAMETER['shift_top_points'])
+    top_points_offset: float = float(HYPERPARAMETER['top_points_offset'])
+    bottom_points_offset: float = float(HYPERPARAMETER['bottom_points_offset'])
+    zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))
+    top_threshold: float = float(HYPERPARAMETER['top_threshold'])
+    bottom_threshold: float = float(HYPERPARAMETER['bottom_threshold'])
+    preview_scaling: float = float(SETTINGS['preview_scaling'])
+    projection: str = str(SETTINGS['projection']).lower()
 
 
 class FunscriptGenerator(QtCore.QThread):
@@ -429,11 +429,14 @@ class FunscriptGenerator(QtCore.QThread):
             )
 
 
-    def get_vr_projection_config(self, image :np.ndarray) -> None:
+    def get_vr_projection_config(self, image :np.ndarray) -> dict:
         """ Get the projection ROI config form user input
 
         Args:
             image (np.ndarray): opencv vr 180 or 360 image
+
+        Returns:
+            dict: projection config
         """
         config = PROJECTION[self.params.projection]
 
@@ -446,6 +449,7 @@ class FunscriptGenerator(QtCore.QThread):
         if image.shape[0] > 3000 or image.shape[1] > 3000:
             image = cv2.resize(image, None, fx=0.5, fy=0.5)
 
+        self.clear_keypress_queue()
         parameter_changed, selected = True, False
         while not selected:
             if parameter_changed:
@@ -532,7 +536,6 @@ class FunscriptGenerator(QtCore.QThread):
                 )
 
         return bbox
-
 
 
     def get_flat_projection_config(self,

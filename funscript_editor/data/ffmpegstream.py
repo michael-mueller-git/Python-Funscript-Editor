@@ -164,7 +164,7 @@ class FFmpegStream:
 
     @staticmethod
     def frame_to_timestamp(frame_number: int, fps: float) -> str:
-        """Get timestamp for given frame number
+        """Get timestamp H:M:S.XXX for given frame number
 
         Args:
             frame_number (int): frame number
@@ -180,7 +180,7 @@ class FFmpegStream:
 
     @staticmethod
     def frame_to_millisec(frame_number: int, fps: float) -> int:
-        """Get timestamp for given frame number
+        """Get timestamp in milliseconds for given frame number
 
         Args:
             frame_number (int): frame number
@@ -195,7 +195,7 @@ class FFmpegStream:
 
     @staticmethod
     def millisec_to_timestamp(millis :int)->str:
-        """ Convert milliseconds to timestamp
+        """ Convert milliseconds to timestamp H:M:S.XXX
 
         Args:
             millis (int): position in video in milliseconds

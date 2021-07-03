@@ -13,7 +13,7 @@ Currently we use a hacky lua script to communicate between the Python Funscript 
    - `Settings.FunscriptGenerator`: Point to the extracted Python Funscript Editor program (better double check the complete path string to avoid errors later on).
    - `Settings.TmpFile`: Specifies a temporary file location where to store the result (must be a file not a directory!). The file does not have to exist at the moment. The specified file will be generated from the Python Funscript Editor and will be overwritten automatically at the next time the generator is started!
 6. Now launch OFS.
-7. Navigate to `View : Special functions : Custom Functions` and select the `funscript_generator.lua` entry. Click the Button `Bind Script` (This may trigger the funscript generator, just ignore it for now).
+7. Navigate to `View : Special functions : Custom Functions` and select the `funscript_generator.lua` entry. Click on the `funscript_generator.lua` entry to get more options for the script (This may trigger the funscript generator, just ignore it for now). Finally click the now visible Button `Bind Script`.
 8. Navigate to `Options : Keys : Dynamic` and insert a shortcut for the funscript generator.
 9. Now you can use the shortcut at any position in the video to start the funscript generator.
 
