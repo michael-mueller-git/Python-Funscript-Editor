@@ -13,29 +13,37 @@ jobs:
         matrix:
             os: ["windows-latest"]
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v2
         with:
           lfs: true
       - name: Checkout LFS objects
         run: git lfs checkout
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: build
           environment-file: environment.yaml
           python-version: 3.9
           auto-activate-base: false
-      - shell: bash -l {0}
+      - name: Collect Conda Info
+        shell: bash -l {0}
         run: |
           conda info
           conda env export
-      - name: Get Version
+      - name: Get Application Version
         id: get_version
         uses: battila7/get-version-action@v2
-      - name: Build
+      - name: Build Application
         shell: bash -l {0}
         run: |
           pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py   
-      - uses: papeloto/action-zip@v1
+      - name: Add Version to Build
+        shell: bash -l {0}
+        run: |
+          echo "${{ steps.get_version.outputs.version }}" > dist/funscript-editor/VERSION.txt
+      - name: Create Asset Archive
+        uses: papeloto/action-zip@v1
         with:
           files: dist/funscript-editor
           recursive: true
