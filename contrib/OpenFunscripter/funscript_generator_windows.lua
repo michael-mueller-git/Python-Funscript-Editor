@@ -3,11 +3,14 @@ Settings.FunscriptGenerator = 'C:/Users/win10/Desktop/funscript-editor/funscript
 Settings.TmpFile = 'C:/Users/win10/AppData/Local/Temp/funscript_actions.csv' -- file where to temporary store the result (must be a file not a directory!)
 SetSettings(Settings)
 
--- Version: 1.1.0
+-- Version: 1.3.0
 function GetActions(video)
     local at = {}
     local pos = {}
     local next_action = CurrentScript:GetClosestActionAfter(CurrentTimeMs)
+    if not next_action == nil and next_action.at < CurrentTimeMs + 500.0 then
+        next_action = CurrentScript:GetClosestActionAfter(next_action.at)
+    end
     local command = '""'..Settings.FunscriptGenerator..'" --generator -s '..(next_action == nil and tostring(CurrentTimeMs) or tostring(CurrentTimeMs)..' -e '..tostring(next_action.at))..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
     print(command)
     os.execute(command)

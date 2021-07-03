@@ -27,7 +27,8 @@ def read_version() -> str:
     version_file = os.path.join(ROOT_DIR, 'VERSION.txt')
     if os.path.exists(version_file):
         with open(version_file, 'r') as f:
-            return f.read().replace('v', '').strip()
+            version = f.read().lower().replace('v', '').strip()
+            if version != "": return version
     return "0.0.0"
 
 #: the package version
