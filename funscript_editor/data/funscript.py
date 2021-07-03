@@ -175,10 +175,11 @@ class Funscript:
         Returns:
             dict: action dictionary with {'pos', 'at'}
         """
-        if len(self.data['actions']) < 2: return {'pos': 0, 'at': 0}
+        if len(self.data['actions']) < 1: return {'pos': 0, 'at': 0}
         idx = (np.abs(np.array(self.get_actions_times()) - current_timestamp)).argmin()
         if self.data['actions'][idx]['at'] > current_timestamp + 1: return self.data['actions'][idx]
-        elif idx < len(self.data['actions']) + 1: return self.data['actions'][idx+1]
+        elif len(self.data['actions']) == 1: return self.data['actions'][0]
+        elif idx+1 < len(self.data['actions']): return self.data['actions'][idx+1]
         else: return self.data['actions'][0]
 
 

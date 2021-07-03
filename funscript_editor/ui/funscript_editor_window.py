@@ -298,6 +298,8 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         else:
             end_frame = -1
 
+        self.__logger.info("Stop at Frame {}".format(end_frame))
+
         reply = QtWidgets.QMessageBox.question(None, 'Track Men', 'Do you want to track the Men? ',
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
         trackMen = True if reply == QtWidgets.QMessageBox.Yes else False
