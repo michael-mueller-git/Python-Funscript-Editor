@@ -296,11 +296,11 @@ class FunscriptGenerator(QtCore.QThread):
             We use x0,y0 from the predicted tracking boxes to create a diff score
         """
         if self.params.track_men:
-            self.score['x'] = [m[0] - w[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
+            self.score['x'] = [w[0] - m[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
             self.score['y'] = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
-            self.score['d'] = [np.sqrt(np.sum((np.array(m[:2]) - np.array(w[:2])) ** 2, axis=0)) for w, m in zip(bboxes['Woman'], bboxes['Men'])]
+            self.score['d'] = [np.sqrt(np.sum((np.array(m[:2]) - np.array(w[:2])) ** 2, axis=0)) for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
         else:
-            self.score['x'] = [max([x[0] for x in self.bboxes['Woman']]) - w[0] for w in self.bboxes['Woman']]
+            self.score['x'] = [w[0] - min([x[0] for x in self.bboxes['Woman']]) for w in self.bboxes['Woman']]
             self.score['y'] = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
             # TODO: how to calc d?
 

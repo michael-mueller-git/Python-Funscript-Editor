@@ -291,9 +291,12 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         if self.funscript is None: return
         if self.video_player is None: return
         if self.video_player.get_video_file is None: return
-        start_frame = self.video_player.get_current_frame \
-                if self.funscript.get_last_action_time() < self.video_player.get_current_timestamp_in_millis \
-                else self.video_player.millisec_to_frame(self.funscript.get_last_action_time())
+        start_frame = self.video_player.get_current_frame
+        next_action = self.funscript.get_next_action(self.video_player.get_current_timestamp_in_millis+100)
+        if next_action['at'] > self.video_player.get_current_timestamp_in_millis+100:
+            end_frame = self.video_player.millisec_to_frame(next_action['at'])
+        else:
+            end_frame = -1
 
         reply = QtWidgets.QMessageBox.question(None, 'Track Men', 'Do you want to track the Men? ',
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
@@ -304,6 +307,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
                 FunscriptGeneratorParameter(
                     video_path = self.video_player.get_video_file,
                     start_frame = start_frame,
+                    end_frame = end_frame,
                     track_men = trackMen
                 ),
                 self.funscript)

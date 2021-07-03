@@ -51,26 +51,26 @@ bottom_threshold: 2.5
 # x-Movement #
 ##############
 
-# Shift predicted right points by given frame number. Positive values delay the position
-# and negative values result in an earlier position.
-shift_right_points: 0
-
 # Shift predicted left points by given frame number. Positive values delay the position
 # and negative values result in an earlier position.
 shift_left_points: 0
 
+# Shift predicted right points by given frame number. Positive values delay the position
+# and negative values result in an earlier position.
+shift_right_points: 0
+
 # An fix offset to the left points (positive values move the point right and negative values
 # move the point left). The offset respect the user defined upper and lower limit.
-left_points_offset: 0.0
+left_points_offset: -10.0
 
 # An fix offset to the right points (positive values move the point right and negative values
 # move the point left). The offset respect the user defined upper and lower limit.
-right_points_offset: 0.0
-
-# Define the right threshold. All right points greater than (max - threshold) will be set to
-# the specified max value. Set 0.0 to disable this function.
-right_threshold: 0.0
+right_points_offset: 10.0
 
 # Define the left threshold. All left points lower than (min + threshold) will be set to
 # the specified min value. Set 0.0 to disable this function.
-left_threshold: 0.0
+left_threshold: 2.5
+
+# Define the right threshold. All right points greater than (max - threshold) will be set to
+# the specified max value. Set 0.0 to disable this function.
+right_threshold: 2.5

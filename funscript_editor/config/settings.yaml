@@ -26,4 +26,4 @@ preview_scaling: 0.6
 # Available Options:
 # - 'flat': 2D Videos
 # - 'vr_he_sbs': 3D VR Side-By-Side Video
-projection: 'vr_he_sbs'
+projection: 'flat'
