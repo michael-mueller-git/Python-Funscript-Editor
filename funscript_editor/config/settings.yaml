@@ -11,10 +11,10 @@ use_zoom: False
 zoom_factor: 4.0
 
 # Specify the tracking direction. Allowed values are `'x'` and `'y'`.
-tracking_direction: 'd'
+tracking_direction: 'y'
 
 # Limit the max player speed in the tracking preview window (0 = disable limit)
-max_playback_fps: 0
+max_playback_fps: 120
 
 # Set the preview image scaling factor. With a value of 1.0, the window should fill the height
 # or width of the screen depending on the aspect ratio of the video.

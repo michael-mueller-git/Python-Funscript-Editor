@@ -19,6 +19,7 @@ from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
 from datetime import datetime
 from funscript_editor.data.ffmpegstream import FFmpegStream, VideoInfo
 from funscript_editor.algorithms.kalmanfilter import KalmanFilter2D
+from scipy.interpolate import interp1d
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -222,12 +223,47 @@ class FunscriptGenerator(QtCore.QThread):
             target (str): the target where to save the interpolated tracking boxes
         """
         if self.params.skip_frames > 0 and len(self.bboxes[target]) > 0:
-            for i in range(1, self.params.skip_frames+1):
-                x0 = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][0], bbox[0]])
-                y0 = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][1], bbox[1]])
-                w = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][2], bbox[2]])
-                h = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][3], bbox[3]])
-                self.bboxes[target].append((x0, y0, w, h))
+            back_in_time = 2
+            if len(self.bboxes[target]) < (self.params.skip_frames+1)*back_in_time:
+                for i in range(1, self.params.skip_frames+1):
+                    # use linear interpolation for the first steps
+                    x0 = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][0], bbox[0]])
+                    y0 = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][1], bbox[1]])
+                    w = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][2], bbox[2]])
+                    h = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][3], bbox[3]])
+                    self.bboxes[target].append((x0, y0, w, h))
+            else:
+                # switch to quadratic interpolation as soon as there is enough data for interpolation
+                x = [-1*(self.params.skip_frames+1)*back_in_time + x + 1 for x in range((self.params.skip_frames+1)*back_in_time)] \
+                        + [self.params.skip_frames+1]
+
+                fx0 = interp1d(
+                        x,
+                        [item[0] for item in self.bboxes[target][-1*(self.params.skip_frames+1)*back_in_time:]] + [bbox[0]],
+                        kind = 'quadratic'
+                    )
+
+                fy0 = interp1d(
+                        x,
+                        [item[1] for item in self.bboxes[target][-1*(self.params.skip_frames+1)*back_in_time:]] + [bbox[1]],
+                        kind = 'quadratic'
+                    )
+
+                fw = interp1d(
+                        x,
+                        [item[2] for item in self.bboxes[target][-1*(self.params.skip_frames+1)*back_in_time:]] + [bbox[2]],
+                        kind = 'quadratic'
+                    )
+
+                fh = interp1d(
+                        x,
+                        [item[3] for item in self.bboxes[target][-1*(self.params.skip_frames+1)*back_in_time:]] + [bbox[3]],
+                        kind = 'quadratic'
+                    )
+
+                for i in range(1, self.params.skip_frames+1):
+                    self.bboxes[target].append((fx0(i), fy0(i), fw(i), fh(i)))
+
         self.bboxes[target].append(bbox)
 
 
@@ -929,5 +965,10 @@ class FunscriptGenerator(QtCore.QThread):
             return
 
         idx_dict = self.determin_change_points()
+
+        idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
+        idx_list.sort()
+        self.plot_y_score('debug.png', idx_list)
+
         self.create_funscript(idx_dict)
         self.finished(status, True)

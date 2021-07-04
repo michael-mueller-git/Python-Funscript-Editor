@@ -324,9 +324,9 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.__save_funscript()
         self.video_player.show_message(status)
         if success:
-            self.__logger.info(status)
+            self.__logger.info("Completed: " + status)
         else:
-            self.__logger.error(status)
+            self.__logger.error("Failed: " + status)
 
     def __delete_current_action(self):
         if self.funscript is None: return
