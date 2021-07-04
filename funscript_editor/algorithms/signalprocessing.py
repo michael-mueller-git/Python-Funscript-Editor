@@ -92,18 +92,19 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
             changepoints['max'].append(tmp_max_idx)
             tmp_max_idx = -1
 
-    delta = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_max_min_delta_in_percent']) ))
+    delta_max = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_max_delta_in_percent']) ))
+    delta_min = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_min_delta_in_percent']) ))
 
     # shift points to the real change points
     for k, idx in enumerate(changepoints['min']):
         new_pos = idx
-        while new_pos+1 < len(score) and score[idx] + delta > score[new_pos+1]:
+        while new_pos+1 < len(score) and score[idx] + delta_min > score[new_pos+1]:
             new_pos += 1
         changepoints['min'][k] = new_pos
 
     for k, idx in enumerate(changepoints['max']):
         new_pos = idx
-        while new_pos+1 < len(score) and score[idx] - delta < score[new_pos+1]:
+        while new_pos+1 < len(score) and score[idx] - delta_max < score[new_pos+1]:
             new_pos += 1
         changepoints['max'][k] = new_pos
 

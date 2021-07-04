@@ -31,6 +31,8 @@ Config Files:
 
 - `skip_frames` (int): This parameter specifies how many frames are skipped and interpolated during tracking. Increase this parameter to improve the processing speed on slow hardware. But higher values result in poorer predictions!
 - `avg_sec_for_local_min_max_extraction` (float): Specify the window size for the calculation of the reference value for the local min and max search.
+- `local_max_delta_in_percent` (float): Specify the maximum deviation for a max point in percent (recommend range: `0.0 - 10.0`)
+- `local_min_delta_in_percent` (float): Specify the maximum deviation for a min point in percent (recommend range: `0.0 - 10.0`)
 - `min_frames` (int): Specify the minimum required frames for the tracking. Wee need this parameter to ensure there is at leas two strokes in the tracking result.
 - `shift_top_points` (int): Shift predicted top points by given frame number. Positive values delay the position and negative values result in an earlier position.
 - `shift_bottom_points` (int): Shift predicted bottom points by given frame number. Positive values delay the position and negative values result in an earlier position.
