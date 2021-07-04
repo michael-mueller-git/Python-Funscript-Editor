@@ -75,26 +75,45 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
         dict: dict with 2 lists with all local max and min indexes ({'min':[], 'max':[]})
     """
     avg = moving_average(score, w=round(fps * HYPERPARAMETER['avg_sec_for_local_min_max_extraction']))
-    result = {'min': [], 'max': []}
+    changepoints = {'min': [], 'max': []}
     tmp_min_idx, tmp_max_idx = -1, -1
     for pos in range(len(score)):
         if score[pos] < avg[pos]:
             if tmp_min_idx < 0: tmp_min_idx = pos
             elif score[tmp_min_idx] >= score[pos]: tmp_min_idx = pos
         elif tmp_min_idx >= 0:
-            if tmp_min_idx >= -1*shift_min and tmp_min_idx + shift_min < len(score):
-                result['min'].append(tmp_min_idx + shift_min)
-            else:
-                result['min'].append(tmp_min_idx)
+            changepoints['min'].append(tmp_min_idx)
             tmp_min_idx = -1
 
         if score[pos] > avg[pos]:
             if tmp_max_idx < 0: tmp_max_idx = pos
             elif score[tmp_max_idx] <= score[pos]: tmp_max_idx = pos
         elif tmp_max_idx >= 0:
-            if tmp_max_idx >= -1*shift_max and tmp_max_idx + shift_max < len(score):
-                result['max'].append(tmp_max_idx + shift_max)
-            else:
-                result['max'].append(tmp_max_idx)
+            changepoints['max'].append(tmp_max_idx)
             tmp_max_idx = -1
-    return result
+
+    delta = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_max_min_delta_in_percent']) ))
+
+    # shift points to the real change points
+    for k, idx in enumerate(changepoints['min']):
+        new_pos = idx
+        while new_pos+1 < len(score) and score[idx] + delta > score[new_pos+1]:
+            new_pos += 1
+        changepoints['min'][k] = new_pos
+
+    for k, idx in enumerate(changepoints['max']):
+        new_pos = idx
+        while new_pos+1 < len(score) and score[idx] - delta < score[new_pos+1]:
+            new_pos += 1
+        changepoints['max'][k] = new_pos
+
+    # apply shift
+    if shift_min != 0:
+        for k, idx in enumerate(changepoints['min']):
+            changepoints['min'][k] = max((0, min((len(score)-1, idx+shift_min)) ))
+
+    if shift_max != 0:
+        for k, idx in enumerate(changepoints['max']):
+            changepoints['max'][k] = max((0, min((len(score)-1, idx+shift_max)) ))
+
+    return changepoints

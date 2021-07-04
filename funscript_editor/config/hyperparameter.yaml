@@ -7,11 +7,14 @@
 # This parameter specifies how many frames are skipped and interpolated during tracking.
 # Increase this parameter to improve the processing speed on slow hardware. But higher
 # values result in poorer predictions!
-skip_frames: 0
+skip_frames: 1
 
 # Specify the window size for the calculation of the reference value for the local min
 # and max search.
 avg_sec_for_local_min_max_extraction: 2.0
+
+# Specify the maximum deviation for a min and max point in percent
+local_max_min_delta_in_percent: 1.0
 
 # Specify the minimum required frames for the tracking. Wee need this parameter to
 # ensure there is at leas two strokes in the tracking result.
