@@ -80,7 +80,7 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
     for pos in range(len(score)):
         if score[pos] < avg[pos]:
             if tmp_min_idx < 0: tmp_min_idx = pos
-            elif score[tmp_min_idx] > score[pos]: tmp_min_idx = pos
+            elif score[tmp_min_idx] >= score[pos]: tmp_min_idx = pos
         elif tmp_min_idx >= 0:
             if tmp_min_idx >= -1*shift_min and tmp_min_idx + shift_min < len(score):
                 result['min'].append(tmp_min_idx + shift_min)
@@ -90,7 +90,7 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
 
         if score[pos] > avg[pos]:
             if tmp_max_idx < 0: tmp_max_idx = pos
-            elif score[tmp_max_idx] < score[pos]: tmp_max_idx = pos
+            elif score[tmp_max_idx] <= score[pos]: tmp_max_idx = pos
         elif tmp_max_idx >= 0:
             if tmp_max_idx >= -1*shift_max and tmp_max_idx + shift_max < len(score):
                 result['max'].append(tmp_max_idx + shift_max)
