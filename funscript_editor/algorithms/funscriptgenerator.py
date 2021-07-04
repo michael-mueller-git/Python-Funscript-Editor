@@ -33,6 +33,7 @@ class FunscriptGeneratorParameter:
     start_frame: int = 0 # default is video start (input: set current video position)
     end_frame: int = -1 # default is video end (-1)
     track_men: bool = True # set by userinput at start (message box)
+    raw_output: bool = False
 
     # Settings
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
@@ -222,6 +223,7 @@ class FunscriptGenerator(QtCore.QThread):
             bbox (tuple): the new tracking box (x,y,w,h)
             target (str): the target where to save the interpolated tracking boxes
         """
+        # TODO: interpolate after tracking when all data points are know
         if self.params.skip_frames > 0 and len(self.bboxes[target]) > 0:
             back_in_time = 2
             if len(self.bboxes[target]) < (self.params.skip_frames+1)*back_in_time:
@@ -854,7 +856,13 @@ class FunscriptGenerator(QtCore.QThread):
         else:
             offset_b = self.params.bottom_points_offset
 
-        score = copy.deepcopy(self.score['y'])
+        if self.params.direction == 'd':
+            score = copy.deepcopy(self.score['d'])
+        elif self.params.direction == 'x':
+            score = copy.deepcopy(self.score['x'])
+        else:
+            score = copy.deepcopy(self.score['y'])
+
         score_min, score_max = min(score), max(score)
 
         for idx in idx_dict['max']:
@@ -870,7 +878,7 @@ class FunscriptGenerator(QtCore.QThread):
         """ Apply Kalman Filter to the tracking prediction """
         if len(self.bboxes['Woman']) < self.video_info.fps: return
 
-        # TODO: we should use the center of the tracking box not x0,y0 of the box
+        # TODO: we should use the center of the tracking box not x0, y0 of the box
 
         self.logger.info("Apply kalman filter")
         kalman = KalmanFilter2D(self.video_info.fps)
@@ -910,37 +918,52 @@ class FunscriptGenerator(QtCore.QThread):
             idx_dict (dict): dictionary with all local max and min points in score
                              {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
         """
-        output_score = self.get_score_with_offset(idx_dict)
+        if self.params.raw_output:
+            if self.params.direction == 'd':
+                output_score = copy.deepcopy(self.score['d'])
+            elif self.params.direction == 'x':
+                output_score = copy.deepcopy(self.score['x'])
+            else:
+                output_score = copy.deepcopy(self.score['y'])
 
-        if self.params.direction == 'd':
-            threshold_a = self.params.bottom_threshold
-        elif self.params.direction == 'x':
-            threshold_a = self.params.left_threshold
+            for idx in range(len(output_score)):
+                self.funscript.add_action(
+                        output_score[idx],
+                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'none'), self.video_info.fps)
+                    )
+
         else:
-            threshold_a = self.params.bottom_threshold
+            output_score = self.get_score_with_offset(idx_dict)
 
-        if self.params.direction == 'd':
-            threshold_b = self.params.top_threshold
-        elif self.params.direction == 'x':
-            threshold_b = self.params.right_threshold
-        else:
-            threshold_b = self.params.top_threshold
+            if self.params.direction == 'd':
+                threshold_a = self.params.bottom_threshold
+            elif self.params.direction == 'x':
+                threshold_a = self.params.left_threshold
+            else:
+                threshold_a = self.params.bottom_threshold
 
-        for idx in idx_dict['min']:
-            self.funscript.add_action(
-                    min(output_score) \
-                            if output_score[idx] < min(output_score) + threshold_a \
-                            else round(output_score[idx]),
-                    FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'min'), self.video_info.fps)
-                )
+            if self.params.direction == 'd':
+                threshold_b = self.params.top_threshold
+            elif self.params.direction == 'x':
+                threshold_b = self.params.right_threshold
+            else:
+                threshold_b = self.params.top_threshold
 
-        for idx in idx_dict['max']:
-            self.funscript.add_action(
-                    max(output_score) \
-                            if output_score[idx] > max(output_score) - threshold_b \
-                            else round(output_score[idx]),
-                    FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'max'), self.video_info.fps)
-                )
+            for idx in idx_dict['min']:
+                self.funscript.add_action(
+                        min(output_score) \
+                                if output_score[idx] < min(output_score) + threshold_a \
+                                else round(output_score[idx]),
+                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'min'), self.video_info.fps)
+                    )
+
+            for idx in idx_dict['max']:
+                self.funscript.add_action(
+                        max(output_score) \
+                                if output_score[idx] > max(output_score) - threshold_b \
+                                else round(output_score[idx]),
+                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'max'), self.video_info.fps)
+                    )
 
 
     def run(self) -> None:
@@ -948,6 +971,9 @@ class FunscriptGenerator(QtCore.QThread):
         if self.params.direction == 'd' and not self.params.track_men:
                 self.finished("Tracking with 'd' and no men tracker is not implemented!", False)
                 return
+
+        if self.params.raw_output:
+            self.logger.warning("Raw output is enabled!")
 
         # NOTE: score['y'] and score['x'] should have the same number size so it should be enouth to check one score length
         with Listener(on_press=self.on_key_press) as listener:

@@ -7,7 +7,7 @@
 # This parameter specifies how many frames are skipped and interpolated during tracking.
 # Increase this parameter to improve the processing speed on slow hardware. But higher
 # values result in poorer predictions!
-skip_frames: 1
+skip_frames: 0
 
 # Specify the window size for the calculation of the reference value for the local min
 # and max search.
