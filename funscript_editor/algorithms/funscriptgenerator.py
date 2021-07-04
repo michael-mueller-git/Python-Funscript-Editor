@@ -805,14 +805,14 @@ class FunscriptGenerator(QtCore.QThread):
             position (str): is max or min
         """
         if self.params.direction == 'd':
-            shift_a = 0
+            shift_a = self.params.shift_top_points
         elif self.params.direction == 'x':
             shift_a = self.params.shift_right_points
         else:
             shift_a = self.params.shift_top_points
 
         if self.params.direction == 'd':
-            shift_b = 0
+            shift_b = self.params.shift_bottom_points
         elif self.params.direction == 'x':
             shift_b = self.params.shift_left_points
         else:
@@ -841,14 +841,14 @@ class FunscriptGenerator(QtCore.QThread):
             list: score with offset
         """
         if self.params.direction == 'd':
-            offset_a = 0
+            offset_a = self.params.top_points_offset
         elif self.params.direction == 'x':
             offset_a = self.params.right_points_offset
         else:
             offset_a = self.params.top_points_offset
 
         if self.params.direction == 'd':
-            offset_b = 0
+            offset_b = self.params.bottom_points_offset
         elif self.params.direction == 'x':
             offset_b = self.params.left_points_offset
         else:
@@ -913,14 +913,14 @@ class FunscriptGenerator(QtCore.QThread):
         output_score = self.get_score_with_offset(idx_dict)
 
         if self.params.direction == 'd':
-            threshold_a = 0
+            threshold_a = self.params.bottom_threshold
         elif self.params.direction == 'x':
             threshold_a = self.params.left_threshold
         else:
             threshold_a = self.params.bottom_threshold
 
         if self.params.direction == 'd':
-            threshold_b = 0
+            threshold_b = self.params.top_threshold
         elif self.params.direction == 'x':
             threshold_b = self.params.right_threshold
         else:
@@ -966,9 +966,10 @@ class FunscriptGenerator(QtCore.QThread):
 
         idx_dict = self.determin_change_points()
 
-        idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
-        idx_list.sort()
-        self.plot_y_score('debug.png', idx_list)
+        if False:
+            idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
+            idx_list.sort()
+            self.plot_y_score('debug.png', idx_list)
 
         self.create_funscript(idx_dict)
         self.finished(status, True)

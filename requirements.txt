@@ -15,5 +15,6 @@ pyreadline
 python-dateutil
 python-mpv
 PyYAML
+scipy
 screeninfo
 six
