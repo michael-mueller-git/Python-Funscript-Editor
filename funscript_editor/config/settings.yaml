@@ -11,7 +11,7 @@ use_zoom: False
 zoom_factor: 4.0
 
 # Specify the tracking direction. Allowed values are `'x'` and `'y'`.
-tracking_direction: 'y'
+tracking_direction: 'd'
 
 # Limit the max player speed in the tracking preview window (0 = disable limit)
 max_playback_fps: 0

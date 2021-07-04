@@ -317,12 +317,16 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.funscript_generator.processStatus.connect(self.__generator_status_changed)
         self.funscript_generator.start()
 
-    def __funscript_generated(self, funscript, status):
+    def __funscript_generated(self, funscript, status, success):
         self.video_player.set_funscript(self.funscript)
         self.funscript_visualizer.set_funscript(self.funscript)
         self.video_player.set_indicate_bussy(False)
         self.__save_funscript()
         self.video_player.show_message(status)
+        if success:
+            self.__logger.info(status)
+        else:
+            self.__logger.error(status)
 
     def __delete_current_action(self):
         if self.funscript is None: return
