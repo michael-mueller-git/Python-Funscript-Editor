@@ -3,7 +3,7 @@ Settings.PythonScript = "/home/arch/Repos/public/Python-Funscript-Editor/funscri
 Settings.TmpFile = "/tmp/funscript_actions.csv"
 SetSettings(Settings)
 
--- Version: 1.3.0
+-- Version: 1.4.0
 function GetActions(video)
     local at = {}
     local pos = {}

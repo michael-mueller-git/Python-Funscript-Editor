@@ -3,7 +3,7 @@ Settings.FunscriptGenerator = 'C:/Users/win10/Desktop/funscript-editor/funscript
 Settings.TmpFile = 'C:/Users/win10/AppData/Local/Temp/funscript_actions.csv' -- file where to temporary store the result (must be a file not a directory!)
 SetSettings(Settings)
 
--- Version: 1.3.0
+-- Version: 1.4.0
 function GetActions(video)
     local at = {}
     local pos = {}
