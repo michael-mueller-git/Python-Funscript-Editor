@@ -8,7 +8,7 @@ function GetActions(video)
     local at = {}
     local pos = {}
     local next_action = CurrentScript:GetClosestActionAfter(CurrentTimeMs)
-    if not next_action == nil and next_action.at < CurrentTimeMs + 500.0 then
+    if next_action and next_action.at < CurrentTimeMs + 500.0 then
         next_action = CurrentScript:GetClosestActionAfter(next_action.at)
     end
     local command = '""'..Settings.FunscriptGenerator..'" --generator -s '..(next_action == nil and tostring(CurrentTimeMs) or tostring(CurrentTimeMs)..' -e '..tostring(next_action.at))..' -i "'..video..'" -o "'..Settings.TmpFile..'"'
