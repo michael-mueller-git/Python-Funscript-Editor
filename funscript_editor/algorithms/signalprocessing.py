@@ -14,6 +14,7 @@ def scale_signal(signal :list, lower: float = 0, upper: float = 99) -> list:
     Returns:
         list: list with scaled signal
     """
+    if len(signal) == 0: return signal
     return [(float(upper) - float(lower)) * (x - min(signal)) / (max(signal) - min(signal)) + float(lower) for x in signal]
 
 
