@@ -43,6 +43,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.setMouseTracking(True)
 
     __generateFunscript = QtCore.pyqtSignal()
+    __openVideo = QtCore.pyqtSignal()
     __logger = logging.getLogger(__name__)
 
 
@@ -128,6 +129,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         helpMenu.addAction(str('Version '+VERSION))
         self.ui.seekBar.sliderReleased.connect(lambda: self.video_player.seek_frame(self.ui.seekBar.value()))
 
+        self.__openVideo.connect(self.__open_video)
         self.__generateFunscript.connect(self.__generate_funscript)
 
     def __setup_shortcut_bindings(self):
@@ -236,7 +238,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         if key == 'shift+end': self.__seek_to_last_action()
         if key == 'shift+home': self.__seek_to_first_action()
         if key == 'ctrl+n': self.__new_funscript()
-        if key == 'ctrl+o': self.__open_video()
+        if key == 'ctrl+o': self.__openVideo.emit()
         if key == 'ctrl+c': self.__clear_funscript_history()
 
     def __show_message(self, message):
