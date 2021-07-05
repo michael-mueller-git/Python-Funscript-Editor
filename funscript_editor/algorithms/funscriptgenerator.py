@@ -264,7 +264,7 @@ class FunscriptGenerator(QtCore.QThread):
                     )
 
                 for i in range(1, self.params.skip_frames+1):
-                    self.bboxes[target].append((fx0(i), fy0(i), fw(i), fh(i)))
+                    self.bboxes[target].append((float(fx0(i)), float(fy0(i)), float(fw(i)), float(fh(i))))
 
         self.bboxes[target].append(bbox)
 
