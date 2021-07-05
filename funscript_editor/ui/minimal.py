@@ -71,6 +71,8 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
         start_frame = int(round(float(start_time)/(float(1000)/float(fps)))) if start_time > 0.0 else 0
         end_frame = int(round(float(end_time)/(float(1000)/float(fps)))) if end_time > 0.0 and start_time < end_time else -1
 
+        self.__logger.info("Set End Time to Frame Number %d", end_frame)
+
         self.funscript_generator = FunscriptGenerator(
                 FunscriptGeneratorParameter(
                     video_path = video_file,
