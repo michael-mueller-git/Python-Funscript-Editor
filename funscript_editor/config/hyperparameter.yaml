@@ -14,10 +14,10 @@ skip_frames: 1
 avg_sec_for_local_min_max_extraction: 2.0
 
 # Specify the maximum deviation for a max point in percent
-local_max_delta_in_percent: 1.25
+local_max_delta_in_percent: 0.5
 
 # Specify the maximum deviation for a min point in percent
-local_min_delta_in_percent: 1.25
+local_min_delta_in_percent: 0.5
 
 # Specify the minimum required frames for the tracking. Wee need this parameter to
 # ensure there is at leas two strokes in the tracking result.

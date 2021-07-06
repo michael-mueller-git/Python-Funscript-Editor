@@ -12,7 +12,7 @@ import numpy as np
 class StaticVideoTracker:
     """
     Video tracker for static feature tracking. We assume that the tracked feature is always in
-    the neighborhood fo the first tracking box. This allows an accelerated prediction.
+    the neighborhood to the first tracking box. This allows an accelerated prediction.
 
 
     Args:

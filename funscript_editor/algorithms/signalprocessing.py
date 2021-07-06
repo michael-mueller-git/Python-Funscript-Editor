@@ -36,6 +36,7 @@ def scale_signal_with_anomalies(
     Returns:
         list: list with scaled signal
     """
+    if len(signal) == 0: return signal
     a1 = np.quantile(signal, lower_quantile)
     a2 = np.quantile(signal, upper_quantile)
     anomaly_free = np.array([x for x in signal if a1 < x < a2])
@@ -93,8 +94,8 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
             changepoints['max'].append(tmp_max_idx)
             tmp_max_idx = -1
 
-    delta_max = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_max_delta_in_percent']) ))
-    delta_min = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_min_delta_in_percent']) ))
+    delta_max = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_max_delta_in_percent'])))
+    delta_min = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_min_delta_in_percent'])))
 
     # shift points to the real change points
     for k, idx in enumerate(changepoints['min']):
@@ -109,7 +110,7 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
             new_pos += 1
         changepoints['max'][k] = new_pos
 
-    # apply shift
+    # apply manual shift
     if shift_min != 0:
         for k, idx in enumerate(changepoints['min']):
             changepoints['min'][k] = max((0, min((len(score)-1, idx+shift_min)) ))

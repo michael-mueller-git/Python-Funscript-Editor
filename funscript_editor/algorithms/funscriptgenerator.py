@@ -216,57 +216,24 @@ class FunscriptGenerator(QtCore.QThread):
         return sum(self.tracking_fps) / float(len(self.tracking_fps))
 
 
-    def append_interpolated_bbox(self, bbox :tuple, target: str) -> None:
+    def interpolate_bboxes(self, bboxes :dict) -> None:
         """ Interpolate tracking boxes for skiped frames
 
         Args:
-            bbox (tuple): the new tracking box (x,y,w,h)
-            target (str): the target where to save the interpolated tracking boxes
+            bboxes (dict): the new tracking box (x,y,w,h) in dict {Men: {frame_num: box, ...}, Woman: {frame_num: box, ...}}
         """
-        # TODO: interpolate after tracking when all data points are know
-        if self.params.skip_frames > 0 and len(self.bboxes[target]) > 0:
-            back_in_time = 2
-            if len(self.bboxes[target]) < (self.params.skip_frames+1)*back_in_time:
-                for i in range(1, self.params.skip_frames+1):
-                    # use linear interpolation for the first steps
-                    x0 = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][0], bbox[0]])
-                    y0 = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][1], bbox[1]])
-                    w = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][2], bbox[2]])
-                    h = np.interp(i, [0, self.params.skip_frames+1], [self.bboxes[target][-1][3], bbox[3]])
-                    self.bboxes[target].append((x0, y0, w, h))
-            else:
-                # switch to quadratic interpolation as soon as there is enough data for interpolation
-                x = [-1*(self.params.skip_frames+1)*back_in_time + x + 1 for x in range((self.params.skip_frames+1)*back_in_time)] \
-                        + [self.params.skip_frames+1]
+        for key in bboxes:
+            x = [k for k in bboxes[key].keys()]
+            boxes = [v for v in bboxes[key].values()]
+            if len(boxes) == 0: continue
 
-                fx0 = interp1d(
-                        x,
-                        [item[0] for item in self.bboxes[target][-1*(self.params.skip_frames+1)*back_in_time:]] + [bbox[0]],
-                        kind = 'quadratic'
-                    )
+            fx0 = interp1d(x, [item[0] for item in boxes], kind = 'cubic')
+            fy0 = interp1d(x, [item[1] for item in boxes], kind = 'cubic')
+            fw  = interp1d(x, [item[2] for item in boxes], kind = 'quadratic')
+            fh  = interp1d(x, [item[3] for item in boxes], kind = 'quadratic')
 
-                fy0 = interp1d(
-                        x,
-                        [item[1] for item in self.bboxes[target][-1*(self.params.skip_frames+1)*back_in_time:]] + [bbox[1]],
-                        kind = 'quadratic'
-                    )
-
-                fw = interp1d(
-                        x,
-                        [item[2] for item in self.bboxes[target][-1*(self.params.skip_frames+1)*back_in_time:]] + [bbox[2]],
-                        kind = 'quadratic'
-                    )
-
-                fh = interp1d(
-                        x,
-                        [item[3] for item in self.bboxes[target][-1*(self.params.skip_frames+1)*back_in_time:]] + [bbox[3]],
-                        kind = 'quadratic'
-                    )
-
-                for i in range(1, self.params.skip_frames+1):
-                    self.bboxes[target].append((float(fx0(i)), float(fy0(i)), float(fw(i)), float(fh(i))))
-
-        self.bboxes[target].append(bbox)
+            for i in range(min(x), max(x)+1):
+                self.bboxes[key].append((float(fx0(i)), float(fy0(i)), float(fw(i)), float(fh(i))))
 
 
     def min_max_selector(self,
@@ -661,15 +628,20 @@ class FunscriptGenerator(QtCore.QThread):
                 start_frame = self.params.start_frame
             )
 
+        bboxes = {
+                'Men': {},
+                'Woman': {}
+            }
+
         first_frame = video.read()
         bboxWoman = self.get_bbox(first_frame, "Select Woman Feature")
         trackerWoman = StaticVideoTracker(first_frame, bboxWoman)
-        self.bboxes['Woman'].append(bboxWoman)
+        bboxes['Woman'][1] = bboxWoman
 
         if self.params.track_men:
             bboxMen = self.get_bbox(self.drawBox(first_frame, bboxWoman), "Select Men Feature")
             trackerMen = StaticVideoTracker(first_frame, bboxMen)
-            self.bboxes['Men'].append(bboxMen)
+            bboxes['Men'][1] = bboxMen
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):
             cycle_time_in_ms = (float(1000) / float(self.params.max_playback_fps)) * (self.params.skip_frames+1)
@@ -703,12 +675,12 @@ class FunscriptGenerator(QtCore.QThread):
             if last_frame is not None:
                 # Process data from last step while the next tracking points get predicted.
                 # This should improve the whole processing speed, because the tracker run in a seperate thread
-                self.append_interpolated_bbox(bboxWoman, 'Woman')
-                last_frame = self.drawBox(last_frame, self.bboxes['Woman'][-1])
+                bboxes['Woman'][frame_num-1] = bboxWoman
+                last_frame = self.drawBox(last_frame, bboxes['Woman'][frame_num-1])
 
                 if self.params.track_men:
-                    self.append_interpolated_bbox(bboxMen, 'Men')
-                    last_frame = self.drawBox(last_frame, self.bboxes['Men'][-1])
+                    bboxes['Men'][frame_num-1] = bboxMen
+                    last_frame = self.drawBox(last_frame, bboxes['Men'][frame_num-1])
 
                 last_frame = self.drawFPS(last_frame)
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
@@ -742,6 +714,8 @@ class FunscriptGenerator(QtCore.QThread):
 
         video.stop()
         self.logger.info(status)
+        self.logger.info('Interpolate tracking boxes')
+        self.interpolate_bboxes(bboxes)
         self.logger.info('Calculate score')
         self.calculate_score()
         return status
