@@ -227,8 +227,8 @@ class FunscriptGenerator(QtCore.QThread):
             boxes = [v for v in bboxes[key].values()]
             if len(boxes) == 0: continue
 
-            fx0 = interp1d(x, [item[0] for item in boxes], kind = 'cubic')
-            fy0 = interp1d(x, [item[1] for item in boxes], kind = 'cubic')
+            fx0 = interp1d(x, [item[0] for item in boxes], kind = 'quadratic')
+            fy0 = interp1d(x, [item[1] for item in boxes], kind = 'quadratic')
             fw  = interp1d(x, [item[2] for item in boxes], kind = 'quadratic')
             fh  = interp1d(x, [item[3] for item in boxes], kind = 'quadratic')
 
@@ -376,7 +376,7 @@ class FunscriptGenerator(QtCore.QThread):
             elif direction == 'x':
                 title_max = "Right"
             else:
-                title_max = "Maxmimum"
+                title_max = "Maximum"
 
             (desired_min, desired_max) = self.min_max_selector(
                     image_min = imgMin,

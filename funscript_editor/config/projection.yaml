@@ -1,5 +1,6 @@
-# projection config
-# NOTE: Do not change any parameters here unless you know exactly what you are doing!
+# video projection parameters
+# Do not change any parameters here unless you know exactly what you are doing!
+# For VR video filer options see: https://ffmpeg.org/ffmpeg-filters.html#v360
 
 # 3D Side-By-Side 180 Dome VR Videos
 vr_he_sbs:

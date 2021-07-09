@@ -67,11 +67,11 @@ shift_right_points: 0
 
 # An fix offset to the left points (positive values move the point right and negative values
 # move the point left). The offset respect the user defined upper and lower limit.
-left_points_offset: -10.0
+left_points_offset: -7.5
 
 # An fix offset to the right points (positive values move the point right and negative values
 # move the point left). The offset respect the user defined upper and lower limit.
-right_points_offset: 10.0
+right_points_offset: 7.5
 
 # Define the left threshold. All left points lower than (min + threshold) will be set to
 # the specified min value. Set 0.0 to disable this function.
