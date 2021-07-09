@@ -1,3 +1,0 @@
-assets/ffmpeg.exe filter=lfs diff=lfs merge=lfs -text
-assets/ffprobe.exe filter=lfs diff=lfs merge=lfs -text
-assets/mpv-1.dll filter=lfs diff=lfs merge=lfs -text
