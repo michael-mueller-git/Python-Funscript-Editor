@@ -1,5 +1,6 @@
 coloredlogs
 cycler
+gitpython
 humanfriendly
 kiwisolver
 matplotlib
