@@ -2,7 +2,7 @@
 
 Funscript is Funjack's haptic script format. It's basically JSON encoded timed positions:
 
-.. code-block::
+.. code-block:: python
 
     {
         "version": "1.0",
