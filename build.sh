@@ -18,12 +18,16 @@ else
 fi
 echo "done"
 
-echo "Add Version"
-git tag | sort | tail -n 1 > dist/funscript-editor/funscript_editor/VERSION.txt
+echo -n "Get Version ... "
+tag="$(git tag | sort | tail -n 1)"
+echo "$tag"
+
+echo "Add Version to buld files"
+echo "$tag" > dist/funscript-editor/funscript_editor/VERSION.txt
 
 echo "Copy Application Documentation"
 mkdir -p dist/funscript-editor/funscript_editor/docs/
 cp -rf docs/app/site/ dist/funscript-editor/funscript_editor/docs/
 
 echo "Create Archive"
-tar -zcvf dist/funscript-editor.tar.gz dist/funscript-editor
+tar -zcvf dist/funscript-editor-${tag}.tar.gz dist/funscript-editor
