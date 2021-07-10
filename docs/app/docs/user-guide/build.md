@@ -31,3 +31,5 @@ make docs
 ```
 
 Now you can run the code direct with `python3 funscript-editor.py` or install install a pip package with `make all`.
+
+**NOTE:** In my Ubuntu test setup the UI hangs at all `cv2.waitKey()` lines in the code. Remove this part of the code solve the issue but the then i could not select an ROI mouse event does not work. When i hard-code a trackingbox the ui work but this is not usable. So we need future investigation for this problem. For now i recommend an Arch based Linux.
