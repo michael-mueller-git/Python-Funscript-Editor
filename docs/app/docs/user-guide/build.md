@@ -20,7 +20,7 @@ Finally you can remove the build environment with `conda env remove -n build`
 
 ## Ubuntu
 
-Ubuntu use the GTK Backend for the preview window. This will cause freezes of the UI, because i use Qt threads in my code. The Arch Linux OpenCV library was compiled with QT (see `python3 -c "import cv2; print(cv2.getBuildInformation())"` output) so no problem here. To use the Application on Ubuntu you have to compile `OpenCV + OpenCV contrib` with `-D WITH_QT=ON` flag from source. Or simply use [miniconda](https://docs.conda.io/en/latest/miniconda.html). They include OpenCV compiled with Qt support. After you have setup miniconda simply type the following commands to use Python-Funscript-Editor on Ubuntu:
+The OpenCV Package in Ubuntu use the GTK Backend for the preview window. This will cause freezes of the UI, because i use Qt threads in my code. The Arch Linux OpenCV library was compiled with QT (see `python3 -c "import cv2; print(cv2.getBuildInformation())"` output) so no problem here. To use the Application on Ubuntu you have to compile `OpenCV + OpenCV contrib` with `-D WITH_QT=ON` flag from source. Or simply use [miniconda](https://docs.conda.io/en/latest/miniconda.html). They include OpenCV compiled with Qt support. After you have setup miniconda simply type the following commands to use Python-Funscript-Editor on Ubuntu:
 
 ```bash
 sudo apt install -y make git gcc g++ libmpv-dev
