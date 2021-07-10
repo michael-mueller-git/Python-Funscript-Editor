@@ -30,10 +30,20 @@ jobs:
       - name: Get Application Version
         id: get_version
         uses: battila7/get-version-action@v2
+      - name: Build Application Documentation
+        shell: bash -l {0}
+        run: |
+          cd docs/build
+          mkdocs build
+          cd ../..
       - name: Build Application
         shell: bash -l {0}
         run: |
           pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" funscript-editor.py
+      - name: Move Documentation to Application Build Directory
+        shell: bash -l {0}
+        run: |
+          mv "docs/app/site" "dist/funscript-editor/funscript_editor/docs"
       - name: Add Version to Build
         shell: bash -l {0}
         run: |
