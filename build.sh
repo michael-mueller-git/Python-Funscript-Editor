@@ -2,7 +2,7 @@
 
 rm -rf build
 rm -rf dist/funscript-editor
-rm -f dist/funscript-editor.tar.gz
+rm -f dist/funscript-editor*.tar.gz
 rm -f funscript-editor.spec
 make docs
 
@@ -19,7 +19,7 @@ fi
 echo "done"
 
 echo -n "Get Version ... "
-tag="$(git tag | sort | tail -n 1)"
+tag="$(git tag | sed 's/* //g' | sort | tail -n 1)"
 echo "$tag"
 
 echo "Add Version to buld files"
