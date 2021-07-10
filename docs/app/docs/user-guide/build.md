@@ -27,6 +27,7 @@ sudo apt install -y make git gcc g++ libmpv-dev
 sudo add-apt-repository ppa:savoury1/ffmpeg4
 sudo apt install -y ffmpeg
 git clone https://github.com/michael-mueller-git/Python-Funscript-Editor.git
+cd Python-Funscript-Editor
 conda env create -f environment_ubuntu.yaml
 conda activate funscript-editor
 make docs
