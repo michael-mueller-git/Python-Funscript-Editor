@@ -18,6 +18,10 @@ if ! command -v sphinx-apidoc ; then
     fi
 fi
 
+if [ -z "$(pip3 list | grep "sphinx-rtd-theme")" ] ; then
+    pip3 install sphinx-rtd-theme
+fi
+
 WDIR=$PWD
 
 if [ -f index.rst ]; then

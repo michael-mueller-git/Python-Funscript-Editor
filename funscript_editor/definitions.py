@@ -24,6 +24,9 @@ elif os.path.exists(os.path.join(sys.prefix, 'share', os.path.basename(ROOT_DIR)
 elif os.path.exists(os.path.join(ROOT_DIR, '..', 'usr', 'share', os.path.basename(ROOT_DIR), 'docs')):
     APP_DOCUMENTATION_DIR = os.path.join(ROOT_DIR, '..', 'usr', 'share', os.path.basename(ROOT_DIR), 'docs', 'app', 'site')
     CODE_DOCUMENTATION_DIR = os.path.join(ROOT_DIR, '..', 'usr', 'share', os.path.basename(ROOT_DIR), 'docs', 'code', '_build', 'html')
+elif os.path.exists(os.path.join(ROOT_DIR, 'docs')):
+    APP_DOCUMENTATION_DIR = os.path.join(ROOT_DIR, 'docs')
+    CODE_DOCUMENTATION_DIR = '' # code documentation not included
 else:
     APP_DOCUMENTATION_DIR = ''
     CODE_DOCUMENTATION_DIR = ''

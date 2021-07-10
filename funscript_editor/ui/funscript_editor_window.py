@@ -124,13 +124,19 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
 
         helpMenu = self.ui.menubar.addMenu("Help")
         # TODO we schold use an http server to show the documentation
-        helpMenu.addAction("App Documentation", lambda : webbrowser.open(os.path.join(APP_DOCUMENTATION_DIR, 'index.html')))
-        helpMenu.addAction("Code Documentation", lambda : webbrowser.open(os.path.join(CODE_DOCUMENTATION_DIR, 'index.html')))
+        helpMenu.addAction("App Documentation", self.__open_docs)
+        # helpMenu.addAction("Code Documentation", lambda : webbrowser.open(os.path.join(CODE_DOCUMENTATION_DIR, 'index.html')))
         helpMenu.addAction(str('Version '+VERSION))
         self.ui.seekBar.sliderReleased.connect(lambda: self.video_player.seek_frame(self.ui.seekBar.value()))
 
         self.__openVideo.connect(self.__open_video)
         self.__generateFunscript.connect(self.__generate_funscript)
+
+    def __open_docs(self):
+        app_docs = os.path.join(APP_DOCUMENTATION_DIR, 'index.html')
+        self.__logger.info("Open Application Documentation: %s", app_docs)
+        browser = webbrowser.get()
+        browser.open_new(app_docs)
 
     def __setup_shortcut_bindings(self):
         QtWidgets.QShortcut('CTRL+Left', self).activated.connect(self.__seek_prev)
