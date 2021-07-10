@@ -1,5 +1,6 @@
 site_name: Funscript Editor
-pages:
+site_url: ''
+nav:
   - Home: 'index.md'
   - User Guide:
     - 'OFS Integration': 'user-guide/ofs-integration.md'
