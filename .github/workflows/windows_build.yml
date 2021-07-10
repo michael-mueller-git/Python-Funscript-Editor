@@ -33,7 +33,7 @@ jobs:
       - name: Build Application Documentation
         shell: bash -l {0}
         run: |
-          cd docs/build
+          cd docs/app
           mkdocs build
           cd ../..
       - name: Build Application
