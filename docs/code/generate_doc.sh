@@ -5,7 +5,17 @@ NAME="funscript_editor"
 IGNORE=( )
 
 if ! command -v sphinx-apidoc ; then
-    pip3 install sphinx sphinx-rtd-theme
+    if command -v pacman ; then
+        # Arch based
+        sudo pacman -Sy python3-sphinx python-sphinx_rtd_theme
+    elif command -v apt ; then
+        # Debian based
+        sudo apt update
+        sudo apt install python3-sphinx
+        pip3 install sphinx-rtd-theme
+    else
+        pip3 install sphinx sphinx-rtd-theme
+    fi
 fi
 
 WDIR=$PWD

@@ -5,13 +5,9 @@ humanfriendly
 kiwisolver
 matplotlib
 numpy
-opencv-contrib-python
 Pillow
 pynput
 pyparsing
-PyQt5
-PyQt5-Qt5
-PyQt5-sip
 pyreadline
 python-dateutil
 python-mpv
