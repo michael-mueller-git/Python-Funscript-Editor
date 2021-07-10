@@ -32,4 +32,4 @@ make docs
 
 Now you can run the code direct with `python3 funscript-editor.py` or install install a pip package with `make all`.
 
-**NOTE:** In my Ubuntu test setup the UI hangs at all `cv2.waitKey()` lines in the code. Remove this part of the code solve the issue but the then i could not select an ROI, because the mouse event do not work. When i hard-code a trackingbox, the ui work but this is not usable. So we need future investigation for this problem. For now i recommend an Arch based Linux.
+**NOTE:** In my Ubuntu test setup the UI hangs because Ubuntu use the GTK Backend while the Arch Linux OpenCV library was compiled with QT (see `python3 -c "import cv2; print(cv2.getBuildInformation())"` output). To use the Application on Ubuntu you have to compile OpenCV + OpenCV contrib with `-D WITH_QT=ON` flag from source.
