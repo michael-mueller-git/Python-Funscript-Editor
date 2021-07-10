@@ -5,7 +5,7 @@ Settings.CondaEnvName = "funscript-editor"
 SetSettings(Settings)
 
 -- Version: 1.4.0
--- Note: I have not thest this script!
+-- Note: I have not test this script!
 function GetActions(video)
     local at = {}
     local pos = {}
