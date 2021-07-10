@@ -3,3 +3,4 @@ VERSION.txt
 build
 dist
 debug*
+funscript-editor.spec
