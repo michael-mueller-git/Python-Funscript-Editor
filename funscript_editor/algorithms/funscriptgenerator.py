@@ -225,12 +225,16 @@ class FunscriptGenerator(QtCore.QThread):
         for key in bboxes:
             x = [k for k in bboxes[key].keys()]
             boxes = [v for v in bboxes[key].values()]
-            if len(boxes) == 0: continue
+            if len(boxes) < 2: continue
 
-            fx0 = interp1d(x, [item[0] for item in boxes], kind = 'quadratic')
-            fy0 = interp1d(x, [item[1] for item in boxes], kind = 'quadratic')
-            fw  = interp1d(x, [item[2] for item in boxes], kind = 'quadratic')
-            fh  = interp1d(x, [item[3] for item in boxes], kind = 'quadratic')
+            # improve border interpolation
+            x_head = [x[0]-1]+x+[x[-1]+1]
+            boxes = [boxes[0]]+boxes+[boxes[-1]]
+
+            fx0 = interp1d(x_head, [item[0] for item in boxes], kind = 'quadratic')
+            fy0 = interp1d(x_head, [item[1] for item in boxes], kind = 'quadratic')
+            fw  = interp1d(x_head, [item[2] for item in boxes], kind = 'quadratic')
+            fh  = interp1d(x_head, [item[3] for item in boxes], kind = 'quadratic')
 
             for i in range(min(x), max(x)+1):
                 self.bboxes[key].append((float(fx0(i)), float(fy0(i)), float(fw(i)), float(fh(i))))
