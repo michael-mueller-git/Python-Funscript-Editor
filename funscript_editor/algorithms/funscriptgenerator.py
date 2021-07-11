@@ -528,15 +528,16 @@ class FunscriptGenerator(QtCore.QThread):
         return config
 
 
-    def __show_loading_screen(self, shape :tuple) -> None:
+    def __show_loading_screen(self, shape: tuple, txt: str = "Please wait...") -> None:
         """ Show an loading screen
 
         Args:
             shape (tuple): image shape of loading screen
+            txt (str): text to display
         """
         try:
             background = np.full(shape, 0, dtype=np.uint8)
-            loading_screen = self.drawText(background, "Please wait ...")
+            loading_screen = self.drawText(background, txt)
             cv2.imshow(self.window_name, self.preview_scaling(loading_screen))
             cv2.waitKey(1)
         except: pass
@@ -552,7 +553,7 @@ class FunscriptGenerator(QtCore.QThread):
         Returns:
             tuple: the entered box tuple (x,y,w,h)
         """
-        image = self.drawText(image, "Press 'space' or 'enter' to continue (sometimes not very responsive)",
+        image = self.drawText(image, "Select area with Mouse and Press 'space' or 'enter' to continue",
                 y = 75, color = (255, 0, 0))
 
         if self.params.use_zoom:
