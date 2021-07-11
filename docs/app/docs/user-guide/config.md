@@ -26,6 +26,7 @@ Config Files:
 - `max_playback_fps` (int): Limit the max player speed in the tracking preview window (0 = disable limit)
 - `preview_scaling` (float): Set the preview image scaling factor. With a value of `1.0`, the window should fill the height or width of the screen depending on the aspect ratio of the video.
 - `projection`: (str): Set the video type. All available options can be obtained from the `projection.yaml` file. Each root keys represent an option. Available Options: `'flat'` = 2D Videos, `'vr_he_sbs'` = 3D VR Side-By-Side Video
+- `tracker`: (str) Specify the tracker algorithm. Available options are `'MIL'`, `'KCF'`, `'CSRT'`.
 
 #### `hyperparameter.yaml`
 

@@ -6,6 +6,7 @@ import logging
 
 from threading import Thread
 from queue import Queue
+from funscript_editor.utils.config import SETTINGS
 
 import numpy as np
 
@@ -66,9 +67,23 @@ class StaticVideoTracker:
         return self.queue_out.get()
 
 
+    def __setup_tracker(self) -> None:
+        """ Setup the tracker specified in the config """
+        if SETTINGS['tracker'].upper() == 'MIL':
+            self.__logger.info("Start MIL Tracker")
+            self.tracker = cv2.TrackerMIL_create()
+        elif SETTINGS['tracker'].upper() == 'KCF':
+            self.__logger.info("Start KCF Tracker")
+            self.tracker = cv2.TrackerKCF_create()
+        else:
+            # falback is CSRT tracker
+            self.__logger.info("Start CSRT Tracker")
+            self.tracker = cv2.TrackerCSRT_create()
+
+
     def run(self) -> None:
         """ The Video Tracker Thread Function """
-        self.tracker = cv2.TrackerCSRT_create() # NOTE: you can change this to your favorite tracker
+        self.__setup_tracker()
         frame_heigt, frame_width = self.first_frame.shape[:2]
 
         dh, dw = int(frame_heigt*self.limit_searchspace['h']), int(frame_width*self.limit_searchspace['w'])

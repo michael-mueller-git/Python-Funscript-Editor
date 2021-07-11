@@ -279,6 +279,7 @@ class FFmpegStream:
                 '-'
             ]
 
+        self.logger.info("Open FFmpeg Stream")
         pipe = sp.Popen(
                 command,
                 stdout = sp.PIPE,
