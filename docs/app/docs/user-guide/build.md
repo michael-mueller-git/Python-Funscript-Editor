@@ -22,6 +22,8 @@ Finally you can remove the build environment with `conda env remove -n build`
 
 The OpenCV Package in Ubuntu use the GTK Backend for the preview window. This will cause freezes of the UI, because i use Qt threads in my code. The Arch Linux OpenCV library was compiled with QT (see `python3 -c "import cv2; print(cv2.getBuildInformation())"` output) so no problem here. To use the Application on Ubuntu you have to compile `OpenCV + OpenCV contrib` with `-D WITH_QT=ON` flag from source. Or simply use [miniconda](https://docs.conda.io/en/latest/miniconda.html). They include OpenCV compiled with Qt support.
 
+**NOTE:** I have also test this setup on Ubuntu 21.04 with Wayland desktop. You can use the setup instructions from Ubuntu 20.04 LTS. The application work with XWayland on the Wayland desktop!
+
 ### Miniconda
 
 After you have setup [miniconda](https://docs.conda.io/en/latest/miniconda.html) on your Ubuntu machine simply type the following commands to use Python-Funscript-Editor on Ubuntu:
