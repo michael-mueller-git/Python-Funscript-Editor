@@ -291,6 +291,7 @@ class FunscriptGenerator(QtCore.QThread):
                 trackbarValueMax = cv2.getTrackbarPos("Max", self.window_name)
             except: pass
 
+        self.__show_loading_screen(preview.shape)
         return (trackbarValueMin, trackbarValueMax) if trackbarValueMin < trackbarValueMax else (trackbarValueMax, trackbarValueMin)
 
 
@@ -523,14 +524,22 @@ class FunscriptGenerator(QtCore.QThread):
 
             if cv2.waitKey(1) in [ord('q')]: break
 
+        self.__show_loading_screen(preview.shape)
+        return config
+
+
+    def __show_loading_screen(self, shape :tuple) -> None:
+        """ Show an loading screen
+
+        Args:
+            shape (tuple): image shape of loading screen
+        """
         try:
-            background = np.full(preview.shape, 0, dtype=np.uint8)
+            background = np.full(shape, 0, dtype=np.uint8)
             loading_screen = self.drawText(background, "Please wait ...")
             cv2.imshow(self.window_name, self.preview_scaling(loading_screen))
             cv2.waitKey(1)
         except: pass
-
-        return config
 
 
     def get_bbox(self, image: np.ndarray, txt: str) -> tuple:
@@ -712,6 +721,7 @@ class FunscriptGenerator(QtCore.QThread):
                 wait = cycle_time_in_ms - (time.time() - cycle_start)*float(1000)
                 if wait > 0: time.sleep(wait/float(1000))
 
+        self.__show_loading_screen(first_frame.shape)
         video.stop()
         self.logger.info(status)
         self.logger.info('Interpolate tracking boxes')
