@@ -26,8 +26,7 @@ echo "Add Version to buld files"
 echo "$tag" > dist/funscript-editor/funscript_editor/VERSION.txt
 
 echo "Copy Application Documentation"
-mkdir -p dist/funscript-editor/funscript_editor/docs/
-cp -rf docs/app/site/ dist/funscript-editor/funscript_editor/docs/
+cp -rf docs/app/site dist/funscript-editor/funscript_editor/docs
 
 echo "Create Archive"
 tar -zcvf dist/funscript-editor-${tag}.tar.gz dist/funscript-editor
