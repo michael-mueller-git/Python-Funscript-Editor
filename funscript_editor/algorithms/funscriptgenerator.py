@@ -959,8 +959,13 @@ class FunscriptGenerator(QtCore.QThread):
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
         if self.params.direction == 'd' and not self.params.track_men:
-                self.finished("Tracking with 'd' and no men tracker is not implemented!", False)
-                return
+            self.finished("Tracking with 'd' and no men tracker is not implemented!", False)
+            return
+
+        if self.video_info.fps < 31.0 and self.params.skip_frames > 0:
+            self.logger.warning("The Video has less than 30 frames per seconds and you have set skip_frames to %d "\
+                    + "this can lead to inaccuracies when predicting the changepoint positions! (consider to set skip_frames to 0)" \
+                    , self.params.skip_frames)
 
         if self.params.raw_output:
             self.logger.warning("Raw output is enabled!")
