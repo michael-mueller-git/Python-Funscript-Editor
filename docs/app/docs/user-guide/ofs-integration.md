@@ -23,7 +23,9 @@ Currently we use a hacky lua script to communicate between the Python Funscript 
    <br> ![Enable OFS Integration](./images/ofs_integration_07.jpg)
 8. Navigate to `Options : Keys : Dynamic` and insert a shortcut for the funscript generator.
    <br> ![Assign an Shortcut](./images/ofs_integration_08.jpg)
-9. Now you can use the shortcut at any position in the video to start the funscript generator.
+9. By default the application assume you want to track VR 3D Side-By-Side Videos. If you want to track 2D Videos, you have to change the settings in a configuration file. The config file is located in `funscript-editor/funscript_editor/config/settings.yaml`. Open the file with an text editor and change the line `projection: 'vr_he_sbs'` to `projection: 'flat'`. Then save the file.
+   <br> ![Settings to Track 2D Videos](./images/ofs_integration_09.jpg)
+10. Now you can use the shortcut at any position in the video to start the funscript generator.
 
 ## Troubleshot
 
