@@ -21,6 +21,35 @@ def create_log_directories(config: dict) -> None:
             if k == 'filename':
                 os.makedirs(os.path.dirname(os.path.abspath(config[k])), exist_ok=True)
 
+
+def get_log_config_path() -> str:
+    """ Get the log config file path for current platfrom
+
+    Returns:
+        str: the log config file path
+    """
+    return WINDOWS_LOG_CONFIG_FILE if platform.system() == 'Windows' else LINUX_LOG_CONFIG_FILE
+
+
+def get_logfiles_paths() -> list:
+    """ Get the logfiles paths from log config
+
+    Returns:
+        list: all logiles paths
+    """
+    try:
+        result = []
+        config_path = get_log_config_path()
+        with open(config_path, 'rt') as f:
+            for line in f.readlines():
+                if "filename:" in line:
+                    result.append(line.split(':')[1].strip())
+
+        return result
+    except:
+        return []
+
+
 def setup_logging(
         default_level :int = logging.INFO,
         env_key :str = 'LOG_CFG') -> None:
@@ -30,7 +59,7 @@ def setup_logging(
         default_level (int): logging level e.g. `logging.INFO` (default is `logging.DEBUG`).
         env_key (str, optional): env variable name to load a configuration file via environment variable (default is `LOG_CFG`).
     """
-    config_path = WINDOWS_LOG_CONFIG_FILE if platform.system() == 'Windows' else LINUX_LOG_CONFIG_FILE
+    config_path = get_log_config_path()
     value = os.getenv(env_key, None)
     if value: config_path = value
     if os.path.exists(config_path):

@@ -11,15 +11,18 @@ from threading import Thread
 from queue import Queue
 from pynput.keyboard import Key, Listener
 from dataclasses import dataclass
-from funscript_editor.data.funscript import Funscript
-from funscript_editor.algorithms.videotracker import StaticVideoTracker
 from PyQt5 import QtGui, QtCore, QtWidgets
 from matplotlib.figure import Figure
-from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
 from datetime import datetime
-from funscript_editor.data.ffmpegstream import FFmpegStream, VideoInfo
-from funscript_editor.algorithms.kalmanfilter import KalmanFilter2D
 from scipy.interpolate import interp1d
+
+from funscript_editor.algorithms.kalmanfilter import KalmanFilter2D
+from funscript_editor.algorithms.videotracker import StaticVideoTracker
+from funscript_editor.data.ffmpegstream import FFmpegStream, VideoInfo
+from funscript_editor.data.funscript import Funscript
+from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
+from funscript_editor.utils.logging import get_logfiles_paths
+from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CONFIG_FILE
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -997,5 +1000,7 @@ class FunscriptGenerator(QtCore.QThread):
             self.finished(status, True)
         except Exception as ex:
             self.logger.critical("The program crashed due to a fatal error. " \
-                    + "Please open an issue on github with the corresponding log file and application configuration", exc_info=ex)
+                    + "Please open an issue on github with the corresponding log file (" \
+                    + ','.join(get_logfiles_paths()) + ") and application configuration (" \
+                    + SETTINGS_CONFIG_FILE + ", " + HYPERPARAMETER_CONFIG_FILE + ")", exc_info=ex)
             self.finished("The program crashed due to a fatal error", False)
