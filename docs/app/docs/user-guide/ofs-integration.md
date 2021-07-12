@@ -5,24 +5,24 @@ Currently we use a hacky lua script to communicate between the Python Funscript 
 ## Installation (Windows)
 
 1. Download the **latest** packed Python Funscript Editor from [github release page](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases).
-   ![Funscript Editor Windows Release](./images/ofs_integration_01.jpg)
+   <br> ![Funscript Editor Windows Release](./images/ofs_integration_01.jpg)
 2. Extract the Archiv.
-   ![Extract Python Funscript Editor Windows Release](./images/ofs_integration_02.jpg)
+   <br> ![Extract Python Funscript Editor Windows Release](./images/ofs_integration_02.jpg)
 3. Download the **latest** `funscript_generator.lua` script from [github release page](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases).
-   ![OFS integration Windows Release](./images/ofs_integration_03.jpg)
+   <br> ![OFS integration Windows Release](./images/ofs_integration_03.jpg)
 4. Move the downloaded `funscript_generator.lua` script to `data/lua` in your OFS directory.
-   ![Copy the OFS integration script to the lua folder](./images/ofs_integration_04.jpg)
+   <br> ![Copy the OFS integration script to the lua folder](./images/ofs_integration_04.jpg)
 5. Open the `funscript_generator.lua` file and adjust the `Settings.FunscriptGenerator` and `Settings.TmpFile` variable.
    <br> - **NOTE:** If you copy the path from Windows explorer to the variable in the lua script you have to escape the `\` symbol. This mean you have to put another `\` in front of each `\` so that there are always `\\` pairs. As an alternative, you can use a simple `/` instead of the single `\` Symbole that also work.
    <br> - `Settings.FunscriptGenerator`: Point to the extracted Python Funscript Editor program (better double check the complete path string to avoid errors later on).
    <br> - `Settings.TmpFile`: Specifies a temporary file location where to store the result (must be a file not a directory!). The file does not have to exist at the moment. The specified file will be generated from the Python Funscript Editor and will be overwritten automatically at the next time the generator is started!
-   ![Adjust Settings/Variables in the lua Script](./images/ofs_integration_05.jpg)
+   <br> ![Adjust Settings/Variables in the lua Script](./images/ofs_integration_05.jpg)
 6. Now launch OFS.
-   ![Start OFS](./images/ofs_integration_06.jpg)
+   <br> ![Start OFS](./images/ofs_integration_06.jpg)
 7. Navigate to `View : Special functions : Custom Functions` and select the `funscript_generator.lua` entry. Click on the `funscript_generator.lua` entry to get more options for the script (This may trigger the funscript generator, just ignore it for now). Finally click the now visible Button `Bind Script`.
-   ![Enable OFS Integration](./images/ofs_integration_07.jpg)
+   <br> ![Enable OFS Integration](./images/ofs_integration_07.jpg)
 8. Navigate to `Options : Keys : Dynamic` and insert a shortcut for the funscript generator.
-   ![Assign an Shortcut](./images/ofs_integration_08.jpg)
+   <br> ![Assign an Shortcut](./images/ofs_integration_08.jpg)
 9. Now you can use the shortcut at any position in the video to start the funscript generator.
 
 ## Troubleshot
