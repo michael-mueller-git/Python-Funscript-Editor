@@ -32,8 +32,7 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
         super(MinimalFunscriptGenerator, self).__init__()
 
         if os.path.isdir(output_file):
-            self.__logger.error("The output TempFile path must be a file not a folder")
-            self.__show_message("The output TempFile path must be a file not a folder")
+            self.__show_message("The output TempFile path must be a file not a folder", error=True)
             sys.exit()
 
         if os.path.exists(output_file):
@@ -51,17 +50,15 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
                     'Do you want to generate the funscript actions by tracking features in the Video? ',
                     QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
             if reply != QtWidgets.QMessageBox.Yes:
-                logging.info('abort')
+                logging.info('Abort Funscript Generator')
                 sys.exit()
 
         if video_file is None or video_file == "":
-            self.__logger.error("Video file was not specified!")
-            self.__show_message("Video file was not specified!")
+            self.__show_message("Video file was not specified!", error=True)
             sys.exit()
 
         if not os.path.exists(video_file):
-            self.__logger.error("Video file not found: %s", video_file)
-            self.__show_message("Video file not found ({})".format(video_file))
+            self.__show_message("Video file not found ({})".format(video_file), error=True)
             sys.exit()
 
         reply = QtWidgets.QMessageBox.question(None, 'Track Men', 'Do you want to track the Men? ',
@@ -88,11 +85,13 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
     __logger = logging.getLogger(__name__)
 
 
-    def __show_message(self, message :str) -> None:
+    def __show_message(self, message :str, error: bool = False) -> None:
+        if error: self.__logger.error(message)
+        else: self.__logger.info(message)
         msg = QtWidgets.QMessageBox()
         msg.setIcon(QtWidgets.QMessageBox.Information)
         msg.setText(message+' ')
-        msg.setWindowTitle("Funscript Generator Info")
+        msg.setWindowTitle("Funscript Generator " + str("Error" if error else "Info"))
         msg.exec_()
 
 
@@ -102,8 +101,7 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
             f.write('at;pos\n')
             for item in funscript.get_actions():
                 f.write('{at};{pos}\n'.format(at=item['at'], pos=item['pos']))
-        logging.info('Completed with status message: "%s"', msg)
-        if not success: self.__show_message(msg)
+        if not success: self.__show_message(msg, error=True)
         sys.exit()
 
 

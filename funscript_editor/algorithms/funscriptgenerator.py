@@ -958,39 +958,44 @@ class FunscriptGenerator(QtCore.QThread):
 
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
-        if self.params.direction == 'd' and not self.params.track_men:
-            self.finished("Tracking with 'd' and no men tracker is not implemented!", False)
-            return
+        try:
+            if self.params.direction == 'd' and not self.params.track_men:
+                self.finished("Tracking with 'd' and no men tracker is not implemented!", False)
+                return
 
-        if self.video_info.fps < 31.0 and self.params.skip_frames > 0:
-            self.logger.warning("The Video has less than 30 frames per seconds and you have set skip_frames to %d "\
-                    + "this can lead to inaccuracies when predicting the changepoint positions! (consider to set skip_frames to 0)" \
-                    , self.params.skip_frames)
+            if self.video_info.fps < 31.0 and self.params.skip_frames > 0:
+                self.logger.warning("The Video has less than 30 frames per seconds and you have set skip_frames to %d "\
+                        + "this can lead to inaccuracies when predicting the changepoint positions! (consider to set skip_frames to 0)" \
+                        , self.params.skip_frames)
 
-        if self.params.raw_output:
-            self.logger.warning("Raw output is enabled!")
+            if self.params.raw_output:
+                self.logger.warning("Raw output is enabled!")
 
-        # NOTE: score['y'] and score['x'] should have the same number size so it should be enouth to check one score length
-        with Listener(on_press=self.on_key_press) as listener:
-            status = self.tracking()
+            # NOTE: score['y'] and score['x'] should have the same number size so it should be enouth to check one score length
+            with Listener(on_press=self.on_key_press) as listener:
+                status = self.tracking()
 
-            if self.params.use_kalman_filter:
-                self.apply_kalman_filter()
+                if self.params.use_kalman_filter:
+                    self.apply_kalman_filter()
 
-            if len(self.score['y']) >= HYPERPARAMETER['min_frames']:
-                self.logger.info("Scale score")
-                self.scale_score(status, direction=self.params.direction)
+                if len(self.score['y']) >= HYPERPARAMETER['min_frames']:
+                    self.logger.info("Scale score")
+                    self.scale_score(status, direction=self.params.direction)
 
-        if len(self.score['y']) < HYPERPARAMETER['min_frames']:
-            self.finished(status + ' -> Tracking time insufficient', False)
-            return
+            if len(self.score['y']) < HYPERPARAMETER['min_frames']:
+                self.finished(status + ' -> Tracking time insufficient', False)
+                return
 
-        idx_dict = self.determin_change_points()
+            idx_dict = self.determin_change_points()
 
-        if False:
-            idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
-            idx_list.sort()
-            self.plot_y_score('debug.png', idx_list)
+            if False:
+                idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
+                idx_list.sort()
+                self.plot_y_score('debug.png', idx_list)
 
-        self.create_funscript(idx_dict)
-        self.finished(status, True)
+            self.create_funscript(idx_dict)
+            self.finished(status, True)
+        except Exception as ex:
+            self.logger.critical("The program crashed due to a fatal error. " \
+                    + "Please open an issue on github with the corresponding log file and application configuration", exc_info=ex)
+            self.finished("The program crashed due to a fatal error", False)

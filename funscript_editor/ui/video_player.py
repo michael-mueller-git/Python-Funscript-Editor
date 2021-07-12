@@ -551,7 +551,6 @@ class VideoPlayer(QtCore.QThread):
 
     def run(self) -> None:
         """ Video Player Thread Function """
-        self.player.wait_until_playing()
         while not self.quit:
             try:
                 time.sleep(0.01)
@@ -560,6 +559,4 @@ class VideoPlayer(QtCore.QThread):
             except: pass
         self.__logger.info("quit video player")
         self.player.terminate()
-
-
 
