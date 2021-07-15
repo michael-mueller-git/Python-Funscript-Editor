@@ -49,6 +49,10 @@ If you are using an older version of the `funscript_generator.lua` you should do
 
 In some cases OFS does not set the path to the video file within the lua script correctly (the variable `VideoFilePath` is empty). Mostly it helps to save the current project and/or create a new project. Then the variable should be set by OFS and the generator should work.
 
+### When press shortcut the message "C:\Users\...” is not recognized as an internal or external command, operable program or batch file.
+
+The path you have set in `Settings.FunscriptGenerator` does not exist. You have an typo in the path or forget an parent directory. Double check the complete path string!
+
 ### Tracking stops automatically
 
 If a tacker does not find the selected feature in the next frame, the tracking process stops. If more than 120 frames have already been tracked, a window appears to select the minimum and maximum value in which the reason for the abort is displayed with e.g. `Info: Tracker Woman Lost`.
