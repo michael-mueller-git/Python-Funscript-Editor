@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Name=funscript-edoitor
+Name=funscript-editor
 Comment=Python Funscript Editor
 GenericName=Funscript Editor
 Exec=funscript-editor %F
