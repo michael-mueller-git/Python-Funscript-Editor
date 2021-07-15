@@ -49,7 +49,7 @@ If you are using an older version of the `funscript_generator.lua` you should do
 
 In some cases OFS does not set the path to the video file within the lua script correctly (the variable `VideoFilePath` is empty). Mostly it helps to save the current project and/or create a new project. Then the variable should be set by OFS and the generator should work.
 
-### When press shortcut the message "C:\Users\...” is not recognized as an internal or external command, operable program or batch file appears in the terminal output.
+### When press shortcut the message "C:\Users\\...” is not recognized as an internal or external command, operable program or batch file appears in the terminal output.
 
 The path you have set in `Settings.FunscriptGenerator` does not exist. You have an typo in the path or forget an parent directory. Double check the complete path string!
 
