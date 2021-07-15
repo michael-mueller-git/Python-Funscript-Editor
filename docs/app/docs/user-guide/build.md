@@ -45,12 +45,3 @@ Now you can run the program direct from source code with:
 conda activate funscript-editor
 python3 funscript-editor.py
 ```
-
-Or you can build an executable from current code with:
-
-```bash
-conda activate funscript-editor
-./build.sh
-```
-
-This create the Ubuntu executable in `./dist`.

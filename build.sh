@@ -22,7 +22,7 @@ echo -n "Get Version ... "
 tag="$(git tag | sed 's/* //g' | sort | tail -n 1)"
 echo "$tag"
 
-echo "Add Version to buld files"
+echo "Add Version to build files"
 echo "$tag" > dist/funscript-editor/funscript_editor/VERSION.txt
 
 echo "Copy Application Documentation"
