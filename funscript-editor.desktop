@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=funscript-edoitor
+Comment=Python Funscript Editor
+GenericName=Funscript Editor
+Exec=funscript-editor %F
+Terminal=false
+Type=Application
+Icon=icon
+Categories=Video;
+StartupNotify=true
+MimeType=application/x-extension-fcstd;
