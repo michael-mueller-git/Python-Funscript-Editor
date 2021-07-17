@@ -102,6 +102,22 @@ class FFmpegStream:
 
 
     @staticmethod
+    def get_ffmpeg_command() -> str:
+        """ Get FFmpeg binary command string
+
+        Returns:
+            str: FFmpeg command
+        """
+        ffmpeg = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ffmpeg")
+        if os.path.exists(ffmpeg):
+            # use local ffmpeg
+            return ffmpeg
+        else:
+            # use ffmpeg in $PATH
+            return "ffmpeg"
+
+
+    @staticmethod
     def get_projection(
             frame :np.ndarray,
             config: dict) -> np.ndarray:
@@ -121,7 +137,7 @@ class FFmpegStream:
             video_filter = video_filter.replace('${' + k + '}', str(v))
 
         command = [
-                'ffmpeg',
+                FFmpegStream.get_ffmpeg_command(),
                 '-hide_banner',
                 '-loglevel', 'warning',
                 '-y',
@@ -264,7 +280,7 @@ class FFmpegStream:
         seek = FFmpegStream.frame_to_timestamp(self.start_frame, self.video_info.fps)
 
         command = [
-                'ffmpeg',
+                FFmpegStream.get_ffmpeg_command(),
                 '-hide_banner',
                 '-loglevel', 'warning',
                 '-ss', str(seek),

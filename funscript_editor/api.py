@@ -36,6 +36,9 @@ def generate_funscript(
     """
     setup_logging()
     logging.info("Python Funscript Generator %s", VERSION)
+    logging.info("Startup Path: %s", str(os.getcwd()))
+    logging.info("Args: video_file=%s, start_time=%s, end_time=%s, output_file=%s", \
+            str(video_file), str(start_time), str(end_time), str(output_file))
     app = QtWidgets.QApplication(sys.argv)
     generator = MinimalFunscriptGenerator(video_file, start_time, end_time, output_file)
     generator.run()
