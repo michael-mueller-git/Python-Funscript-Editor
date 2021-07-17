@@ -115,6 +115,11 @@ if [ -d dist ]; then
     find dist -iname "*.whl" | sort | tail -n 1 | xargs -I {} pip3 install --force-reinstall {}
 fi
 
+if [ -f ffmpeg ]; then
+    cp -fv ffmpeg $APPDIR/usr/conda/lib/python3*/site-packages/funscript_editor/data
+    chmod +x $APPDIR/usr/conda/lib/python3*/site-packages/funscript_editor/data/ffmpeg
+fi
+
 # create missing symlinks
 mkdir -p "$APPDIR"/usr/bin/
 mkdir -p "$APPDIR"/usr/lib/
@@ -177,5 +182,6 @@ export PATH="$APPDIR"/usr/bin:"$PATH"
 export FONTCONFIG_PATH="$APPDIR"/usr/conda/etc/fonts
 export FONTCONFIG_FILE="$APPDIR"/usr/conda/etc/fonts/fonts.conf
 EOF
+
 
 exit 0

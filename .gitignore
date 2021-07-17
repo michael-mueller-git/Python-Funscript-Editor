@@ -10,3 +10,5 @@ linuxdeploy*.AppImage
 Miniconda3-latest*.sh
 __pycache__
 funscript-editor*.AppImage
+ffmpeg
+ffmpeg-git*.tar.xz
