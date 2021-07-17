@@ -159,6 +159,9 @@ done
 # specific files in usr/conda/bin/ (regex could result in false replacements in other files)
 [ -f usr/conda/bin/python3-config ] && sed -i --follow-symlinks "s|$APPDIR_FULL|\${APPDIR}|g" usr/conda/bin/python3-config
 [ -f usr/conda/bin/ncursesw6-config ] && sed -i --follow-symlinks "s|$APPDIR_FULL|\${APPDIR}|g" usr/conda/bin/ncursesw6-config
+[ -f usr/conda/etc/fonts/fonts.conf ] && sed -i --follow-symlinks "s|<cachedir>$APPDIR_FULL|<cachedir>/tmp|g" usr/conda/etc/fonts/fonts.conf 
+[ -f usr/conda/etc/fonts/fonts.conf ] && sed -i --follow-symlinks "s|<dir>$APPDIR_FULL|<dir>|g" usr/conda/etc/fonts/fonts.conf 
+
 popd
 
 # generate linuxdeploy-plugin-conda-hook
@@ -170,6 +173,9 @@ cat > "$APPDIR"/apprun-hooks/linuxdeploy-plugin-conda-hook.sh <<\EOF
 export APPDIR="${APPDIR:-$(readlink -f "$(dirname "$0")")}"
 # export PATH to allow /usr/bin/env shebangs to use the supplied applications
 export PATH="$APPDIR"/usr/bin:"$PATH"
+# set font config path
+export FONTCONFIG_PATH="$APPDIR"/usr/conda/etc/fonts
+export FONTCONFIG_FILE="$APPDIR"/usr/conda/etc/fonts/fonts.conf
 EOF
 
 exit 0
