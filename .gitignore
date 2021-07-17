@@ -4,3 +4,9 @@ build
 dist
 debug*
 funscript-editor.spec
+AppDir
+AppDir2
+linuxdeploy*.AppImage
+Miniconda3-latest*.sh
+__pycache__
+funscript-editor*.AppImage
