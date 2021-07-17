@@ -38,6 +38,14 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
         if os.path.exists(output_file):
             os.remove(output_file)
 
+        if video_file is None or video_file == "":
+            self.__show_message("Video file was not specified!", error=True)
+            sys.exit()
+
+        if not os.path.exists(video_file):
+            self.__show_message("Video file not found ({})".format(video_file), error=True)
+            sys.exit()
+
         cap = cv2.VideoCapture(video_file)
         fps = cap.get(cv2.CAP_PROP_FPS)
         cap.release()
@@ -52,14 +60,6 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
             if reply != QtWidgets.QMessageBox.Yes:
                 logging.info('Abort Funscript Generator')
                 sys.exit()
-
-        if video_file is None or video_file == "":
-            self.__show_message("Video file was not specified!", error=True)
-            sys.exit()
-
-        if not os.path.exists(video_file):
-            self.__show_message("Video file not found ({})".format(video_file), error=True)
-            sys.exit()
 
         reply = QtWidgets.QMessageBox.question(None, 'Track Men', 'Do you want to track the Men? ',
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
