@@ -19,6 +19,7 @@ if ! command -v sphinx-apidoc ; then
 fi
 
 if [ -z "$(pip3 list | grep "sphinx-rtd-theme")" ] ; then
+    echo "install sphinx-rtd-theme"
     pip3 install sphinx-rtd-theme
 fi
 

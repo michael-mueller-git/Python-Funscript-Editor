@@ -5,6 +5,7 @@ import git # pip install gitpython
 
 PACKAGE = 'funscript_editor'
 DESCRIPTION = "A tool to create funscripts"
+INCLUDE_REQUIREMENTS = False
 
 TAGS = sorted(git.Repo('.').tags, key=lambda x: x.commit.committed_datetime) if os.path.exists('.git') else []
 VERSION = str(TAGS[-1]) if len(TAGS) > 0 else "0.0.0"
@@ -22,11 +23,14 @@ docs = [os.path.join('.', x) \
 with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
-with open("requirements.txt", "r", encoding="utf-8") as f:
-    requirements = [x.strip() for x in f.readlines()\
-            if not any(a in x.lower() for a in ['opencv', 'pyqt'])]
-            #NOTE: I recommend to install this packages with your favorite package manager.
-            # Otherwise they will not work reliably. e.g. use pacman -Sy python-opencv python-pyqt5 ...
+if INCLUDE_REQUIREMENTS:
+    with open("requirements.txt", "r", encoding="utf-8") as f:
+        requirements = [x.strip() for x in f.readlines()\
+                if not any(a in x.lower() for a in ['opencv', 'pyqt'])]
+                #NOTE: I recommend to install this packages with your favorite package manager.
+                # Otherwise they will not work reliably. e.g. use pacman -Sy python-opencv python-pyqt5 ...
+else:
+    requirements = []
 
 with open(os.path.join(PACKAGE, 'VERSION.txt'), 'w') as f:
     f.write(VERSION)

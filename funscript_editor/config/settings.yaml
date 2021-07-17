@@ -20,10 +20,7 @@ max_playback_fps: 0
 # or width of the screen depending on the aspect ratio of the video.
 preview_scaling: 0.6
 
-# Set the video type. All available options can be obtained from the projection.yaml file.
-# Each root keys represent an option.
-#
-# Available Options:
+# Set the video type. Available Options:
 # - 'flat': 2D Videos
 # - 'vr_he_sbs': 3D VR Side-By-Side Video
 projection: 'vr_he_sbs'
