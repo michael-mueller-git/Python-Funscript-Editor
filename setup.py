@@ -1,11 +1,15 @@
 import setuptools
 import os
+import glob
 import sys
 import git # pip install gitpython
+
+from pathlib import Path
 
 PACKAGE = 'funscript_editor'
 DESCRIPTION = "A tool to create funscripts"
 INCLUDE_REQUIREMENTS = False
+DOCS = ['docs/app/site', 'docs/code/_build/html']
 
 TAGS = sorted(git.Repo('.').tags, key=lambda x: x.commit.committed_datetime) if os.path.exists('.git') else []
 VERSION = str(TAGS[-1]) if len(TAGS) > 0 else "0.0.0"
@@ -15,10 +19,11 @@ src = [os.path.join('..', x) \
         if x.startswith(PACKAGE+os.sep) \
         and os.path.exists(x)]
 
-docs = [os.path.join('.', x) \
-        for x in git.Git('.').ls_files().splitlines() \
-        if x.startswith('docs'+os.sep) \
-        and os.path.exists(x)]
+docs = []
+for docs_dir in DOCS:
+    docs += [os.path.join('.', x) \
+            for x in Path(docs_dir).rglob('**/*') \
+            if os.path.isfile(x)]
 
 with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
@@ -34,6 +39,7 @@ else:
 
 with open(os.path.join(PACKAGE, 'VERSION.txt'), 'w') as f:
     f.write(VERSION)
+    src += [os.path.join('..', PACKAGE, 'VERSION.txt')]
 
 setuptools.setup(
     name=PACKAGE.replace('_', '-'),

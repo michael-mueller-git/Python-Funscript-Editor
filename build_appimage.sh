@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "WARNING: The Full application in the AppImage only work on the build system. Only the Generator work portable for now!"
+
 if [ ! -f ./linuxdeploy-x86_64.AppImage ]; then
     wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
 fi
