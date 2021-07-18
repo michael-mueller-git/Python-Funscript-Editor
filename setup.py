@@ -61,7 +61,7 @@ setuptools.setup(
     install_requires=requirements,
     packages=[PACKAGE],
     package_data={PACKAGE: src},
-    data_files=[(os.path.join(sys.prefix, 'share', PACKAGE, os.path.dirname(x)), [x]) for x in docs],
+    data_files=[(os.path.join('/', PACKAGE, os.path.dirname(x)), [x]) for x in docs],
     python_requires=">=3.6",
     setup_requires=['wheel', 'gitpython'],
 )
