@@ -1,8 +1,10 @@
 # Python Funscript Editor
 
-A Python program that use Computer Vision to predict the funscript actions. Most of you are probably interested in the [Open Funscripter (OFS)](https://github.com/OpenFunscripter/OFS) integration of this tool. I create a hacky lua script to integrate the prediction of this tool in OFS. More information and installation instructions in [OFS Integration](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/ofs-integration.md). For the application configuration see [this](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/config.md) Documentation page.
+A small Python program that use use Computer Vision to partially automate the generation of funscripts.
 
-**NOTE:** The Tool could also use as an standalone application with an build in UI. Due to the limitations it is not intended for productive use.
+## Getting Started
+
+The application has an build in UI. Due to the limitations (mainly on Windows) it is not intended for productive use. Therefore i create a lua script to integrate the tool in [Open Funscripter (OFS)](https://github.com/OpenFunscripter/OFS). For the Installation see my detailed step by step [OFS Integration instruction](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/ofs-integration.md). By default the application is configured for 3D Side-By-Side VR Videos. If you want to track 2D Videos you have to manually change the config! Therefore read the [configuration page](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/config.md) in the application documentation.
 
 ## Documentation
 
