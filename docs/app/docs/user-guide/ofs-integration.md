@@ -47,7 +47,7 @@ If you are using an older version of the `funscript_generator.lua` you should do
 
 ### When calling the generator, only a message box is displayed with the message: "Video file was not specified!"
 
-In some cases OFS does not set the path to the video file within the lua script correctly (the variable `VideoFilePath` is empty). Mostly it helps to save the current project and/or create a new project. Then the variable should be set by OFS and the generator should work.
+In some cases OFS does not set the path to the video file within the lua script correctly (the variable `VideoFilePath` is empty). This happen when the video path contains some special character like square braked `[` and `]`. Rename your video files and store them in a path without special character. Then the variable should be set by OFS and the motion tracking funscript generator should work.
 
 ### When press shortcut the message "C:\Users\\...” is not recognized as an internal or external command, operable program or batch file appears in the terminal output.
 

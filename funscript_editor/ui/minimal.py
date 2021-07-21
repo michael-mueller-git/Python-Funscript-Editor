@@ -39,7 +39,9 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
             os.remove(output_file)
 
         if video_file is None or video_file == "":
-            self.__show_message("Video file was not specified!", error=True)
+            self.__show_message("Video file was not specified! " \
+                    + "(Make sure there are no special symbols like squared brackets in the video file path)",
+                    error=True)
             sys.exit()
 
         if not os.path.exists(video_file):

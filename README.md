@@ -8,7 +8,7 @@ The application has an build in UI. Due to the limitations (mainly on Windows) i
 
 ## Documentation
 
-The application documentation is located in [`./docs/app/docs`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs)
+The full application documentation is located in [`./docs/app/docs`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs)
 
 ## Contribute
 
