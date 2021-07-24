@@ -264,7 +264,7 @@ class Ui_MainWindow(object):
         self.label_33.setText(_translate("MainWindow", "Ctrl+I"))
         self.label_37.setText(_translate("MainWindow", "Shift+Pos1"))
         self.label_38.setText(_translate("MainWindow", "First Action"))
-        self.label_39.setText(_translate("MainWindow", "Shift+Ende"))
+        self.label_39.setText(_translate("MainWindow", "Shift+End"))
         self.label_40.setText(_translate("MainWindow", "Last Action"))
         self.strokeGroupBox.setTitle(_translate("MainWindow", "Statistics"))
         self.label_11.setText(_translate("MainWindow", "Fastest Stroke:"))

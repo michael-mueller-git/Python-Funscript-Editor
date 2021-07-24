@@ -328,7 +328,7 @@
                                                 <item row="17" column="0">
                                                     <widget class="QLabel" name="label_39">
                                                         <property name="text">
-                                                            <string>Shift+Ende</string>
+                                                            <string>Shift+End</string>
                                                         </property>
                                                     </widget>
                                                 </item>
