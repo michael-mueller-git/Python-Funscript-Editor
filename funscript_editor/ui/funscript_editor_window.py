@@ -24,6 +24,7 @@ from funscript_editor.data.funscript import Funscript
 from funscript_editor.algorithms.funscriptgenerator import FunscriptGenerator, FunscriptGeneratorParameter
 from funscript_editor.utils.config import UI_CONFIG, VERSION
 from funscript_editor.definitions import APP_DOCUMENTATION_DIR, CODE_DOCUMENTATION_DIR
+from funscript_editor.data.ffmpegstream import FFmpegStream
 
 class FunscriptEditorWindow(QtWidgets.QMainWindow):
     """ Funscript Editor window """
@@ -115,6 +116,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.ui.fastestStrokeLabel.setText('{} ms'.format(self.funscript.get_fastest_stroke()))
         self.ui.slowstStrokeLabel.setText('{} ms'.format(self.funscript.get_slowest_stroke()))
         self.ui.medianStrokesLabel.setText('{} ms'.format(self.funscript.get_median_stroke()))
+        self.ui.timestamp.setText(FFmpegStream.millisec_to_timestamp(self.video_player.get_current_timestamp_in_millis)+' ')
 
     def __setup_ui_binding(self):
         self.ui.menuFile.addAction('Open (Ctrl+O)', self.__open_video)
@@ -286,6 +288,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.funscript_visualizer.set_funscript(self.funscript)
         self.ui.seekBar.setMaximum(max((0, self.video_player.get_length-1)))
         self.ui.seekBar.setValue(0)
+        self.ui.timestamp.setText('0 ')
 
     def __new_funscript(self):
         self.funscript = Funscript(fps=self.video_player.get_fps)

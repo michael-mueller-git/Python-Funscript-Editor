@@ -1,433 +1,448 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>1600</width>
-    <height>1000</height>
-   </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>1600</width>
-    <height>1000</height>
-   </size>
-  </property>
-  <property name="windowTitle">
-   <string>Video Player with Signal</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>icon.png</normaloff>icon.png</iconset>
-  </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="mainLayout">
-    <item>
-     <widget class="QSplitter" name="splitterVertical">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <widget class="QSplitter" name="splitterHorizontal">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <widget class="QWidget" name="verticalLayoutWidget">
-        <layout class="QVBoxLayout" name="videoLayout">
-         <item>
-          <widget class="QWidget" name="videoPane" native="true"/>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QSlider" name="seekBar">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QGroupBox" name="settingsLayout">
-        <property name="title">
-         <string/>
+    <class>MainWindow</class>
+    <widget class="QMainWindow" name="MainWindow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1600</width>
+                <height>1000</height>
+            </rect>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QGroupBox" name="shortcutsGroupBox">
-           <property name="title">
-            <string>Keyboard Shortcuts</string>
-           </property>
-           <layout class="QFormLayout" name="verticalLayout_3">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>P, Space</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Pause / Playback</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>.</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>Next frame</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>,</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Previus frame</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>[</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Decrease speed</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>]</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QLabel" name="label_10">
-              <property name="text">
-               <string>Increase speed</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>Ctrl+Shift+Left</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QLabel" name="label_14">
-              <property name="text">
-               <string>Previous Action Point</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="label_16">
-              <property name="text">
-               <string>Ctrl+Shift+Right</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="QLabel" name="label_18">
-              <property name="text">
-               <string>Next Action Point</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="label_19">
-              <property name="text">
-               <string>Shift+L</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1">
-             <widget class="QLabel" name="label_20">
-              <property name="text">
-               <string>Loop Video</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="label_21">
-              <property name="text">
-               <string>W</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1">
-             <widget class="QLabel" name="label_22">
-              <property name="text">
-               <string>Move Stroke Indicator Up</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="label_23">
-              <property name="text">
-               <string>A</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
-             <widget class="QLabel" name="label_26">
-              <property name="text">
-               <string>Move Stroke Indicator Left</string>
-              </property>
-             </widget>
-            </item>
-            <item row="10" column="0">
-             <widget class="QLabel" name="label_24">
-              <property name="text">
-               <string>S</string>
-              </property>
-             </widget>
-            </item>
-            <item row="10" column="1">
-             <widget class="QLabel" name="label_27">
-              <property name="text">
-               <string>Move Stroke Indicator Down</string>
-              </property>
-             </widget>
-            </item>
-            <item row="11" column="0">
-             <widget class="QLabel" name="label_25">
-              <property name="text">
-               <string>D</string>
-              </property>
-             </widget>
-            </item>
-            <item row="11" column="1">
-             <widget class="QLabel" name="label_28">
-              <property name="text">
-               <string>Move Stroke Indicator Right</string>
-              </property>
-             </widget>
-            </item>
-            <item row="13" column="0">
-             <widget class="QLabel" name="label_29">
-              <property name="text">
-               <string>Ctrl+Plus</string>
-              </property>
-             </widget>
-            </item>
-            <item row="13" column="1">
-             <widget class="QLabel" name="label_31">
-              <property name="text">
-               <string>Increase Stoke Indicator</string>
-              </property>
-             </widget>
-            </item>
-            <item row="14" column="0">
-             <widget class="QLabel" name="label_30">
-              <property name="text">
-               <string>Ctrl+Minus</string>
-              </property>
-             </widget>
-            </item>
-            <item row="14" column="1">
-             <widget class="QLabel" name="label_32">
-              <property name="text">
-               <string>Decrease Stroke Indicator</string>
-              </property>
-             </widget>
-            </item>
-            <item row="15" column="0">
-             <widget class="QLabel" name="label_34">
-              <property name="text">
-               <string>Ctrl+G</string>
-              </property>
-             </widget>
-            </item>
-            <item row="15" column="1">
-             <widget class="QLabel" name="label_36">
-              <property name="text">
-               <string>Start Funscript Generator</string>
-              </property>
-             </widget>
-            </item>
-            <item row="12" column="1">
-             <widget class="QLabel" name="label_35">
-              <property name="text">
-               <string>Invert Stroke indicator</string>
-              </property>
-             </widget>
-            </item>
-            <item row="12" column="0">
-             <widget class="QLabel" name="label_33">
-              <property name="text">
-               <string>Ctrl+I</string>
-              </property>
-             </widget>
-            </item>
-            <item row="16" column="0">
-             <widget class="QLabel" name="label_37">
-              <property name="text">
-               <string>Shift+Pos1</string>
-              </property>
-             </widget>
-            </item>
-            <item row="16" column="1">
-             <widget class="QLabel" name="label_38">
-              <property name="text">
-               <string>First Action</string>
-              </property>
-             </widget>
-            </item>
-            <item row="17" column="0">
-             <widget class="QLabel" name="label_39">
-              <property name="text">
-               <string>Shift+Ende</string>
-              </property>
-             </widget>
-            </item>
-            <item row="17" column="1">
-             <widget class="QLabel" name="label_40">
-              <property name="text">
-               <string>Last Action</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="strokeGroupBox">
-           <property name="title">
-            <string>Statistics</string>
-           </property>
-           <layout class="QFormLayout" name="verticalLayout_4">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_11">
-              <property name="text">
-               <string>Fastest Stroke:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="fastestStrokeLabel">
-              <property name="text">
-               <string>0 ms</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Median Strokes:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="medianStrokesLabel">
-              <property name="text">
-               <string>0 ms</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_15">
-              <property name="text">
-               <string>Slowest Stroke:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="slowstStrokeLabel">
-              <property name="text">
-               <string>0 ms</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_17">
-              <property name="text">
-               <string>Current Stroke</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLabel" name="currentStrokeLabel">
-              <property name="text">
-               <string>0 ms</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
-      <widget class="QLabel" name="animationPane">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1600</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-   </widget>
-   <addaction name="menuFile"/>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
- </widget>
- <resources/>
- <connections/>
+        <property name="minimumSize">
+            <size>
+                <width>1600</width>
+                <height>1000</height>
+            </size>
+        </property>
+        <property name="windowTitle">
+            <string>Video Player with Signal</string>
+        </property>
+        <property name="windowIcon">
+            <iconset>
+                <normaloff>icon.png</normaloff>
+                icon.png
+            </iconset>
+        </property>
+        <widget class="QWidget" name="centralwidget">
+            <layout class="QHBoxLayout" name="mainLayout">
+                <item>
+                    <widget class="QSplitter" name="splitterVertical">
+                        <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                        </property>
+                        <widget class="QSplitter" name="splitterHorizontal">
+                            <property name="orientation">
+                                <enum>Qt::Horizontal</enum>
+                            </property>
+                            <widget class="QWidget" name="verticalLayoutWidget">
+                                <layout class="QVBoxLayout" name="videoLayout">
+                                    <item>
+                                        <widget class="QWidget" name="videoPane" native="true" />
+                                    </item>
+                                    <item>
+                                        <layout class="QHBoxLayout" name="horizontalLayout">
+                                            <property name="sizeConstraint">
+                                                <enum>QLayout::SetMaximumSize</enum>
+                                            </property>
+                                            <item>
+                                                <widget class="QSlider" name="seekBar">
+                                                    <property name="orientation">
+                                                        <enum>Qt::Horizontal</enum>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item>
+                                                <widget class="QLabel" name="timestamp">
+                                                    <property name="sizePolicy">
+                                                        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                                                            <horstretch>0</horstretch>
+                                                            <verstretch>0</verstretch>
+                                                        </sizepolicy>
+                                                    </property>
+                                                    <property name="maximumSize">
+                                                        <size>
+                                                            <width>16777215</width>
+                                                            <height>50</height>
+                                                        </size>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>-- </string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                        </layout>
+                                    </item>
+                                </layout>
+                            </widget>
+                            <widget class="QGroupBox" name="settingsLayout">
+                                <property name="title">
+                                    <string />
+                                </property>
+                                <layout class="QVBoxLayout" name="verticalLayout_2">
+                                    <item>
+                                        <widget class="QGroupBox" name="shortcutsGroupBox">
+                                            <property name="title">
+                                                <string>Keyboard Shortcuts</string>
+                                            </property>
+                                            <layout class="QFormLayout" name="verticalLayout_3">
+                                                <item row="0" column="0">
+                                                    <widget class="QLabel" name="label">
+                                                        <property name="text">
+                                                            <string>P, Space</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="0" column="1">
+                                                    <widget class="QLabel" name="label_2">
+                                                        <property name="text">
+                                                            <string>Pause / Playback</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="1" column="0">
+                                                    <widget class="QLabel" name="label_3">
+                                                        <property name="text">
+                                                            <string>.</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="1" column="1">
+                                                    <widget class="QLabel" name="label_4">
+                                                        <property name="text">
+                                                            <string>Next frame</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="2" column="0">
+                                                    <widget class="QLabel" name="label_5">
+                                                        <property name="text">
+                                                            <string>,</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="2" column="1">
+                                                    <widget class="QLabel" name="label_6">
+                                                        <property name="text">
+                                                            <string>Previus frame</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="3" column="0">
+                                                    <widget class="QLabel" name="label_7">
+                                                        <property name="text">
+                                                            <string>[</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="3" column="1">
+                                                    <widget class="QLabel" name="label_8">
+                                                        <property name="text">
+                                                            <string>Decrease speed</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="4" column="0">
+                                                    <widget class="QLabel" name="label_9">
+                                                        <property name="text">
+                                                            <string>]</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="4" column="1">
+                                                    <widget class="QLabel" name="label_10">
+                                                        <property name="text">
+                                                            <string>Increase speed</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="5" column="0">
+                                                    <widget class="QLabel" name="label_12">
+                                                        <property name="text">
+                                                            <string>Ctrl+Shift+Left</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="5" column="1">
+                                                    <widget class="QLabel" name="label_14">
+                                                        <property name="text">
+                                                            <string>Previous Action Point</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="6" column="0">
+                                                    <widget class="QLabel" name="label_16">
+                                                        <property name="text">
+                                                            <string>Ctrl+Shift+Right</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="6" column="1">
+                                                    <widget class="QLabel" name="label_18">
+                                                        <property name="text">
+                                                            <string>Next Action Point</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="7" column="0">
+                                                    <widget class="QLabel" name="label_19">
+                                                        <property name="text">
+                                                            <string>Shift+L</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="7" column="1">
+                                                    <widget class="QLabel" name="label_20">
+                                                        <property name="text">
+                                                            <string>Loop Video</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="8" column="0">
+                                                    <widget class="QLabel" name="label_21">
+                                                        <property name="text">
+                                                            <string>W</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="8" column="1">
+                                                    <widget class="QLabel" name="label_22">
+                                                        <property name="text">
+                                                            <string>Move Stroke Indicator Up</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="9" column="0">
+                                                    <widget class="QLabel" name="label_23">
+                                                        <property name="text">
+                                                            <string>A</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="9" column="1">
+                                                    <widget class="QLabel" name="label_26">
+                                                        <property name="text">
+                                                            <string>Move Stroke Indicator Left</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="10" column="0">
+                                                    <widget class="QLabel" name="label_24">
+                                                        <property name="text">
+                                                            <string>S</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="10" column="1">
+                                                    <widget class="QLabel" name="label_27">
+                                                        <property name="text">
+                                                            <string>Move Stroke Indicator Down</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="11" column="0">
+                                                    <widget class="QLabel" name="label_25">
+                                                        <property name="text">
+                                                            <string>D</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="11" column="1">
+                                                    <widget class="QLabel" name="label_28">
+                                                        <property name="text">
+                                                            <string>Move Stroke Indicator Right</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="13" column="0">
+                                                    <widget class="QLabel" name="label_29">
+                                                        <property name="text">
+                                                            <string>Ctrl+Plus</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="13" column="1">
+                                                    <widget class="QLabel" name="label_31">
+                                                        <property name="text">
+                                                            <string>Increase Stoke Indicator</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="14" column="0">
+                                                    <widget class="QLabel" name="label_30">
+                                                        <property name="text">
+                                                            <string>Ctrl+Minus</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="14" column="1">
+                                                    <widget class="QLabel" name="label_32">
+                                                        <property name="text">
+                                                            <string>Decrease Stroke Indicator</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="15" column="0">
+                                                    <widget class="QLabel" name="label_34">
+                                                        <property name="text">
+                                                            <string>Ctrl+G</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="15" column="1">
+                                                    <widget class="QLabel" name="label_36">
+                                                        <property name="text">
+                                                            <string>Start Funscript Generator</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="12" column="1">
+                                                    <widget class="QLabel" name="label_35">
+                                                        <property name="text">
+                                                            <string>Invert Stroke indicator</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="12" column="0">
+                                                    <widget class="QLabel" name="label_33">
+                                                        <property name="text">
+                                                            <string>Ctrl+I</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="16" column="0">
+                                                    <widget class="QLabel" name="label_37">
+                                                        <property name="text">
+                                                            <string>Shift+Pos1</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="16" column="1">
+                                                    <widget class="QLabel" name="label_38">
+                                                        <property name="text">
+                                                            <string>First Action</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="17" column="0">
+                                                    <widget class="QLabel" name="label_39">
+                                                        <property name="text">
+                                                            <string>Shift+Ende</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="17" column="1">
+                                                    <widget class="QLabel" name="label_40">
+                                                        <property name="text">
+                                                            <string>Last Action</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                            </layout>
+                                        </widget>
+                                    </item>
+                                    <item>
+                                        <widget class="QGroupBox" name="strokeGroupBox">
+                                            <property name="title">
+                                                <string>Statistics</string>
+                                            </property>
+                                            <layout class="QFormLayout" name="verticalLayout_4">
+                                                <item row="0" column="0">
+                                                    <widget class="QLabel" name="label_11">
+                                                        <property name="text">
+                                                            <string>Fastest Stroke:</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="0" column="1">
+                                                    <widget class="QLabel" name="fastestStrokeLabel">
+                                                        <property name="text">
+                                                            <string>0 ms</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="1" column="0">
+                                                    <widget class="QLabel" name="label_13">
+                                                        <property name="text">
+                                                            <string>Median Strokes:</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="1" column="1">
+                                                    <widget class="QLabel" name="medianStrokesLabel">
+                                                        <property name="text">
+                                                            <string>0 ms</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="2" column="0">
+                                                    <widget class="QLabel" name="label_15">
+                                                        <property name="text">
+                                                            <string>Slowest Stroke:</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="2" column="1">
+                                                    <widget class="QLabel" name="slowstStrokeLabel">
+                                                        <property name="text">
+                                                            <string>0 ms</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="3" column="0">
+                                                    <widget class="QLabel" name="label_17">
+                                                        <property name="text">
+                                                            <string>Current Stroke</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item row="3" column="1">
+                                                    <widget class="QLabel" name="currentStrokeLabel">
+                                                        <property name="text">
+                                                            <string>0 ms</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                            </layout>
+                                        </widget>
+                                    </item>
+                                </layout>
+                            </widget>
+                        </widget>
+                        <widget class="QLabel" name="animationPane">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="text">
+                                <string />
+                            </property>
+                        </widget>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+        <widget class="QMenuBar" name="menubar">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>1600</width>
+                    <height>34</height>
+                </rect>
+            </property>
+            <widget class="QMenu" name="menuFile">
+                <property name="title">
+                    <string>File</string>
+                </property>
+            </widget>
+            <addaction name="menuFile" />
+        </widget>
+        <widget class="QStatusBar" name="statusbar" />
+    </widget>
+    <resources />
+    <connections />
 </ui>
