@@ -11,6 +11,15 @@ vr_he_sbs:
     fov: 100
     phi: -45
 
+vr_fisheye_200_sbs:
+  name: '3D VR Video (Fisheye 200)'
+  video_filter: 'v360=input=fisheye:in_stereo=sbs:id_fov=200:pitch=${phi}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
+  parameter:
+    height: 720
+    width: 1240
+    fov: 100
+    phi: -45
+
 flat:
   name: '2D Video'
   video_filter: 'scale=${width}:${height}'

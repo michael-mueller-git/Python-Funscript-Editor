@@ -891,7 +891,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             dict: all local max and min points in score {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
         """
-        self.logger.info("Determine local max and min")
+        self.logger.info("Determine change points")
         if self.params.direction == 'd':
             idx_dict = sp.get_local_max_and_min_idx(self.score['d'], self.video_info.fps)
         elif self.params.direction == 'x':

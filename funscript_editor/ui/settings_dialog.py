@@ -35,7 +35,9 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.videoTypeComboBox.currentTextChanged.connect(
                 lambda value: self.__set_setting(
                     'videoType',
-                    list(filter(lambda x: PROJECTION[x]['name'] == value, PROJECTION.keys()))[0]))
+                    list(filter(lambda x: PROJECTION[x]['name'] == value, PROJECTION.keys()))[0]
+                )
+            )
         self.ui.trackingAxisComboBox.currentTextChanged.connect(lambda value: self.__set_setting('trackingAxis', value))
         self.ui.trackingMethodComboBox.currentTextChanged.connect(lambda value: self.__set_setting('trackingMethod', value))
 
