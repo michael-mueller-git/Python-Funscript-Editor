@@ -96,7 +96,7 @@ class FFmpegStream:
         cap = cv2.VideoCapture(video_path)
         if frame_number > 0:
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
-        success, frame = cap.read()
+        _, frame = cap.read()
         cap.release()
         return frame
 
@@ -172,8 +172,10 @@ class FFmpegStream:
                 )
 
         pipe.terminate()
-        pipe.stdin.close()
-        pipe.stdout.close()
+        try: pipe.stdin.close()
+        except: pass
+        try: pipe.stdout.close()
+        except: pass
 
         return projection
 
@@ -322,4 +324,5 @@ class FFmpegStream:
         self.stopped = True
         self.logger.info('Close FFmpeg Stream')
         pipe.terminate()
-        pipe.stdout.close()
+        try: pipe.stdout.close()
+        except: pass

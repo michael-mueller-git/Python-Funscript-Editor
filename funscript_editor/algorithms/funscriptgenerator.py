@@ -1,13 +1,12 @@
 """ Top level process to generate the funscript actions by tracking selected features in the video """
 
 import cv2
-import json
 import copy
 import time
+import math
 import logging
 
 from screeninfo import get_monitors
-from threading import Thread
 from queue import Queue
 from pynput.keyboard import Key, Listener
 from dataclasses import dataclass
@@ -18,7 +17,7 @@ from scipy.interpolate import interp1d
 
 from funscript_editor.algorithms.kalmanfilter import KalmanFilter2D
 from funscript_editor.algorithms.videotracker import StaticVideoTracker
-from funscript_editor.data.ffmpegstream import FFmpegStream, VideoInfo
+from funscript_editor.data.ffmpegstream import FFmpegStream
 from funscript_editor.data.funscript import Funscript
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
 from funscript_editor.utils.logging import get_logfiles_paths
@@ -95,7 +94,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.score = {
                 'x': [],
                 'y': [],
-                'euclideanDistance': []
+                'euclideanDistance': [],
+                'pitch': []
             }
         self.bboxes = {
                 'Men': [],
@@ -263,8 +263,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             tuple: with selected (min: flaot, max float)
         """
-        cv2.createTrackbar("Min", self.window_name, lower_limit, upper_limit, lambda x: None)
-        cv2.createTrackbar("Max", self.window_name, upper_limit, upper_limit, lambda x: None)
+        cv2.createTrackbar("Min", self.window_name, lower_limit, upper_limit, lambda _: None)
+        cv2.createTrackbar("Max", self.window_name, upper_limit, upper_limit, lambda _: None)
         image = np.concatenate((image_min, image_max), axis=1)
 
         if info != "":
@@ -317,6 +317,25 @@ class FunscriptGeneratorThread(QtCore.QThread):
             self.score['euclideanDistance'] = [np.sqrt(np.sum((np.array(m) - np.array(w)) ** 2, axis=0)) \
                     for w, m in zip(woman_center, men_center)]
 
+            for i in range( min(( len(men_center), len(woman_center) )) ):
+                x = self.bboxes['Woman'][i][0] - self.bboxes['Men'][i][0]
+                y = self.bboxes['Men'][i][1] - self.bboxes['Woman'][i][1]
+                if x >= 0 and y >= 0:
+                    self.score['pitch'].append(np.arctan(np.array(y / max((10e-3, x)))))
+                elif x >= 0 and y < 0:
+                    self.score['pitch'].append(-1.0*np.arctan(np.array(y / max((10e-3, x)))))
+                elif x < 0 and y < 0:
+                    self.score['pitch'].append(math.pi + -1.0*np.arctan(np.array(y / x)))
+                elif x < 0 and y >= 0:
+                    self.score['pitch'].append(math.pi + np.arctan(np.array(y / x)))
+                else:
+                    # this should never happen
+                    self.logger.error('Calculate score not implement for x=%d, y=%d', x, y)
+
+            # invert
+            self.score['pitch'] = [-1.0*item for item in self.score['pitch']]
+
+
         else:
             self.score['x'] = [w[0] - min([x[0] for x in self.bboxes['Woman']]) for w in self.bboxes['Woman']]
             self.score['y'] = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
@@ -324,6 +343,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.score['x'] = sp.scale_signal(self.score['x'], 0, 100)
         self.score['y'] = sp.scale_signal(self.score['y'], 0, 100)
         self.score['euclideanDistance'] = sp.scale_signal(self.score['euclideanDistance'], 0, 100)
+        self.score['pitch'] = sp.scale_signal(self.score['pitch'], 0, 100)
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:
@@ -339,8 +359,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
         if len(self.score['y']) < 2: return
 
         cap = cv2.VideoCapture(self.params.video_path)
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         if metric == 'euclideanDistance':
             min_frame = np.argmin(np.array(self.score['euclideanDistance'])) + self.params.start_frame
@@ -898,11 +916,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """
         self.logger.info("Determine change points")
         if self.params.metric == 'euclideanDistance':
-            idx_dict = sp.get_local_max_and_min_idx(self.score['euclideanDistance'], self.video_info.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score['euclideanDistance'], round(self.video_info.fps))
         elif self.params.metric == 'x':
-            idx_dict = sp.get_local_max_and_min_idx(self.score['x'], self.video_info.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score['x'], round(self.video_info.fps))
         else:
-            idx_dict = sp.get_local_max_and_min_idx(self.score['y'], self.video_info.fps)
+            idx_dict = sp.get_local_max_and_min_idx(self.score['y'], round(self.video_info.fps))
         return idx_dict
 
 
@@ -976,7 +994,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 self.logger.warning("Raw output is enabled!")
 
             # NOTE: score['y'] and score['x'] should have the same number size so it should be enouth to check one score length
-            with Listener(on_press=self.on_key_press) as listener:
+            with Listener(on_press=self.on_key_press) as _:
                 status = self.tracking()
 
                 if self.params.use_kalman_filter:

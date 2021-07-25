@@ -23,15 +23,11 @@ Funscript is Funjack's haptic script format. It's basically JSON encoded timed p
     - at : time to be at position in milliseconds
 """
 
-import copy
 import os
 import cv2
 import json
-import logging
 
 import numpy as np
-
-from PyQt5 import QtGui, QtCore ,QtWidgets
 
 
 class Funscript:
@@ -55,9 +51,6 @@ class Funscript:
                 'sections': []
                 }
         self.changed = False
-
-
-    __logger = logging.getLogger(__name__)
 
 
     def get_fps(self) -> float:
