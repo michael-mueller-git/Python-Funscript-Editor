@@ -306,15 +306,20 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Note:
             We use x0,y0 from the predicted tracking boxes to create a diff score
         """
+        woman_center = [ [round(item[0]+item[2]/2), round(item[1]+item[3]/2)] for item in self.bboxes['Woman']]
+
         if self.params.track_men:
+            men_center = [ [round(item[0]+item[2]/2), round(item[1]+item[3]/2)] for item in self.bboxes['Men']]
+
             self.score['x'] = [w[0] - m[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
             self.score['y'] = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
-            self.score['euclideanDistance'] = [np.sqrt(np.sum((np.array(m[:2]) - np.array(w[:2])) ** 2, axis=0)) \
-                    for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
+
+            self.score['euclideanDistance'] = [np.sqrt(np.sum((np.array(m) - np.array(w)) ** 2, axis=0)) \
+                    for w, m in zip(woman_center, men_center)]
+
         else:
             self.score['x'] = [w[0] - min([x[0] for x in self.bboxes['Woman']]) for w in self.bboxes['Woman']]
             self.score['y'] = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
-            # TODO: how to calc d?
 
         self.score['x'] = sp.scale_signal(self.score['x'], 0, 100)
         self.score['y'] = sp.scale_signal(self.score['y'], 0, 100)
