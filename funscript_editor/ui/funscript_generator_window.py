@@ -108,7 +108,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                 FunscriptGeneratorParameter(
                     video_path = self.video_file,
                     track_men = self.settings['trackingMethod'] != 'Woman',
-                    direction = self.settings['trackingAxis'],
+                    metric = self.settings['trackingMetric'],
                     projection = self.settings['videoType'],
                     start_frame = self.start_frame,
                     end_frame = self.end_frame

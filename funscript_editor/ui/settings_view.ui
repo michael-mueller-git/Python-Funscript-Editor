@@ -64,7 +64,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Tracking Axis:</string>
+        <string>Tracking Metric:</string>
        </property>
       </widget>
      </item>
@@ -76,7 +76,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QComboBox" name="trackingAxisComboBox">
+      <widget class="QComboBox" name="trackingMetricComboBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>0</horstretch>

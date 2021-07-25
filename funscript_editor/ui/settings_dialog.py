@@ -38,13 +38,22 @@ class SettingsDialog(QtWidgets.QDialog):
                     list(filter(lambda x: PROJECTION[x]['name'] == value, PROJECTION.keys()))[0]
                 )
             )
-        self.ui.trackingAxisComboBox.currentTextChanged.connect(lambda value: self.__set_setting('trackingAxis', value))
+        self.ui.trackingMetricComboBox.currentTextChanged.connect(self.__set_tracking_metric)
         self.ui.trackingMethodComboBox.currentTextChanged.connect(lambda value: self.__set_setting('trackingMethod', value))
 
     def __setup_combo_boxes(self):
         self.ui.videoTypeComboBox.addItems([PROJECTION[key]['name'] for key in PROJECTION.keys()])
-        self.ui.trackingAxisComboBox.addItems(['y', 'x'])
+        self.ui.trackingMetricComboBox.addItems(['y', 'x', 'euclideanDistance'])
         self.ui.trackingMethodComboBox.addItems(['Woman', 'Woman + Men'])
+
+    def __set_tracking_metric(self, value):
+        if value in ['x', 'y']:
+            self.ui.trackingMethodComboBox.setEnabled(True)
+        else:
+            self.ui.trackingMethodComboBox.setCurrentText('Woman + Men')
+            self.ui.trackingMethodComboBox.setEnabled(False)
+
+        self.__set_setting('trackingMetric', value)
 
     def __apply(self):
         self.form.hide()

@@ -35,7 +35,7 @@ class FunscriptGeneratorParameter:
     # No default values
     video_path: str # no default value
     track_men: bool
-    direction: str
+    metric: str
     projection: str
 
     # Settings
@@ -95,7 +95,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.score = {
                 'x': [],
                 'y': [],
-                'd': []
+                'euclideanDistance': []
             }
         self.bboxes = {
                 'Men': [],
@@ -309,7 +309,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         if self.params.track_men:
             self.score['x'] = [w[0] - m[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
             self.score['y'] = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
-            self.score['d'] = [np.sqrt(np.sum((np.array(m[:2]) - np.array(w[:2])) ** 2, axis=0)) \
+            self.score['euclideanDistance'] = [np.sqrt(np.sum((np.array(m[:2]) - np.array(w[:2])) ** 2, axis=0)) \
                     for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
         else:
             self.score['x'] = [w[0] - min([x[0] for x in self.bboxes['Woman']]) for w in self.bboxes['Woman']]
@@ -318,10 +318,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         self.score['x'] = sp.scale_signal(self.score['x'], 0, 100)
         self.score['y'] = sp.scale_signal(self.score['y'], 0, 100)
-        self.score['d'] = sp.scale_signal(self.score['d'], 0, 100)
+        self.score['euclideanDistance'] = sp.scale_signal(self.score['euclideanDistance'], 0, 100)
 
 
-    def scale_score(self, status: str, direction : str = 'y') -> None:
+    def scale_score(self, status: str, metric : str = 'y') -> None:
         """ Scale the score to desired stroke high
 
         Note:
@@ -329,7 +329,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         Args:
             status (str): a status/info message to display in the window
-            direction (str): scale the 'y' or 'x' score
+            metric (str): scale the 'y' or 'x' score
         """
         if len(self.score['y']) < 2: return
 
@@ -337,10 +337,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        if direction == 'd':
-            min_frame = np.argmin(np.array(self.score['d'])) + self.params.start_frame
-            max_frame = np.argmax(np.array(self.score['d'])) + self.params.start_frame
-        elif direction == 'x':
+        if metric == 'euclideanDistance':
+            min_frame = np.argmin(np.array(self.score['euclideanDistance'])) + self.params.start_frame
+            max_frame = np.argmax(np.array(self.score['euclideanDistance'])) + self.params.start_frame
+        elif metric == 'x':
             min_frame = np.argmin(np.array(self.score['x'])) + self.params.start_frame
             max_frame = np.argmax(np.array(self.score['x'])) + self.params.start_frame
         else:
@@ -370,16 +370,16 @@ class FunscriptGeneratorThread(QtCore.QThread):
             imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
             imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
 
-            if direction == 'y':
+            if metric == 'y':
                 title_min = "Bottom"
-            elif direction == 'x':
+            elif metric == 'x':
                 title_min = "Left"
             else:
                 title_min = "Minimum"
 
-            if direction == 'y':
+            if metric == 'y':
                 title_max = "Top"
-            elif direction == 'x':
+            elif metric == 'x':
                 title_max = "Right"
             else:
                 title_max = "Maximum"
@@ -396,9 +396,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
             desired_min = 0
             desired_max = 99
 
-        if direction == 'd':
-            self.score['d'] = sp.scale_signal(self.score['d'], desired_min, desired_max)
-        elif direction == 'x':
+        if metric == 'euclideanDistance':
+            self.score['euclideanDistance'] = sp.scale_signal(self.score['euclideanDistance'], desired_min, desired_max)
+        elif metric == 'x':
             self.score['x'] = sp.scale_signal(self.score['x'], desired_min, desired_max)
         else:
             self.score['y'] = sp.scale_signal(self.score['y'], desired_min, desired_max)
@@ -796,16 +796,16 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Args:
             position (str): is max or min
         """
-        if self.params.direction == 'd':
+        if self.params.metric == 'euclideanDistance':
             shift_a = self.params.shift_top_points
-        elif self.params.direction == 'x':
+        elif self.params.metric == 'x':
             shift_a = self.params.shift_right_points
         else:
             shift_a = self.params.shift_top_points
 
-        if self.params.direction == 'd':
+        if self.params.metric == 'euclideanDistance':
             shift_b = self.params.shift_bottom_points
-        elif self.params.direction == 'x':
+        elif self.params.metric == 'x':
             shift_b = self.params.shift_left_points
         else:
             shift_b = self.params.shift_bottom_points
@@ -832,23 +832,23 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             list: score with offset
         """
-        if self.params.direction == 'd':
+        if self.params.metric == 'euclideanDistance':
             offset_a = self.params.top_points_offset
-        elif self.params.direction == 'x':
+        elif self.params.metric == 'x':
             offset_a = self.params.right_points_offset
         else:
             offset_a = self.params.top_points_offset
 
-        if self.params.direction == 'd':
+        if self.params.metric == 'euclideanDistance':
             offset_b = self.params.bottom_points_offset
-        elif self.params.direction == 'x':
+        elif self.params.metric == 'x':
             offset_b = self.params.left_points_offset
         else:
             offset_b = self.params.bottom_points_offset
 
-        if self.params.direction == 'd':
-            score = copy.deepcopy(self.score['d'])
-        elif self.params.direction == 'x':
+        if self.params.metric == 'euclideanDistance':
+            score = copy.deepcopy(self.score['euclideanDistance'])
+        elif self.params.metric == 'x':
             score = copy.deepcopy(self.score['x'])
         else:
             score = copy.deepcopy(self.score['y'])
@@ -892,9 +892,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
             dict: all local max and min points in score {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
         """
         self.logger.info("Determine change points")
-        if self.params.direction == 'd':
-            idx_dict = sp.get_local_max_and_min_idx(self.score['d'], self.video_info.fps)
-        elif self.params.direction == 'x':
+        if self.params.metric == 'euclideanDistance':
+            idx_dict = sp.get_local_max_and_min_idx(self.score['euclideanDistance'], self.video_info.fps)
+        elif self.params.metric == 'x':
             idx_dict = sp.get_local_max_and_min_idx(self.score['x'], self.video_info.fps)
         else:
             idx_dict = sp.get_local_max_and_min_idx(self.score['y'], self.video_info.fps)
@@ -909,9 +909,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                              {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
         """
         if self.params.raw_output:
-            if self.params.direction == 'd':
-                output_score = copy.deepcopy(self.score['d'])
-            elif self.params.direction == 'x':
+            if self.params.metric == 'euclideanDistance':
+                output_score = copy.deepcopy(self.score['euclideanDistance'])
+            elif self.params.metric == 'x':
                 output_score = copy.deepcopy(self.score['x'])
             else:
                 output_score = copy.deepcopy(self.score['y'])
@@ -925,16 +925,16 @@ class FunscriptGeneratorThread(QtCore.QThread):
         else:
             output_score = self.get_score_with_offset(idx_dict)
 
-            if self.params.direction == 'd':
+            if self.params.metric == 'euclideanDistance':
                 threshold_a = self.params.bottom_threshold
-            elif self.params.direction == 'x':
+            elif self.params.metric == 'x':
                 threshold_a = self.params.left_threshold
             else:
                 threshold_a = self.params.bottom_threshold
 
-            if self.params.direction == 'd':
+            if self.params.metric == 'euclideanDistance':
                 threshold_b = self.params.top_threshold
-            elif self.params.direction == 'x':
+            elif self.params.metric == 'x':
                 threshold_b = self.params.right_threshold
             else:
                 threshold_b = self.params.top_threshold
@@ -959,9 +959,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
         try:
-            if self.params.direction == 'd' and not self.params.track_men:
-                self.finished("Tracking with 'd' and no men tracker is not implemented!", False)
-                return
+            if self.params.metric not in ['x', 'y']:
+                self.params.track_men = True # we need 2 tracking points
 
             if self.video_info.fps < 31.0 and self.params.skip_frames > 0:
                 self.logger.warning("The Video has less than 30 frames per seconds and you have set skip_frames to %d "\
@@ -980,7 +979,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 if len(self.score['y']) >= HYPERPARAMETER['min_frames']:
                     self.logger.info("Scale score")
-                    self.scale_score(status, direction=self.params.direction)
+                    self.scale_score(status, metric=self.params.metric)
 
             if len(self.score['y']) < HYPERPARAMETER['min_frames']:
                 self.finished(status + ' -> Tracking time insufficient', False)
