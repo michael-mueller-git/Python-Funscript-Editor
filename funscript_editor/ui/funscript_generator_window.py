@@ -6,6 +6,7 @@ import cv2
 from funscript_editor.utils.logging import setup_logging
 from funscript_editor.algorithms.funscriptgenerator import FunscriptGeneratorThread, FunscriptGeneratorParameter
 from funscript_editor.data.funscript import Funscript
+from funscript_editor.ui.settings_dialog import SettingsDialog
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -53,35 +54,19 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         fps = cap.get(cv2.CAP_PROP_FPS)
         cap.release()
 
+        self.video_file = video_file
         self.funscript = Funscript(fps)
         self.output_file = output_file
 
-        if False:
-            reply = QtWidgets.QMessageBox.question(None, 'Generate Funscript ', \
-                    'Do you want to generate the funscript actions by tracking features in the Video? ',
-                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
-            if reply != QtWidgets.QMessageBox.Yes:
-                logging.info('Abort Funscript Generator')
-                sys.exit()
+        self.start_frame = int(round(float(start_time)/(float(1000)/float(fps)))) if start_time > 0.0 else 0
+        self.end_frame = int(round(float(end_time)/(float(1000)/float(fps)))) if end_time > 0.0 and start_time < end_time else -1
 
-        reply = QtWidgets.QMessageBox.question(None, 'Track Men', 'Do you want to track the Men? ',
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
-        trackMen = True if reply == QtWidgets.QMessageBox.Yes else False
+        self.__logger.info("Set End Time to Frame Number %d", self.end_frame)
 
-        start_frame = int(round(float(start_time)/(float(1000)/float(fps)))) if start_time > 0.0 else 0
-        end_frame = int(round(float(end_time)/(float(1000)/float(fps)))) if end_time > 0.0 and start_time < end_time else -1
-
-        self.__logger.info("Set End Time to Frame Number %d", end_frame)
-
-        self.funscript_generator = FunscriptGeneratorThread(
-                FunscriptGeneratorParameter(
-                    video_path = video_file,
-                    start_frame = start_frame,
-                    end_frame = end_frame,
-                    track_men = trackMen
-                ),
-                self.funscript)
-        self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
+        self.settings = {}
+        self.settings_dialog = SettingsDialog(self.settings)
+        self.settings_dialog.applySettings.connect(self.run)
+        self.settings_dialog.show()
 
 
     __logger = logging.getLogger(__name__)
@@ -110,10 +95,24 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                 f.write('at;pos\n')
                 for item in funscript.get_actions():
                     f.write('{at};{pos}\n'.format(at=item['at'], pos=item['pos']))
+
+            self.__logger.info("Save result to %s", self.output_file)
             if not success: self.__show_message(msg, error=True)
             sys.exit()
 
 
     def run(self) -> None:
         """ start generator """
+        self.__logger.info('settings: %s', str(self.settings))
+        self.funscript_generator = FunscriptGeneratorThread(
+                FunscriptGeneratorParameter(
+                    video_path = self.video_file,
+                    track_men = self.settings['trackingMethod'] != 'Woman',
+                    direction = self.settings['trackingAxis'],
+                    projection = self.settings['videoType'],
+                    start_frame = self.start_frame,
+                    end_frame = self.end_frame
+                ),
+                self.funscript)
+        self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
         self.funscript_generator.start()

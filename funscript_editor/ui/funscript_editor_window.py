@@ -287,9 +287,9 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
 
         self.video_player.set_funscript(self.funscript)
         self.funscript_visualizer.set_funscript(self.funscript)
-        self.ui.seekBar.setMaximum(max((0, self.video_player.get_length-1)))
+        self.ui.seekBar.setMaximum(max((0, self.video_player.get_length-2)))
         self.ui.seekBar.setValue(0)
-        self.ui.timestamp.setText('0 ')
+        self.ui.timestamp.setText(FFmpegStream.millisec_to_timestamp(0)+' ')
 
     def __new_funscript(self):
         self.funscript = Funscript(fps=self.video_player.get_fps)
@@ -300,13 +300,10 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         if self.funscript is None: return
         if self.video_player is None: return
         if self.video_player.get_video_file is None: return
+        # self.video_player.set_indicate_bussy(True) # we have no event if the user abort, for now we disable the bussy indicator
         start_time = self.video_player.get_current_timestamp_in_millis
         next_action = self.funscript.get_next_action(self.video_player.get_current_timestamp_in_millis+100)
-        if next_action['at'] > self.video_player.get_current_timestamp_in_millis+100:
-            end_time = next_action['at']
-        else:
-            end_time = -1
-
+        end_time = next_action['at'] if next_action['at'] > self.video_player.get_current_timestamp_in_millis+100 else -1.0
         self.__logger.info("Stop at {}".format(end_time))
 
         self.funscript_generator_window = FunscriptGeneratorWindow(
@@ -316,7 +313,6 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
                 self.funscript
             )
         self.funscript_generator_window.funscriptCompleted.connect(self.__funscript_generated)
-        self.funscript_generator_window.run()
 
 
     def __funscript_generated(self, funscript, status, success):

@@ -41,5 +41,4 @@ def generate_funscript(
             str(video_file), str(start_time), str(end_time), str(output_file))
     app = QtWidgets.QApplication(sys.argv)
     generator = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file)
-    generator.run()
     sys.exit(app.exec_())

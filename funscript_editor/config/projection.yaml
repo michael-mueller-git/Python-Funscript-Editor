@@ -2,8 +2,8 @@
 # Do not change any parameters here unless you know exactly what you are doing!
 # For VR video filer options see: https://ffmpeg.org/ffmpeg-filters.html#v360
 
-# 3D Side-By-Side 180 Dome VR Videos
 vr_he_sbs:
+  name: '3D VR Video'
   video_filter: 'v360=input=he:in_stereo=sbs:pitch=${phi}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
   parameter:
     height: 720
@@ -11,8 +11,8 @@ vr_he_sbs:
     fov: 100
     phi: -45
 
-# 2D Videos
 flat:
+  name: '2D Video'
   video_filter: 'scale=${width}:${height}'
   parameter:
     height: 720

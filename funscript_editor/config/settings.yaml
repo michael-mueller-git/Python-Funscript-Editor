@@ -10,20 +10,12 @@ use_zoom: False
 # Set the desired zoom value which will be used when the zoom function is activated.
 zoom_factor: 4.0
 
-# Specify the tracking direction. Allowed values are `'x'` and `'y'`.
-tracking_direction: 'y'
-
 # Limit the max player speed in the tracking preview window (0 = disable limit)
 max_playback_fps: 0
 
 # Set the preview image scaling factor. With a value of 1.0, the window should fill the height
 # or width of the screen depending on the aspect ratio of the video.
 preview_scaling: 0.6
-
-# Set the video type. Available Options:
-# - 'flat': 2D Videos
-# - 'vr_he_sbs': 3D VR Side-By-Side Video
-projection: 'flat'
 
 # Specify the tracker algorithm. Available options are 'MIL', 'KCF', 'CSRT'.
 tracker: 'CSRT'

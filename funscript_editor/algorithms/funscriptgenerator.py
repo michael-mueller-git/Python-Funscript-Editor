@@ -32,19 +32,20 @@ import matplotlib.pyplot as plt
 @dataclass
 class FunscriptGeneratorParameter:
     """ Funscript Generator Parameter Dataclass with default values """
+    # No default values
     video_path: str # no default value
-    start_frame: int = 0 # default is video start (input: set current video position)
-    end_frame: int = -1 # default is video end (-1)
-    track_men: bool = True # set by userinput at start (message box)
-    raw_output: bool = False
+    track_men: bool
+    direction: str
+    projection: str
 
     # Settings
+    start_frame: int = 0 # default is video start (input: set current video position)
+    end_frame: int = -1 # default is video end (-1)
+    raw_output: bool = False
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
-    direction: str = SETTINGS['tracking_direction']
     use_zoom: bool = SETTINGS['use_zoom']
     zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))
     preview_scaling: float = float(SETTINGS['preview_scaling'])
-    projection: str = str(SETTINGS['projection']).lower()
     use_kalman_filter: bool = SETTINGS['use_kalman_filter']
 
     # General

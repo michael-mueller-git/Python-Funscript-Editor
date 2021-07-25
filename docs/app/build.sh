@@ -5,6 +5,8 @@ if [ -z "$(pip3 list | grep "mkdocs")" ] ; then
     pip3 install mkdocs
 fi
 
+rm -rf ./site
+
 if command -v mkdocs ; then
     mkdocs build
 else

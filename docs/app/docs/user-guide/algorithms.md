@@ -4,8 +4,6 @@
 
 Idea: By using [OpenCV Tracker](https://learnopencv.com/object-tracking-using-opencv-cpp-python/), we can determine the relative movements in a static camera setup and map them into Funscript actions using simple signal processing.
 
-The Algorithm is implemented for 3D Side-By-Side VR Videos. Some parameter are currently hard coded. It should be possible to expand the functionality to 2D Videos by changing the code, with the following limitations.
-
 ### Limitations
 
 - Static camera setup
