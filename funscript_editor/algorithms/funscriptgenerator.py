@@ -306,10 +306,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Note:
             We use x0,y0 from the predicted tracking boxes to create a diff score
         """
-        woman_center = [ [round(item[0]+item[2]/2), round(item[1]+item[3]/2)] for item in self.bboxes['Woman']]
+        woman_center = [ [item[0]+item[2]/2, item[1]+item[3]/2] for item in self.bboxes['Woman']]
 
         if self.params.track_men:
-            men_center = [ [round(item[0]+item[2]/2), round(item[1]+item[3]/2)] for item in self.bboxes['Men']]
+            men_center = [ [item[0]+item[2]/2, item[1]+item[3]/2] for item in self.bboxes['Men']]
 
             self.score['x'] = [w[0] - m[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
             self.score['y'] = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
