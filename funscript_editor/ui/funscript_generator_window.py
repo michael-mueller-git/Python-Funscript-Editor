@@ -4,14 +4,13 @@ import os
 import cv2
 
 from funscript_editor.utils.logging import setup_logging
-from funscript_editor.ui.funscript_editor_window import FunscriptEditorWindow
-from funscript_editor.algorithms.funscriptgenerator import FunscriptGenerator, FunscriptGeneratorParameter
+from funscript_editor.algorithms.funscriptgenerator import FunscriptGeneratorThread, FunscriptGeneratorParameter
 from funscript_editor.data.funscript import Funscript
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
+class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     """ Class to Generate a funscript with minimal UI
 
     Note:
@@ -21,7 +20,7 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
         video_file (str): path to video file
         start_time (float): start position in video (timestamp in milliseconds)
         end_time (float): end position in video (timestamp in milliseconds) use -1.0 for video end.
-        output_file (str): csv output file path
+        output_file (str, Funscript): csv output file path (Optional you can pass a funscript object where to store the result)
     """
 
     def __init__(self,
@@ -29,14 +28,16 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
             start_time: float,
             end_time: float,
             output_file: str):
-        super(MinimalFunscriptGenerator, self).__init__()
+        super(FunscriptGeneratorWindow, self).__init__()
 
-        if os.path.isdir(output_file):
-            self.__show_message("The output TempFile path must be a file not a folder", error=True)
-            sys.exit()
+        if not isinstance(output_file, Funscript):
+            output_file = os.path.abspath(output_file)
+            if os.path.isdir(output_file):
+                self.__show_message("The output TempFile path must be a file not a folder", error=True)
+                sys.exit()
 
-        if os.path.exists(output_file):
-            os.remove(output_file)
+            if os.path.exists(output_file):
+                os.remove(output_file)
 
         if video_file is None or video_file == "":
             self.__show_message("Video file was not specified! " \
@@ -53,7 +54,7 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
         cap.release()
 
         self.funscript = Funscript(fps)
-        self.output_file = os.path.abspath(output_file)
+        self.output_file = output_file
 
         if False:
             reply = QtWidgets.QMessageBox.question(None, 'Generate Funscript ', \
@@ -72,7 +73,7 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
 
         self.__logger.info("Set End Time to Frame Number %d", end_frame)
 
-        self.funscript_generator = FunscriptGenerator(
+        self.funscript_generator = FunscriptGeneratorThread(
                 FunscriptGeneratorParameter(
                     video_path = video_file,
                     start_frame = start_frame,
@@ -81,10 +82,11 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
                 ),
                 self.funscript)
         self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
-        self.funscript_generator.processStatus.connect(self.__status_changed)
 
 
     __logger = logging.getLogger(__name__)
+
+    funscriptCompleted = QtCore.pyqtSignal(object, str, bool)
 
 
     def __show_message(self, message :str, error: bool = False) -> None:
@@ -98,17 +100,18 @@ class MinimalFunscriptGenerator(QtWidgets.QMainWindow):
 
 
     def __funscript_generated(self, funscript, msg, success) -> None:
-        os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
-        with open(self.output_file, 'w') as f:
-            f.write('at;pos\n')
+        if isinstance(self.output_file, Funscript):
             for item in funscript.get_actions():
-                f.write('{at};{pos}\n'.format(at=item['at'], pos=item['pos']))
-        if not success: self.__show_message(msg, error=True)
-        sys.exit()
-
-
-    def __status_changed(self, frame) -> None:
-        pass
+                self.output_file.add_action(item['pos'], item['at'])
+            self.funscriptCompleted.emit(self.output_file, msg, success)
+        else:
+            os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
+            with open(self.output_file, 'w') as f:
+                f.write('at;pos\n')
+                for item in funscript.get_actions():
+                    f.write('{at};{pos}\n'.format(at=item['at'], pos=item['pos']))
+            if not success: self.__show_message(msg, error=True)
+            sys.exit()
 
 
     def run(self) -> None:

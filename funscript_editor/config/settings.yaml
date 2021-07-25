@@ -23,7 +23,7 @@ preview_scaling: 0.6
 # Set the video type. Available Options:
 # - 'flat': 2D Videos
 # - 'vr_he_sbs': 3D VR Side-By-Side Video
-projection: 'vr_he_sbs'
+projection: 'flat'
 
 # Specify the tracker algorithm. Available options are 'MIL', 'KCF', 'CSRT'.
 tracker: 'CSRT'

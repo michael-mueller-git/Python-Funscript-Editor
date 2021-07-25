@@ -67,7 +67,7 @@ class FunscriptGeneratorParameter:
     right_threshold: float = float(HYPERPARAMETER['right_threshold'])
 
 
-class FunscriptGenerator(QtCore.QThread):
+class FunscriptGeneratorThread(QtCore.QThread):
     """ Funscript Generator Thread
 
     Args:
@@ -104,9 +104,6 @@ class FunscriptGenerator(QtCore.QThread):
 
     #: completed event with reference to the funscript with the predicted actions, status message and success flag
     funscriptCompleted = QtCore.pyqtSignal(object, str, bool)
-
-    #: processing event with current processed frame number
-    processStatus = QtCore.pyqtSignal(int)
 
     logger = logging.getLogger(__name__)
 
@@ -687,7 +684,6 @@ class FunscriptGenerator(QtCore.QThread):
 
             trackerWoman.update(frame)
             if self.params.track_men: trackerMen.update(frame)
-            self.processStatus.emit(frame_num)
 
             if last_frame is not None:
                 # Process data from last step while the next tracking points get predicted.

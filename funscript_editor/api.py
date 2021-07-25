@@ -5,7 +5,7 @@ import cv2
 
 from funscript_editor.utils.logging import setup_logging
 from funscript_editor.ui.funscript_editor_window import FunscriptEditorWindow
-from funscript_editor.ui.minimal import MinimalFunscriptGenerator
+from funscript_editor.ui.funscript_generator_window import FunscriptGeneratorWindow
 from funscript_editor.utils.config import VERSION
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -40,6 +40,6 @@ def generate_funscript(
     logging.info("Args: video_file=%s, start_time=%s, end_time=%s, output_file=%s", \
             str(video_file), str(start_time), str(end_time), str(output_file))
     app = QtWidgets.QApplication(sys.argv)
-    generator = MinimalFunscriptGenerator(video_file, start_time, end_time, output_file)
+    generator = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file)
     generator.run()
     sys.exit(app.exec_())

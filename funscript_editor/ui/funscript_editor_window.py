@@ -21,10 +21,11 @@ from funscript_editor.ui.funscript_editor_view import Ui_MainWindow
 from funscript_editor.ui.video_player import VideoPlayer
 from funscript_editor.ui.funscript_visualizer import FunscriptVisualizer
 from funscript_editor.data.funscript import Funscript
-from funscript_editor.algorithms.funscriptgenerator import FunscriptGenerator, FunscriptGeneratorParameter
+from funscript_editor.algorithms.funscriptgenerator import FunscriptGeneratorThread, FunscriptGeneratorParameter
 from funscript_editor.utils.config import UI_CONFIG, VERSION
 from funscript_editor.definitions import APP_DOCUMENTATION_DIR, CODE_DOCUMENTATION_DIR
 from funscript_editor.data.ffmpegstream import FFmpegStream
+from funscript_editor.ui.funscript_generator_window import FunscriptGeneratorWindow
 
 class FunscriptEditorWindow(QtWidgets.QMainWindow):
     """ Funscript Editor window """
@@ -295,38 +296,28 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.video_player.set_funscript(self.funscript)
         self.funscript_visualizer.set_funscript(self.funscript)
 
-    def __generator_status_changed(self, current):
-        self.statusBar().showMessage("{} ({})".format(current, datetime.now().strftime("%H:%M:%S")))
-
     def __generate_funscript(self):
         if self.funscript is None: return
         if self.video_player is None: return
         if self.video_player.get_video_file is None: return
-        start_frame = self.video_player.get_current_frame
+        start_time = self.video_player.get_current_timestamp_in_millis
         next_action = self.funscript.get_next_action(self.video_player.get_current_timestamp_in_millis+100)
         if next_action['at'] > self.video_player.get_current_timestamp_in_millis+100:
-            end_frame = self.video_player.millisec_to_frame(next_action['at'])
+            end_time = next_action['at']
         else:
-            end_frame = -1
+            end_time = -1
 
-        self.__logger.info("Stop at Frame {}".format(end_frame))
+        self.__logger.info("Stop at {}".format(end_time))
 
-        reply = QtWidgets.QMessageBox.question(None, 'Track Men', 'Do you want to track the Men? ',
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
-        trackMen = True if reply == QtWidgets.QMessageBox.Yes else False
+        self.funscript_generator_window = FunscriptGeneratorWindow(
+                self.video_player.get_video_file,
+                start_time,
+                end_time,
+                self.funscript
+            )
+        self.funscript_generator_window.funscriptCompleted.connect(self.__funscript_generated)
+        self.funscript_generator_window.run()
 
-        self.video_player.set_indicate_bussy(True)
-        self.funscript_generator = FunscriptGenerator(
-                FunscriptGeneratorParameter(
-                    video_path = self.video_player.get_video_file,
-                    start_frame = start_frame,
-                    end_frame = end_frame,
-                    track_men = trackMen
-                ),
-                self.funscript)
-        self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
-        self.funscript_generator.processStatus.connect(self.__generator_status_changed)
-        self.funscript_generator.start()
 
     def __funscript_generated(self, funscript, status, success):
         self.video_player.set_funscript(self.funscript)
