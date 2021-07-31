@@ -1,6 +1,6 @@
 # Python Funscript Editor
 
-A small Python program that use use Computer Vision to partially automate the generation of funscripts.
+A small Python program that use Computer Vision to partially automate the generation of funscripts.
 
 ## Getting Started
 
