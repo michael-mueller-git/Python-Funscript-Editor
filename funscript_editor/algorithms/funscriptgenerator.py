@@ -371,7 +371,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         cap.release()
 
         if success_min and success_max:
-            if 'vr' in self.params.projection.split('_'):
+            if self.is_vr_video():
                 if 'sbs' in self.params.projection.split('_'):
                     imgMin = imgMin[:, :int(imgMin.shape[1]/2)]
                     imgMax = imgMax[:, :int(imgMax.shape[1]/2)]
@@ -630,7 +630,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """
         first_frame = FFmpegStream.get_frame(self.params.video_path, self.params.start_frame)
 
-        if 'vr' in self.params.projection.split('_'):
+        if self.is_vr_video():
             projection_config = self.get_vr_projection_config(first_frame)
         else:
             projection_config = self.get_flat_projection_config(first_frame)
@@ -799,8 +799,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             int: real frame position
         """
-        shift_max = self.params.shift_top_points if metric == 'y' else self.params.shift_max_points
-        shift_min = self.params.shift_bottom_points if metric == 'y' else self.params.shift_min_points
+        shift_max = self.params.shift_top_points if metric == 'y' and self.is_vr_video() else self.params.shift_max_points
+        shift_min = self.params.shift_bottom_points if metric == 'y' and self.is_vr_video() else self.params.shift_min_points
 
         if position in ['max'] :
             if frame_number >= -1*shift_max \
@@ -825,8 +825,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             list: score with offset
         """
-        offset_max = self.params.top_points_offset if metric == 'y' else self.params.max_points_offset
-        offset_min = self.params.bottom_points_offset if metric == 'y' else self.params.min_points_offset
+        offset_max = self.params.top_points_offset if metric == 'y' and self.is_vr_video() else self.params.max_points_offset
+        offset_min = self.params.bottom_points_offset if metric == 'y' and self.is_vr_video() else self.params.min_points_offset
 
         score = copy.deepcopy(self.score[metric])
         score_min, score_max = min(score), max(score)
@@ -877,6 +877,15 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return sp.get_local_max_and_min_idx(self.score[metric], round(self.video_info.fps))
 
 
+    def is_vr_video(self):
+        """ Check if current video is set to VR
+
+        Returns:
+            bool: true if VR is selected else false
+        """
+        return 'vr' in self.params.projection.lower().split('_')
+
+
     def create_funscript(self, idx_dict: dict) -> None:
         """ Generate the Funscript
 
@@ -895,8 +904,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         else:
             output_score = self.get_score_with_offset(idx_dict, self.params.metric)
 
-            threshold_min = self.params.bottom_threshold if self.params.metric == 'y' else self.params.min_threshold
-            threshold_max = self.params.top_threshold if self.params.metric == 'y' else self.params.max_threshold
+            threshold_min = self.params.bottom_threshold if self.params.metric == 'y' and self.is_vr_video() else self.params.min_threshold
+            threshold_max = self.params.top_threshold if self.params.metric == 'y' and self.is_vr_video() else self.params.max_threshold
 
             for idx in idx_dict['min']:
                 self.funscript.add_action(
