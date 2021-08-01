@@ -30,8 +30,7 @@ import numpy as np
 @dataclass
 class FunscriptGeneratorParameter:
     """ Funscript Generator Parameter Dataclass with default values """
-    # No default values
-    video_path: str # no default value
+    video_path: str
     track_men: bool
     metric: str
     projection: str
@@ -49,7 +48,7 @@ class FunscriptGeneratorParameter:
     # General
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
 
-    # y VR Movement
+    # VR Movement in y Direction
     shift_bottom_points: int = int(HYPERPARAMETER['shift_bottom_points'])
     shift_top_points: int = int(HYPERPARAMETER['shift_top_points'])
     bottom_points_offset: float = float(HYPERPARAMETER['bottom_points_offset'])
@@ -57,7 +56,7 @@ class FunscriptGeneratorParameter:
     bottom_threshold: float = float(HYPERPARAMETER['bottom_threshold'])
     top_threshold: float = float(HYPERPARAMETER['top_threshold'])
 
-    # x-Movement
+    # All other predicted Movements
     shift_min_points: int = int(HYPERPARAMETER['shift_min_points'])
     shift_max_points: int = int(HYPERPARAMETER['shift_max_points'])
     min_points_offset: float = float(HYPERPARAMETER['min_points_offset'])
