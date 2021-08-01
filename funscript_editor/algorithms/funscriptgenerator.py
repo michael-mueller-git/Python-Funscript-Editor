@@ -4,6 +4,7 @@ import cv2
 import copy
 import time
 import math
+import json
 import logging
 
 from screeninfo import get_monitors
@@ -25,7 +26,6 @@ from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CO
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
-
 
 @dataclass
 class FunscriptGeneratorParameter:
@@ -939,6 +939,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
             with Listener(on_press=self.on_key_press) as _:
                 status = self.tracking()
+
+                if False:
+                    with open('debug.json', 'w') as f:
+                        json.dump(self.score, f)
 
                 if self.params.use_kalman_filter:
                     self.apply_kalman_filter()
