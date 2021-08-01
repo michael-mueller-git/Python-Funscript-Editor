@@ -52,9 +52,13 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         cap = cv2.VideoCapture(video_file)
         fps = cap.get(cv2.CAP_PROP_FPS)
+        height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        video_aspect_ratio = float(width) / max((1, float(height)))
         cap.release()
 
         self.video_file = video_file
+        self.is_sbs_vr_video = True if 1.9 < video_aspect_ratio < 2.1 else False
         self.funscript = Funscript(fps)
         self.output_file = output_file
 
@@ -64,7 +68,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__logger.info("Set End Time to Frame Number %d", self.end_frame)
 
         self.settings = {}
-        self.settings_dialog = SettingsDialog(self.settings)
+        self.settings_dialog = SettingsDialog(self.settings, include_vr = self.is_sbs_vr_video)
         self.settings_dialog.applySettings.connect(self.run)
         self.settings_dialog.show()
 

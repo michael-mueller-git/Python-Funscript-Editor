@@ -929,9 +929,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if self.params.metric not in ['x', 'y']:
                 self.params.track_men = True # we need 2 tracking points
 
-            if self.video_info.fps < 31.0 and self.params.skip_frames > 0:
+            if self.video_info.fps < 31.0 and self.params.skip_frames > 1:
                 self.logger.warning("The Video has less than 30 frames per seconds and you have set skip_frames to %d "\
-                        + "this can lead to inaccuracies when predicting the changepoint positions! (consider to set skip_frames to 0)" \
+                        + "this can lead to inaccuracies when predicting the changepoint positions! (consider to set skip_frames to 0 or 1)" \
                         , self.params.skip_frames)
 
             if self.params.raw_output:

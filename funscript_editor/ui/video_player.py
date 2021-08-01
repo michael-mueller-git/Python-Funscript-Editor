@@ -413,7 +413,7 @@ class VideoPlayer(QtCore.QThread):
             np.ndarray: opencv image
         """
         try: return cv2.cvtColor(np.array(self.player.screenshot_raw()), cv2.COLOR_RGB2BGR)
-        except: return None
+        except: return np.ndarray(0)
 
 
     def set_funscript(self, funscript :Funscript) -> None:
