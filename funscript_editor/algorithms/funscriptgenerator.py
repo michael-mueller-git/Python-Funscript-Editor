@@ -701,7 +701,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
-                    self.delete_last_tracking_predictions(int((self.get_average_tracking_fps()+1)*2.0))
+                    self.delete_last_tracking_predictions(int((self.get_average_tracking_fps()+1)*2.1))
                     break
 
             (successWoman, bboxWoman) = trackerWoman.result()
@@ -965,8 +965,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
             self.create_funscript(idx_dict)
             self.finished(status, True)
         except Exception as ex:
-            self.logger.critical("The program crashed due to a fatal error. " \
-                    + "Please open an issue on github with the corresponding log file (" \
-                    + ','.join(get_logfiles_paths()) + ") and application configuration (" \
-                    + SETTINGS_CONFIG_FILE + ", " + HYPERPARAMETER_CONFIG_FILE + ")", exc_info=ex)
+            self.logger.critical("The program crashed die to a fatal error", exc_info=ex)
+            # self.logger.critical("The program crashed due to a fatal error. " \
+            #         + "Please open an issue on github with the corresponding log file (" \
+            #         + ','.join(get_logfiles_paths()) + ") and application configuration (" \
+            #         + SETTINGS_CONFIG_FILE + ", " + HYPERPARAMETER_CONFIG_FILE + ")", exc_info=ex)
             self.finished("The program crashed due to a fatal error", False)
