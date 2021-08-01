@@ -10,7 +10,7 @@ from screeninfo import get_monitors
 from queue import Queue
 from pynput.keyboard import Key, Listener
 from dataclasses import dataclass
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtCore
 from matplotlib.figure import Figure
 from datetime import datetime
 from scipy.interpolate import interp1d
@@ -25,7 +25,6 @@ from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CO
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -109,7 +108,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
     logger = logging.getLogger(__name__)
 
 
-    def determine_preview_scaling(self, frame_width, frame_height) -> float:
+    def determine_preview_scaling(self, frame_width, frame_height) -> None:
         """ Determine the scaling for current monitor setup
 
         Args:
@@ -356,28 +355,22 @@ class FunscriptGeneratorThread(QtCore.QThread):
             status (str): a status/info message to display in the window
             metric (str): scale the 'y' or 'x' score
         """
-        if len(self.score['y']) < 2: return
+        if metric not in self.score.keys():
+            self.logger.error("key %s is not in score dict", metric)
+            return
+
+        if len(self.score[metric]) < 2: return
+        min_frame = np.argmin(np.array(self.score[metric])) + self.params.start_frame
+        max_frame = np.argmax(np.array(self.score[metric])) + self.params.start_frame
 
         cap = cv2.VideoCapture(self.params.video_path)
-
-        if metric == 'euclideanDistance':
-            min_frame = np.argmin(np.array(self.score['euclideanDistance'])) + self.params.start_frame
-            max_frame = np.argmax(np.array(self.score['euclideanDistance'])) + self.params.start_frame
-        elif metric == 'x':
-            min_frame = np.argmin(np.array(self.score['x'])) + self.params.start_frame
-            max_frame = np.argmax(np.array(self.score['x'])) + self.params.start_frame
-        else:
-            min_frame = np.argmin(np.array(self.score['y'])) + self.params.start_frame
-            max_frame = np.argmax(np.array(self.score['y'])) + self.params.start_frame
-
         cap.set(cv2.CAP_PROP_POS_FRAMES, min_frame)
-        successMin, imgMin = cap.read()
+        success_min, imgMin = cap.read()
         cap.set(cv2.CAP_PROP_POS_FRAMES, max_frame)
-        successMax, imgMax = cap.read()
-
+        success_max, imgMax = cap.read()
         cap.release()
 
-        if successMin and successMax:
+        if success_min and success_max:
             if 'vr' in self.params.projection.split('_'):
                 if 'sbs' in self.params.projection.split('_'):
                     imgMin = imgMin[:, :int(imgMin.shape[1]/2)]
@@ -390,41 +383,23 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 scale = PROJECTION[self.params.projection]['parameter']['width'] / float(1.75*imgMax.shape[1])
             else:
                 scale = PROJECTION[self.params.projection]['parameter']['height'] / float(1.75*imgMax.shape[0])
+
             imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
             imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
-
-            if metric == 'y':
-                title_min = "Bottom"
-            elif metric == 'x':
-                title_min = "Left"
-            else:
-                title_min = "Minimum"
-
-            if metric == 'y':
-                title_max = "Top"
-            elif metric == 'x':
-                title_max = "Right"
-            else:
-                title_max = "Maximum"
 
             (desired_min, desired_max) = self.min_max_selector(
                     image_min = imgMin,
                     image_max = imgMax,
                     info = status,
-                    title_min = title_min,
-                    title_max = title_max
+                    title_min = metric + " Minimum",
+                    title_max = metric + " Maximum"
                 )
         else:
             self.logger.warning("Determine min and max failed")
             desired_min = 0
             desired_max = 99
 
-        if metric == 'euclideanDistance':
-            self.score['euclideanDistance'] = sp.scale_signal(self.score['euclideanDistance'], desired_min, desired_max)
-        elif metric == 'x':
-            self.score['x'] = sp.scale_signal(self.score['x'], desired_min, desired_max)
-        else:
-            self.score['y'] = sp.scale_signal(self.score['y'], desired_min, desired_max)
+        self.score[metric] = sp.scale_signal(self.score[metric], desired_min, desired_max)
 
 
     def plot_y_score(self, name: str, idx_list: list, dpi : int = 300) -> None:
@@ -533,7 +508,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 preview = self.drawText(preview, "Press 'q' to use current selected region of interest)",
                         y = 50, color = (255, 0, 0))
-                preview = self.drawText(preview, "Use 'w', 's' to move up/down to the region of interest",
+                preview = self.drawText(preview, "VR Projection: Use 'w', 's' to move up/down to the region of interest",
                         y = 75, color = (0, 255, 0))
 
             cv2.imshow(self.window_name, self.preview_scaling(preview))
@@ -813,76 +788,54 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.funscriptCompleted.emit(self.funscript, status, success)
 
 
-    def apply_shift(self, frame_number, position: str) -> int:
+    def apply_shift(self, frame_number: int, metric: str, position: str) -> int:
         """ Apply shift to predicted frame positions
 
         Args:
-            position (str): is max or min
+            frame_number (int): relative frame number
+            metric (str): metric to apply the shift
+            position (str): keyword ['max', 'min', 'None']
+
+        Returns:
+            int: real frame position
         """
-        if self.params.metric == 'euclideanDistance':
-            shift_a = self.params.shift_top_points
-        elif self.params.metric == 'x':
-            shift_a = self.params.shift_right_points
-        else:
-            shift_a = self.params.shift_top_points
+        shift_max = self.params.shift_top_points if metric == 'y' else self.params.shift_right_points
+        shift_min = self.params.shift_bottom_points if metric == 'y' else self.params.shift_left_points
 
-        if self.params.metric == 'euclideanDistance':
-            shift_b = self.params.shift_bottom_points
-        elif self.params.metric == 'x':
-            shift_b = self.params.shift_left_points
-        else:
-            shift_b = self.params.shift_bottom_points
+        if position in ['max'] :
+            if frame_number >= -1*shift_max \
+                    and frame_number + shift_max < len(self.score[metric]): \
+                    return self.params.start_frame + frame_number + shift_max
 
-        if position in ['max', 'top', 'right'] :
-            if frame_number >= -1*shift_a \
-                    and frame_number + shift_a < len(self.score['y']): \
-                    return self.params.start_frame + frame_number + shift_a
-
-        if position in ['min', 'bottom', 'left']:
-            if frame_number >= -1*shift_b \
-                    and frame_number + shift_b < len(self.score['y']): \
-                    return self.params.start_frame + frame_number + shift_b
+        if position in ['min']:
+            if frame_number >= -1*shift_min \
+                    and frame_number + shift_min < len(self.score[metric]): \
+                    return self.params.start_frame + frame_number + shift_min
 
         return self.params.start_frame + frame_number
 
 
-    def get_score_with_offset(self, idx_dict) -> list:
+    def get_score_with_offset(self, idx_dict: dict, metric: str) -> list:
         """ Apply the offsets form config file
 
         Args:
             idx_dict (dict): the idx dictionary with {'min':[], 'max':[]} idx lists
+            metric (str): the metric for the score calculation
 
         Returns:
             list: score with offset
         """
-        if self.params.metric == 'euclideanDistance':
-            offset_a = self.params.top_points_offset
-        elif self.params.metric == 'x':
-            offset_a = self.params.right_points_offset
-        else:
-            offset_a = self.params.top_points_offset
+        offset_max = self.params.top_points_offset if metric == 'y' else self.params.right_points_offset
+        offset_min = self.params.bottom_points_offset if metric == 'y' else self.params.left_points_offset
 
-        if self.params.metric == 'euclideanDistance':
-            offset_b = self.params.bottom_points_offset
-        elif self.params.metric == 'x':
-            offset_b = self.params.left_points_offset
-        else:
-            offset_b = self.params.bottom_points_offset
-
-        if self.params.metric == 'euclideanDistance':
-            score = copy.deepcopy(self.score['euclideanDistance'])
-        elif self.params.metric == 'x':
-            score = copy.deepcopy(self.score['x'])
-        else:
-            score = copy.deepcopy(self.score['y'])
-
+        score = copy.deepcopy(self.score[metric])
         score_min, score_max = min(score), max(score)
 
         for idx in idx_dict['max']:
-            score[idx] = max(( score_min, min((score_max, score[idx] + offset_a)) ))
+            score[idx] = max(( score_min, min((score_max, score[idx] + offset_max)) ))
 
         for idx in idx_dict['min']:
-            score[idx] = max(( score_min, min((score_max, score[idx] + offset_b)) ))
+            score[idx] = max(( score_min, min((score_max, score[idx] + offset_min)) ))
 
         return score
 
@@ -908,20 +861,20 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 self.bboxes['Men'][idx] = (prediction[0], prediction[1], item[2], item[3])
 
 
-    def determin_change_points(self) -> dict:
+    def determine_change_points(self, metric: str) -> dict:
         """ Determine all change points
+
+        Args:
+            metric (str): from which metric you want to have the chainge points
 
         Returns:
             dict: all local max and min points in score {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
         """
-        self.logger.info("Determine change points")
-        if self.params.metric == 'euclideanDistance':
-            idx_dict = sp.get_local_max_and_min_idx(self.score['euclideanDistance'], round(self.video_info.fps))
-        elif self.params.metric == 'x':
-            idx_dict = sp.get_local_max_and_min_idx(self.score['x'], round(self.video_info.fps))
-        else:
-            idx_dict = sp.get_local_max_and_min_idx(self.score['y'], round(self.video_info.fps))
-        return idx_dict
+        self.logger.info("Determine change points for %s", metric)
+        if metric not in self.score.keys():
+            self.logger.error("key %s not in score metrics dict", metric)
+            return dict()
+        return sp.get_local_max_and_min_idx(self.score[metric], round(self.video_info.fps))
 
 
     def create_funscript(self, idx_dict: dict) -> None:
@@ -932,50 +885,33 @@ class FunscriptGeneratorThread(QtCore.QThread):
                              {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
         """
         if self.params.raw_output:
-            if self.params.metric == 'euclideanDistance':
-                output_score = copy.deepcopy(self.score['euclideanDistance'])
-            elif self.params.metric == 'x':
-                output_score = copy.deepcopy(self.score['x'])
-            else:
-                output_score = copy.deepcopy(self.score['y'])
-
+            output_score = copy.deepcopy(self.score[self.params.metric])
             for idx in range(len(output_score)):
                 self.funscript.add_action(
                         output_score[idx],
-                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'none'), self.video_info.fps)
+                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, self.params.metric, 'None'), self.video_info.fps)
                     )
 
         else:
-            output_score = self.get_score_with_offset(idx_dict)
+            output_score = self.get_score_with_offset(idx_dict, self.params.metric)
 
-            if self.params.metric == 'euclideanDistance':
-                threshold_a = self.params.bottom_threshold
-            elif self.params.metric == 'x':
-                threshold_a = self.params.left_threshold
-            else:
-                threshold_a = self.params.bottom_threshold
-
-            if self.params.metric == 'euclideanDistance':
-                threshold_b = self.params.top_threshold
-            elif self.params.metric == 'x':
-                threshold_b = self.params.right_threshold
-            else:
-                threshold_b = self.params.top_threshold
+            threshold_min = self.params.bottom_threshold if self.params.metric == 'y' else self.params.left_threshold
+            threshold_max = self.params.top_threshold if self.params.metric == 'y' else self.params.right_threshold
 
             for idx in idx_dict['min']:
                 self.funscript.add_action(
                         min(output_score) \
-                                if output_score[idx] < min(output_score) + threshold_a \
+                                if output_score[idx] < min(output_score) + threshold_min \
                                 else round(output_score[idx]),
-                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'min'), self.video_info.fps)
+                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, self.params.metric, 'min'), self.video_info.fps)
                     )
 
             for idx in idx_dict['max']:
                 self.funscript.add_action(
                         max(output_score) \
-                                if output_score[idx] > max(output_score) - threshold_b \
+                                if output_score[idx] > max(output_score) - threshold_max \
                                 else round(output_score[idx]),
-                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, 'max'), self.video_info.fps)
+                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, self.params.metric, 'max'), self.video_info.fps)
                     )
 
 
@@ -993,22 +929,21 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if self.params.raw_output:
                 self.logger.warning("Raw output is enabled!")
 
-            # NOTE: score['y'] and score['x'] should have the same number size so it should be enouth to check one score length
             with Listener(on_press=self.on_key_press) as _:
                 status = self.tracking()
 
                 if self.params.use_kalman_filter:
                     self.apply_kalman_filter()
 
-                if len(self.score['y']) >= HYPERPARAMETER['min_frames']:
+                if len(self.score[self.params.metric]) >= HYPERPARAMETER['min_frames']:
                     self.logger.info("Scale score")
                     self.scale_score(status, metric=self.params.metric)
 
-            if len(self.score['y']) < HYPERPARAMETER['min_frames']:
+            if len(self.score[self.params.metric]) < HYPERPARAMETER['min_frames']:
                 self.finished(status + ' -> Tracking time insufficient', False)
                 return
 
-            idx_dict = self.determin_change_points()
+            idx_dict = self.determine_change_points(self.params.metric)
 
             if False:
                 idx_list = [x for k in ['min', 'max'] for x in idx_dict[k]]
