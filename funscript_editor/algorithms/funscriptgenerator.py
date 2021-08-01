@@ -49,7 +49,7 @@ class FunscriptGeneratorParameter:
     # General
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
 
-    # y-Movement
+    # y VR Movement
     shift_bottom_points: int = int(HYPERPARAMETER['shift_bottom_points'])
     shift_top_points: int = int(HYPERPARAMETER['shift_top_points'])
     bottom_points_offset: float = float(HYPERPARAMETER['bottom_points_offset'])
@@ -58,12 +58,12 @@ class FunscriptGeneratorParameter:
     top_threshold: float = float(HYPERPARAMETER['top_threshold'])
 
     # x-Movement
-    shift_left_points: int = int(HYPERPARAMETER['shift_left_points'])
-    shift_right_points: int = int(HYPERPARAMETER['shift_right_points'])
-    left_points_offset: float = float(HYPERPARAMETER['left_points_offset'])
-    right_points_offset: float = float(HYPERPARAMETER['right_points_offset'])
-    left_threshold: float = float(HYPERPARAMETER['left_threshold'])
-    right_threshold: float = float(HYPERPARAMETER['right_threshold'])
+    shift_min_points: int = int(HYPERPARAMETER['shift_min_points'])
+    shift_max_points: int = int(HYPERPARAMETER['shift_max_points'])
+    min_points_offset: float = float(HYPERPARAMETER['min_points_offset'])
+    max_points_offset: float = float(HYPERPARAMETER['max_points_offset'])
+    min_threshold: float = float(HYPERPARAMETER['min_threshold'])
+    max_threshold: float = float(HYPERPARAMETER['max_threshold'])
 
 
 class FunscriptGeneratorThread(QtCore.QThread):
@@ -331,7 +331,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     # this should never happen
                     self.logger.error('Calculate score not implement for x=%d, y=%d', x, y)
 
-            # invert
+            # invert because math angle is ccw
             self.score['pitch'] = [-1.0*item for item in self.score['pitch']]
 
 
@@ -799,8 +799,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             int: real frame position
         """
-        shift_max = self.params.shift_top_points if metric == 'y' else self.params.shift_right_points
-        shift_min = self.params.shift_bottom_points if metric == 'y' else self.params.shift_left_points
+        shift_max = self.params.shift_top_points if metric == 'y' else self.params.shift_max_points
+        shift_min = self.params.shift_bottom_points if metric == 'y' else self.params.shift_min_points
 
         if position in ['max'] :
             if frame_number >= -1*shift_max \
@@ -825,8 +825,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             list: score with offset
         """
-        offset_max = self.params.top_points_offset if metric == 'y' else self.params.right_points_offset
-        offset_min = self.params.bottom_points_offset if metric == 'y' else self.params.left_points_offset
+        offset_max = self.params.top_points_offset if metric == 'y' else self.params.max_points_offset
+        offset_min = self.params.bottom_points_offset if metric == 'y' else self.params.min_points_offset
 
         score = copy.deepcopy(self.score[metric])
         score_min, score_max = min(score), max(score)
@@ -895,8 +895,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         else:
             output_score = self.get_score_with_offset(idx_dict, self.params.metric)
 
-            threshold_min = self.params.bottom_threshold if self.params.metric == 'y' else self.params.left_threshold
-            threshold_max = self.params.top_threshold if self.params.metric == 'y' else self.params.right_threshold
+            threshold_min = self.params.bottom_threshold if self.params.metric == 'y' else self.params.min_threshold
+            threshold_max = self.params.top_threshold if self.params.metric == 'y' else self.params.max_threshold
 
             for idx in idx_dict['min']:
                 self.funscript.add_action(

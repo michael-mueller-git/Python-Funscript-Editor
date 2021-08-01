@@ -43,7 +43,7 @@ class SettingsDialog(QtWidgets.QDialog):
 
     def __setup_combo_boxes(self):
         self.ui.videoTypeComboBox.addItems([PROJECTION[key]['name'] for key in PROJECTION.keys()])
-        self.ui.trackingMetricComboBox.addItems(['y', 'x', 'euclideanDistance'])
+        self.ui.trackingMetricComboBox.addItems(['y', 'x', 'euclideanDistance', 'pitch'])
         self.ui.trackingMethodComboBox.addItems(['Woman', 'Woman + Men'])
 
     def __set_tracking_metric(self, value):
