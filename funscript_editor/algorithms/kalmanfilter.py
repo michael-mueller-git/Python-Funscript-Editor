@@ -56,7 +56,7 @@ class KalmanFilter2D:
         self.prediction_counter += 1
 
 
-    def update(self, x: float, y: float) -> np.ndarray:
+    def update(self, x: float, y: float) -> list:
         """ Update the 2D Kalman Filter
 
         Args:

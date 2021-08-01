@@ -11,6 +11,7 @@ class SettingsDialog(QtWidgets.QDialog):
 
     Args:
         settings (dict): dict where to store the settings
+        include_vr (bool): include vr options
     """
 
     def __init__(self, settings: dict, include_vr: bool = True):
@@ -24,7 +25,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.__setup_ui_bindings()
         self.__setup_combo_boxes()
 
-    #: apply settiongs event
+    #: apply settings event
     applySettings = QtCore.pyqtSignal()
 
     def show(self):
@@ -43,7 +44,9 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.trackingMethodComboBox.currentTextChanged.connect(lambda value: self.__set_setting('trackingMethod', value))
 
     def __setup_combo_boxes(self):
-        self.ui.videoTypeComboBox.addItems([PROJECTION[key]['name'] for key in PROJECTION.keys() if 'vr' not in key.lower() or self.include_vr])
+        self.ui.videoTypeComboBox.addItems([PROJECTION[key]['name'] \
+                for key in PROJECTION.keys() \
+                if 'vr' not in key.lower() or self.include_vr])
         self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'x (left-right)', 'euclideanDistance', 'pitch'])
         self.ui.trackingMethodComboBox.addItems(['Woman', 'Woman + Men'])
 

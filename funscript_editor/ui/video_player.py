@@ -5,6 +5,7 @@ import cv2
 import time
 import os
 import logging
+import typing
 
 from typing import Callable
 from PIL import Image, ImageDraw, ImageFont
@@ -193,12 +194,12 @@ class VideoPlayer(QtCore.QThread):
                 self.key_callback('ctrl+n')
 
         @self.player.on_key_press('ctrl+o')
-        def __ctrl_n_binding():
+        def __ctrl_o_binding():
             if self.key_callback is not None:
                 self.key_callback('ctrl+o')
 
         @self.player.on_key_press('ctrl+c')
-        def __ctrl_n_binding():
+        def __ctrl_c_binding():
             if self.key_callback is not None:
                 self.key_callback('ctrl+c')
 
@@ -256,7 +257,7 @@ class VideoPlayer(QtCore.QThread):
 
 
     @property
-    def get_video_file(self) -> str:
+    def get_video_file(self) -> typing.Union[str, None]:
         """ Get current video file path
 
         Returns:
@@ -299,16 +300,20 @@ class VideoPlayer(QtCore.QThread):
 
     def increase_speed(self) -> None:
         """ Increase the playback speed """
-        self.player.speed += 0.2
-        if 0.9 < self.player.speed < 1.1: self.player.speed = 1.0
-        self.show_message('Speed: ' + str(self.player.speed))
+        try:
+            self.player.speed += 0.2
+            if 0.9 < self.player.speed < 1.1: self.player.speed = 1.0
+            self.show_message('Speed: ' + str(self.player.speed))
+        except: pass
 
 
     def decrease_speed(self) -> None:
         """ Decrease the playback speed """
-        if self.player.speed > 0.21: self.player.speed -= 0.2
-        if 0.9 < self.player.speed < 1.1: self.player.speed = 1.0
-        self.show_message('Speed: ' + str(self.player.speed))
+        try:
+            if self.player.speed > 0.21: self.player.speed -= 0.2
+            if 0.9 < self.player.speed < 1.1: self.player.speed = 1.0
+            self.show_message('Speed: ' + str(self.player.speed))
+        except: pass
 
 
     def show_message(self, message :str) -> None:
