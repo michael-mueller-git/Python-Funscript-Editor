@@ -445,19 +445,25 @@ class FunscriptGeneratorThread(QtCore.QThread):
         figure.savefig(fname=name, dpi=dpi, bbox_inches='tight')
 
 
-    def delete_last_tracking_predictions(self, num :int) -> None:
+    def delete_last_tracking_predictions(self, bboxes: dict, num :int) -> dict:
         """ Delete the latest tracking predictions e.g. to clear bad tracking values
 
         Args:
+        bboxes (dict): the raw bboxes
             num (int): number of frames to remove from predicted boxes
+
+        Returns:
+            dict: the filtered bboxes
         """
-        if len(self.bboxes['Woman']) <= num:
-            self.bboxes['Woman'] = []
-            self.bboxes['Men'] = []
-        else:
-            for _ in range(num):
-                del self.bboxes['Woman'][-1]
-                if self.params.track_men: del self.bboxes['Men'][-1]
+        if len(bboxes['Woman'].keys()) > 0:
+            keys = [k for k in bboxes['Woman'].keys()]
+            del_keys = [k for k in keys if k > max(keys) - num]
+            for k in del_keys:
+                try:
+                    del bboxes['Woman'][k]
+                    if self.params.track_men: del bboxes['Men'][k]
+                except: pass
+        return bboxes
 
 
     def preview_scaling(self, preview_image :np.ndarray, post_scale :float = 1.0) -> np.ndarray:
@@ -701,20 +707,20 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
-                    self.delete_last_tracking_predictions(int((self.get_average_tracking_fps()+1)*2.1))
+                    bboxes = self.delete_last_tracking_predictions(bboxes, int((self.get_average_tracking_fps()+1)*2.0))
                     break
 
             (successWoman, bboxWoman) = trackerWoman.result()
             if not successWoman:
                 status = 'Tracker Woman Lost'
-                self.delete_last_tracking_predictions((self.params.skip_frames+1)*3)
+                bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*3)
                 break
 
             if self.params.track_men:
                 (successMen, bboxMen) = trackerMen.result()
                 if not successMen:
                     status = 'Tracking Men Lost'
-                    self.delete_last_tracking_predictions((self.params.skip_frames+1)*3)
+                    bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*3)
                     break
 
             last_frame = frame
