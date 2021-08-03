@@ -4,7 +4,7 @@ We use a lua script to communicate between the Python Funscript Generator and th
 
 ## Installation (Windows)
 
-1. Download and install [Open Funscripter](https://github.com/OpenFunscripter/OFS/releases). Please memorize the specified installation path, you will need it later.
+1. Download and install [Open Funscripter (OFS)](https://github.com/OpenFunscripter/OFS/releases). Please memorize the specified installation path, you will need it later.
    <br> ![OFS installation Step 1](./images/ofs_installation_01.jpg)
    <br> ![OFS installation Step 2](./images/ofs_installation_02.jpg)
 2. Download the **latest** packed Python Funscript Editor from [github release page](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases).
