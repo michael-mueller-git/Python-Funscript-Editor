@@ -93,7 +93,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 'x': [],
                 'y': [],
                 'euclideanDistance': [],
-                'pitch': []
+                'roll': []
             }
         self.bboxes = {
                 'Men': [],
@@ -319,19 +319,19 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 x = self.bboxes['Woman'][i][0] - self.bboxes['Men'][i][0]
                 y = self.bboxes['Men'][i][1] - self.bboxes['Woman'][i][1]
                 if x >= 0 and y >= 0:
-                    self.score['pitch'].append(np.arctan(np.array(y / max((10e-3, x)))))
+                    self.score['roll'].append(np.arctan(np.array(y / max((10e-3, x)))))
                 elif x >= 0 and y < 0:
-                    self.score['pitch'].append(-1.0*np.arctan(np.array(y / max((10e-3, x)))))
+                    self.score['roll'].append(-1.0*np.arctan(np.array(y / max((10e-3, x)))))
                 elif x < 0 and y < 0:
-                    self.score['pitch'].append(math.pi + -1.0*np.arctan(np.array(y / x)))
+                    self.score['roll'].append(math.pi + -1.0*np.arctan(np.array(y / x)))
                 elif x < 0 and y >= 0:
-                    self.score['pitch'].append(math.pi + np.arctan(np.array(y / x)))
+                    self.score['roll'].append(math.pi + np.arctan(np.array(y / x)))
                 else:
                     # this should never happen
                     self.logger.error('Calculate score not implement for x=%d, y=%d', x, y)
 
             # invert because math angle is ccw
-            self.score['pitch'] = [-1.0*item for item in self.score['pitch']]
+            self.score['roll'] = [-1.0*item for item in self.score['roll']]
 
 
         else:
@@ -341,7 +341,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.score['x'] = sp.scale_signal(self.score['x'], 0, 100)
         self.score['y'] = sp.scale_signal(self.score['y'], 0, 100)
         self.score['euclideanDistance'] = sp.scale_signal(self.score['euclideanDistance'], 0, 100)
-        self.score['pitch'] = sp.scale_signal(self.score['pitch'], 0, 100)
+        self.score['roll'] = sp.scale_signal(self.score['roll'], 0, 100)
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:

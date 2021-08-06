@@ -47,7 +47,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.videoTypeComboBox.addItems([PROJECTION[key]['name'] \
                 for key in PROJECTION.keys() \
                 if 'vr' not in key.lower() or self.include_vr])
-        self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'x (left-right)', 'euclideanDistance', 'pitch'])
+        self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'x (left-right)', 'euclideanDistance', 'roll (rotation)'])
         self.ui.trackingMethodComboBox.addItems(['Woman', 'Woman + Men'])
 
     def __set_tracking_metric(self, value):
