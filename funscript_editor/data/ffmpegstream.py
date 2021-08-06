@@ -286,6 +286,7 @@ class FFmpegStream:
                 '-hide_banner',
                 '-loglevel', 'warning',
                 '-ss', str(seek),
+                '-hwaccel', 'auto',
                 '-i', self.video_path,
                 '-f', 'image2pipe',
                 '-pix_fmt', 'bgr24',
