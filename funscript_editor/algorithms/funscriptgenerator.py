@@ -1,12 +1,15 @@
 """ Top level process to generate the funscript actions by tracking selected features in the video """
 
 import cv2
+import os
 import copy
 import time
 import math
 import json
 import logging
+import threading
 
+from playsound import playsound
 from screeninfo import get_monitors
 from queue import Queue
 from pynput.keyboard import Key, Listener
@@ -20,7 +23,7 @@ from funscript_editor.algorithms.kalmanfilter import KalmanFilter2D
 from funscript_editor.algorithms.videotracker import StaticVideoTracker
 from funscript_editor.data.ffmpegstream import FFmpegStream
 from funscript_editor.data.funscript import Funscript
-from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
+from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION, NOTIFICATION_SOUND_FILE
 from funscript_editor.utils.logging import get_logfiles_paths
 from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CONFIG_FILE
 
@@ -278,6 +281,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         cv2.putText(image, "Use 'space' to quit and set the trackbar values",
             (self.x_text_start, 100), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
 
+        beep_thread = threading.Thread(target=self.beep)
+        beep_thread.start()
         self.clear_keypress_queue()
         trackbarValueMin = lower_limit
         trackbarValueMax = upper_limit
@@ -296,6 +301,15 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         self.__show_loading_screen(preview.shape)
         return (trackbarValueMin, trackbarValueMax) if trackbarValueMin < trackbarValueMax else (trackbarValueMax, trackbarValueMin)
+
+
+    def beep(self) -> None:
+        """ Play an sound to signal an event """
+        if NOTIFICATION_SOUND_FILE is not None:
+            if os.path.exists(NOTIFICATION_SOUND_FILE):
+                playsound(NOTIFICATION_SOUND_FILE)
+            else:
+                self.logger.warning("Notification sound file not found (%s)", NOTIFICATION_SOUND_FILE)
 
 
     def calculate_score(self) -> None:

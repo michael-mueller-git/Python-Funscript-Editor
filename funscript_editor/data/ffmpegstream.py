@@ -302,6 +302,7 @@ class FFmpegStream:
         pipe = sp.Popen(
                 command,
                 stdout = sp.PIPE,
+                stderr = sp.PIPE,
                 bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width']
             )
 
@@ -327,3 +328,6 @@ class FFmpegStream:
         pipe.terminate()
         try: pipe.stdout.close()
         except: pass
+        try: pipe.stderr.close()
+        except: pass
+

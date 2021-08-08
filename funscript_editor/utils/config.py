@@ -3,7 +3,7 @@
 import os
 import yaml
 
-from funscript_editor.definitions import ROOT_DIR, UI_CONFIG_FILE, \
+from funscript_editor.definitions import ROOT_DIR, CONFIG_DIR, UI_CONFIG_FILE, \
         HYPERPARAMETER_CONFIG_FILE, SETTINGS_CONFIG_FILE, PROJECTION_CONFIG_FILE
 
 def read_yaml_config(config_file: str) -> dict:
@@ -45,3 +45,6 @@ SETTINGS = read_yaml_config(SETTINGS_CONFIG_FILE)
 
 #: projection parameter
 PROJECTION = read_yaml_config(PROJECTION_CONFIG_FILE)
+
+#: notification sound file
+NOTIFICATION_SOUND_FILE = os.path.join(CONFIG_DIR, SETTINGS['notification_sound']) if SETTINGS['notification_sound'] != 'off' else None

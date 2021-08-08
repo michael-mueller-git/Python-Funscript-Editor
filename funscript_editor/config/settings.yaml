@@ -19,3 +19,6 @@ preview_scaling: 0.6
 
 # Specify the tracker algorithm. Available options are 'MIL', 'KCF', 'CSRT'.
 tracker: 'CSRT'
+
+# Specify the wav file to play when tracking finished (write 'off' to disable the sound notification)
+notification_sound: 'sound_notification.wav'
