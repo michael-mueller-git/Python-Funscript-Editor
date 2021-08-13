@@ -98,7 +98,7 @@ export CONDA_ALWAYS_YES="true"
 if [ -d "$APPDIR"/usr/conda ]; then
     log "WARNING: conda prefix directory exists: $APPDIR/usr/conda"
     log "Please make sure you perform a clean build before releases to make sure your process works properly."
-    
+
     # activate environment
     . "$APPDIR"/usr/conda/bin/activate
 else
@@ -164,8 +164,8 @@ done
 # specific files in usr/conda/bin/ (regex could result in false replacements in other files)
 [ -f usr/conda/bin/python3-config ] && sed -i --follow-symlinks "s|$APPDIR_FULL|\${APPDIR}|g" usr/conda/bin/python3-config
 [ -f usr/conda/bin/ncursesw6-config ] && sed -i --follow-symlinks "s|$APPDIR_FULL|\${APPDIR}|g" usr/conda/bin/ncursesw6-config
-[ -f usr/conda/etc/fonts/fonts.conf ] && sed -i --follow-symlinks "s|<cachedir>$APPDIR_FULL|<cachedir>/tmp|g" usr/conda/etc/fonts/fonts.conf 
-[ -f usr/conda/etc/fonts/fonts.conf ] && sed -i --follow-symlinks "s|<dir>$APPDIR_FULL|<dir>|g" usr/conda/etc/fonts/fonts.conf 
+[ -f usr/conda/etc/fonts/fonts.conf ] && sed -i --follow-symlinks "s|<cachedir>$APPDIR_FULL|<cachedir>/tmp|g" usr/conda/etc/fonts/fonts.conf
+[ -f usr/conda/etc/fonts/fonts.conf ] && sed -i --follow-symlinks "s|<dir>$APPDIR_FULL|<dir>|g" usr/conda/etc/fonts/fonts.conf
 
 popd
 

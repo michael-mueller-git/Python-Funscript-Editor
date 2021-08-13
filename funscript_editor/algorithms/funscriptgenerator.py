@@ -37,6 +37,7 @@ class FunscriptGeneratorParameter:
     track_men: bool
     metric: str
     projection: str
+    supervised_tracking: bool = True
 
     # Settings
     start_frame: int = 0 # default is video start (input: set current video position)
@@ -131,22 +132,23 @@ class FunscriptGeneratorThread(QtCore.QThread):
             self.params.preview_scaling = float(SETTINGS['preview_scaling']) * max(scale)
 
 
-    def drawBox(self, img: np.ndarray, bbox: tuple) -> np.ndarray:
+    def draw_box(self, img: np.ndarray, bbox: tuple, color: tuple = (255, 0, 255)) -> np.ndarray:
         """ Draw an tracking box on the image/frame
 
         Args:
             img (np.ndarray): opencv image
             bbox (tuple): tracking box with (x,y,w,h)
+            color (tuple): RGB color values for the box
 
         Returns:
             np.ndarray: opencv image with annotated tracking box
         """
         annotated_img = img.copy()
-        cv2.rectangle(annotated_img, (bbox[0], bbox[1]), ((bbox[0]+bbox[2]), (bbox[1]+bbox[3])), (255, 0, 255), 3, 1)
+        cv2.rectangle(annotated_img, (bbox[0], bbox[1]), ((bbox[0]+bbox[2]), (bbox[1]+bbox[3])), color, 3, 1)
         return annotated_img
 
 
-    def drawFPS(self, img: np.ndarray) -> np.ndarray:
+    def draw_fps(self, img: np.ndarray) -> np.ndarray:
         """ Draw processing FPS on the image/frame
 
         Args:
@@ -164,7 +166,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return annotated_img
 
 
-    def drawTime(self, img: np.ndarray, frame_num: int) -> np.ndarray:
+    def draw_time(self, img: np.ndarray, frame_num: int) -> np.ndarray:
         """ Draw Time on the image/frame
 
         Args:
@@ -191,7 +193,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return annotated_img
 
 
-    def drawText(self, img: np.ndarray, txt: str, y :int = 50, color :tuple = (0,0,255)) -> np.ndarray:
+    def draw_text(self, img: np.ndarray, txt: str, y :int = 50, color :tuple = (0,0,255)) -> np.ndarray:
         """ Draw text to an image/frame
 
         Args:
@@ -525,9 +527,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 parameter_changed = False
                 preview = FFmpegStream.get_projection(image, config)
 
-                preview = self.drawText(preview, "Press 'q' to use current selected region of interest)",
+                preview = self.draw_text(preview, "Press 'q' to use current selected region of interest)",
                         y = 50, color = (255, 0, 0))
-                preview = self.drawText(preview, "VR Projection: Use 'w', 's' to move up/down to the region of interest",
+                preview = self.draw_text(preview, "VR Projection: Use 'w', 's' to move up/down to the region of interest",
                         y = 75, color = (0, 255, 0))
 
             cv2.imshow(self.window_name, self.preview_scaling(preview))
@@ -559,7 +561,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """
         try:
             background = np.full(shape, 0, dtype=np.uint8)
-            loading_screen = self.drawText(background, txt)
+            loading_screen = self.draw_text(background, txt)
             cv2.imshow(self.window_name, self.preview_scaling(loading_screen))
             cv2.waitKey(1)
         except: pass
@@ -575,12 +577,12 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             tuple: the entered box tuple (x,y,w,h)
         """
-        image = self.drawText(image, "Select area with Mouse and Press 'space' or 'enter' to continue",
+        image = self.draw_text(image, "Select area with Mouse and Press 'space' or 'enter' to continue",
                 y = 75, color = (255, 0, 0))
 
         if self.params.use_zoom:
             while True:
-                zoom_bbox = cv2.selectROI(self.window_name, self.drawText(image, "Zoom selected area"), False)
+                zoom_bbox = cv2.selectROI(self.window_name, self.draw_text(image, "Zoom selected area"), False)
                 if zoom_bbox is None or len(zoom_bbox) == 0: continue
                 if zoom_bbox[2] < 75 or zoom_bbox[3] < 75:
                     self.logger.error("The selected zoom area is to small")
@@ -590,7 +592,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             image = image[zoom_bbox[1]:zoom_bbox[1]+zoom_bbox[3], zoom_bbox[0]:zoom_bbox[0]+zoom_bbox[2]]
             image = cv2.resize(image, None, fx=self.params.zoom_factor, fy=self.params.zoom_factor)
 
-        image = self.drawText(image, txt)
+        image = self.draw_text(image, txt)
         image = self.preview_scaling(image)
         while True:
             bbox = cv2.selectROI(self.window_name, image, False)
@@ -666,14 +668,25 @@ class FunscriptGeneratorThread(QtCore.QThread):
             }
 
         first_frame = video.read()
-        bboxWoman = self.get_bbox(first_frame, "Select Woman Feature")
-        trackerWoman = StaticVideoTracker(first_frame, bboxWoman)
-        bboxes['Woman'][1] = bboxWoman
+        bbox_woman = self.get_bbox(first_frame, "Select Woman Feature")
+        preview_frame = self.draw_box(first_frame, bbox_woman, color=(255,0,255))
+        if self.params.supervised_tracking:
+            tracking_area_woman = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Woman Feature")
+            preview_frame = self.draw_box(preview_frame, tracking_area_woman, color=(0,255,0))
+            tracker_woman = StaticVideoTracker(first_frame, bbox_woman, supervised_tracking_area = tracking_area_woman)
+        else:
+            tracker_woman = StaticVideoTracker(first_frame, bbox_woman)
+        bboxes['Woman'][1] = bbox_woman
 
         if self.params.track_men:
-            bboxMen = self.get_bbox(self.drawBox(first_frame, bboxWoman), "Select Men Feature")
-            trackerMen = StaticVideoTracker(first_frame, bboxMen)
-            bboxes['Men'][1] = bboxMen
+            bbox_men = self.get_bbox(preview_frame, "Select Men Feature")
+            preview_frame = self.draw_box(preview_frame, bbox_men, color=(255,0,255))
+            if self.params.supervised_tracking:
+                tracking_area_men = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Men Feature")
+                tracker_men = StaticVideoTracker(first_frame, bbox_men, supervised_tracking_area = tracking_area_men)
+            else:
+                tracker_men = StaticVideoTracker(first_frame, bbox_men)
+            bboxes['Men'][1] = bbox_men
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):
             cycle_time_in_ms = (float(1000) / float(self.params.max_playback_fps)) * (self.params.skip_frames+1)
@@ -700,23 +713,27 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 status = "Tracking stop at existing action point"
                 break
 
-            trackerWoman.update(frame)
-            if self.params.track_men: trackerMen.update(frame)
+            tracker_woman.update(frame)
+            if self.params.track_men: tracker_men.update(frame)
 
             if last_frame is not None:
                 # Process data from last step while the next tracking points get predicted.
                 # This should improve the whole processing speed, because the tracker run in a seperate thread
-                bboxes['Woman'][frame_num-1] = bboxWoman
-                last_frame = self.drawBox(last_frame, bboxes['Woman'][frame_num-1])
+                bboxes['Woman'][frame_num-1] = bbox_woman
+                last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1])
+                if self.params.supervised_tracking:
+                    last_frame = self.draw_box(last_frame, tracking_area_woman, color=(0,255,0))
 
                 if self.params.track_men:
-                    bboxes['Men'][frame_num-1] = bboxMen
-                    last_frame = self.drawBox(last_frame, bboxes['Men'][frame_num-1])
+                    bboxes['Men'][frame_num-1] = bbox_men
+                    last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1])
+                    if self.params.supervised_tracking:
+                        last_frame = self.draw_box(last_frame, tracking_area_men, color=(0,255,0))
 
-                last_frame = self.drawFPS(last_frame)
+                last_frame = self.draw_fps(last_frame)
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
                         (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
-                last_frame = self.drawTime(last_frame, frame_num + self.params.start_frame)
+                last_frame = self.draw_time(last_frame, frame_num + self.params.start_frame)
                 cv2.imshow(self.window_name, self.preview_scaling(last_frame))
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
@@ -724,16 +741,16 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     bboxes = self.delete_last_tracking_predictions(bboxes, int((self.get_average_tracking_fps()+1)*2.0))
                     break
 
-            (successWoman, bboxWoman) = trackerWoman.result()
-            if not successWoman:
-                status = 'Tracker Woman Lost'
+            (woman_tracker_status, bbox_woman) = tracker_woman.result()
+            if woman_tracker_status != "OK":
+                status = 'Woman ' + woman_tracker_status
                 bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*3)
                 break
 
             if self.params.track_men:
-                (successMen, bboxMen) = trackerMen.result()
-                if not successMen:
-                    status = 'Tracking Men Lost'
+                (men_tracker_status, bbox_men) = tracker_men.result()
+                if men_tracker_status != "OK":
+                    status = 'Men ' + men_tracker_status
                     bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*3)
                     break
 
