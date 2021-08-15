@@ -35,9 +35,9 @@ class FunscriptGeneratorParameter:
     """ Funscript Generator Parameter Dataclass with default values """
     video_path: str
     track_men: bool
+    supervised_tracking: bool
     metric: str
     projection: str
-    supervised_tracking: bool = True
 
     # Settings
     start_frame: int = 0 # default is video start (input: set current video position)
@@ -393,6 +393,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 elif 'ou' in self.params.projection.split('_'):
                     imgMin = imgMin[:int(imgMin.shape[0]/2), :]
                     imgMax = imgMax[:int(imgMax.shape[0]/2), :]
+                else:
+                    self.logger.warning("Unknown VR Projection Type: %s", self.params.projection)
 
             if PROJECTION[self.params.projection]['parameter']['width'] > 0:
                 scale = PROJECTION[self.params.projection]['parameter']['width'] / float(1.75*imgMax.shape[1])
@@ -671,7 +673,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
         bbox_woman = self.get_bbox(first_frame, "Select Woman Feature")
         preview_frame = self.draw_box(first_frame, bbox_woman, color=(255,0,255))
         if self.params.supervised_tracking:
-            tracking_area_woman = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Woman Feature")
+            while True:
+                tracking_area_woman = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Woman Feature")
+                if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_area_woman): break
+                self.logger.error("Invalid supervised tracking area selected")
             preview_frame = self.draw_box(preview_frame, tracking_area_woman, color=(0,255,0))
             tracker_woman = StaticVideoTracker(first_frame, bbox_woman, supervised_tracking_area = tracking_area_woman)
         else:
@@ -682,7 +687,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
             bbox_men = self.get_bbox(preview_frame, "Select Men Feature")
             preview_frame = self.draw_box(preview_frame, bbox_men, color=(255,0,255))
             if self.params.supervised_tracking:
-                tracking_area_men = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Men Feature")
+                while True:
+                    tracking_area_men = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Men Feature")
+                    if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_area_men): break
+                    self.logger.error("Invalid supervised tracking area selected")
                 tracker_men = StaticVideoTracker(first_frame, bbox_men, supervised_tracking_area = tracking_area_men)
             else:
                 tracker_men = StaticVideoTracker(first_frame, bbox_men)
@@ -720,15 +728,15 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 # Process data from last step while the next tracking points get predicted.
                 # This should improve the whole processing speed, because the tracker run in a seperate thread
                 bboxes['Woman'][frame_num-1] = bbox_woman
-                last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1])
+                last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1], color=(0,255,0))
                 if self.params.supervised_tracking:
                     last_frame = self.draw_box(last_frame, tracking_area_woman, color=(0,255,0))
 
                 if self.params.track_men:
                     bboxes['Men'][frame_num-1] = bbox_men
-                    last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1])
+                    last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1], color=(255,0,255))
                     if self.params.supervised_tracking:
-                        last_frame = self.draw_box(last_frame, tracking_area_men, color=(0,255,0))
+                        last_frame = self.draw_box(last_frame, tracking_area_men, color=(255,0,255))
 
                 last_frame = self.draw_fps(last_frame)
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",

@@ -28,9 +28,11 @@ class SettingsDialog(QtWidgets.QDialog):
     #: apply settings event
     applySettings = QtCore.pyqtSignal()
 
+
     def show(self):
-        """ Show wttings dialog """
+        """ Show settings dialog """
         self.form.show()
+
 
     def __setup_ui_bindings(self):
         self.ui.okButton.clicked.connect(self.__apply)
@@ -43,27 +45,34 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.trackingMetricComboBox.currentTextChanged.connect(self.__set_tracking_metric)
         self.ui.trackingMethodComboBox.currentTextChanged.connect(lambda value: self.__set_setting('trackingMethod', value))
 
+
     def __setup_combo_boxes(self):
         self.ui.videoTypeComboBox.addItems([PROJECTION[key]['name'] \
                 for key in PROJECTION.keys() \
                 if 'vr' not in key.lower() or self.include_vr])
+        self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman', 'Unsupervised Woman + Men', 'Supervised Woman', 'Supervised Woman + Men']) # set before tracking metric
         self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'x (left-right)', 'euclideanDistance', 'roll (rotation)'])
-        # self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman', 'Unsupervised Woman + Men', 'Supervised Woman', 'Supervised Woman + Men'])
-        self.ui.trackingMethodComboBox.addItems(['Woman', 'Woman + Men'])
+
 
     def __set_tracking_metric(self, value):
         value = value.split('(')[0].strip()
+        current_tracking_method_items = [self.ui.trackingMethodComboBox.itemText(i) for i in range(self.ui.trackingMethodComboBox.count())]
+
         if value in ['x', 'y']:
-            self.ui.trackingMethodComboBox.setEnabled(True)
+            if 'Unsupervised Woman' not in current_tracking_method_items:
+                self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman', 'Supervised Woman'])
         else:
-            self.ui.trackingMethodComboBox.setCurrentText('Woman + Men')
-            self.ui.trackingMethodComboBox.setEnabled(False)
+            if 'Unsupervised Woman' in current_tracking_method_items:
+                self.ui.trackingMethodComboBox.clear()
+                self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman + Men', 'Supervised Woman + Men'])
 
         self.__set_setting('trackingMetric', value)
+
 
     def __apply(self):
         self.form.hide()
         self.applySettings.emit()
+
 
     def __set_setting(self, key, value):
         self.settings[key] = value

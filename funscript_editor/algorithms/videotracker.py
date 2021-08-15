@@ -21,6 +21,7 @@ class StaticVideoTracker:
         first_frame (np.ndarray): open cv image representing the start frame
         tracking_bbox (tuple): tuple with (x,y,w,h) of the init tracking box
         limit_searchspace (dict) : only insert the specified region around the init box
+        supervised_tracking_area (tuple, optional): tuple with (x,y,w,h) of the supervised tracking area
         queue_size (int): in (work) and out (result) queue size
     """
 
@@ -44,6 +45,37 @@ class StaticVideoTracker:
 
 
     __logger = logging.getLogger(__name__)
+
+
+    @staticmethod
+    def is_bbox_in_tracking_area(bbox: tuple, supervised_tracking_area: tuple = None) -> bool:
+        """ Check if tracking box is inside the supervised tracking area
+
+        Args:
+            bbox (tuple): tuple with (x,y,w,h) of the tracking box
+            supervised_tracking_area (tuple, optional): tuple with (x,y,w,h) of the supervised tracking area
+
+        Returns:
+            bool: True if tracking box is in supervised_tracking_area else False
+        """
+        if bbox is None:
+            return False
+        if supervised_tracking_area is None:
+            return True
+        if supervised_tracking_area[2] <= 1:
+            return False
+        if supervised_tracking_area[3] <= 1:
+            return False
+        if bbox[0] < supervised_tracking_area[0]:
+            return False
+        if bbox[1] < supervised_tracking_area[1]:
+            return False
+        if bbox[0] + bbox[2] > supervised_tracking_area[0] + supervised_tracking_area[2]:
+            return False
+        if bbox[1] + bbox[3] > supervised_tracking_area[1] + supervised_tracking_area[3]:
+            return False
+
+        return True
 
 
     def stop(self) -> None:
@@ -117,15 +149,8 @@ class StaticVideoTracker:
                 if success:
                     status = "OK"
                     bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]))
-                    if self.supervised_tracking_area is not None:
-                        if bbox[0] < self.supervised_tracking_area[0]:
-                            status = "Feature outside the specified area"
-                        elif bbox[1] < self.supervised_tracking_area[1]:
-                            status = "Feature outside the specified area"
-                        elif bbox[0] + bbox[2] > self.supervised_tracking_area[0] + self.supervised_tracking_area[2]:
-                            status = "Feature outside the specified area"
-                        elif bbox[1] + bbox[3] > self.supervised_tracking_area[1] + self.supervised_tracking_area[3]:
-                            status = "Feature outside the specified area"
+                    if not StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
+                        status = "Feature outside the specified area"
 
                 self.queue_out.put((status, bbox))
 
