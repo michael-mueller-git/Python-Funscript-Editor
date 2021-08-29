@@ -26,7 +26,7 @@ We use a lua script to communicate between the Python Funscript Generator and th
    <br> ![Enable OFS Integration](./images/ofs_integration_07.jpg)
 9. Navigate to `Options : Keys : Dynamic` and insert a shortcut for the funscript generator.
    <br> ![Assign an Shortcut](./images/ofs_integration_08.jpg)
-10. Now you can use the shortcut at any position in the video to start the funscript generator.
+10. Now you can use the shortcut in OFS at any position in the video to start the funscript generator.
 
 ## Troubleshot
 
@@ -63,3 +63,7 @@ If less than 120 frames have been processed, a message box should pop up with th
 ### Tracking stops very often
 
 The selection of the tracking feature is tricky and requires some practice and experience. For a good tracking result, unique features in the video should be selected near the desired tacking position.
+
+### The standalone application `funscript-editor-exe` show only a black console window
+
+On slow hardware the application requires several seconds to load. Therefore wait at leas 60 seconds when the black console window opens!

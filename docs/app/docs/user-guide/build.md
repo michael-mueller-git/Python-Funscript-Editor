@@ -45,3 +45,5 @@ Now you can run the program direct from source code with:
 conda activate funscript-editor
 python3 funscript-editor.py
 ```
+
+You can update the application to the latest version with `git pull` inside the repository directory.
