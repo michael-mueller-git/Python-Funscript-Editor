@@ -464,24 +464,34 @@ class FunscriptGeneratorThread(QtCore.QThread):
         figure.savefig(fname=name, dpi=dpi, bbox_inches='tight')
 
 
-    def delete_last_tracking_predictions(self, bboxes: dict, num :int) -> dict:
+    def correct_bboxes(self, bboxes: dict, num :int) -> dict:
         """ Delete the latest tracking predictions e.g. to clear bad tracking values
 
         Args:
-        bboxes (dict): the raw bboxes
+            bboxes (dict): the raw bboxes
             num (int): number of frames to remove from predicted boxes
 
         Returns:
             dict: the filtered bboxes
         """
+        if self.params.track_men:
+            last_relevant_prediction = min((
+                max([0]+[k for k in bboxes['Woman'].keys()]),
+                max([0]+[k for k in bboxes['Men'].keys()])
+            ))
+        else:
+            last_relevant_prediction = max([0]+[k for k in bboxes['Woman'].keys()])
+
         if len(bboxes['Woman'].keys()) > 0:
-            keys = [k for k in bboxes['Woman'].keys()]
-            del_keys = [k for k in keys if k > max(keys) - num]
-            for k in del_keys:
-                try:
-                    del bboxes['Woman'][k]
-                    if self.params.track_men: del bboxes['Men'][k]
+            for k in [k for k in bboxes['Woman'].keys() if k > last_relevant_prediction - num]:
+                try: del bboxes['Woman'][k]
                 except: pass
+
+        if len(bboxes['Men'].keys()) > 0:
+            for k in [k for k in bboxes['Men'].keys() if k > last_relevant_prediction - num]:
+                try: del bboxes['Men'][k]
+                except: pass
+
         return bboxes
 
 
@@ -707,6 +717,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         status = "End of video reached"
         self.clear_keypress_queue()
         last_frame, frame_num = None, 1 # first frame is init frame
+        delete_last_predictions = 0
         while video.isOpen():
             cycle_start = time.time()
             frame = video.read()
@@ -750,32 +761,32 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
-                    bboxes = self.delete_last_tracking_predictions(bboxes, int((self.get_average_tracking_fps()+1)*2.0))
+                    delete_last_predictions = int((self.get_average_tracking_fps()+1)*2.0)
                     break
 
             (woman_tracker_status, bbox_woman) = tracker_woman.result()
             if woman_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
                 status = 'Woman ' + woman_tracker_status
-                bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
+                delete_last_predictions = (self.params.skip_frames+1)*2
                 break
 
             if woman_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
                 if len(bboxes['Woman']) == 0 or frame_num - max([x for x in bboxes['Woman'].keys()]) >= tracking_lost_frames:
                     status = 'Woman ' + woman_tracker_status
-                    bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
+                    delete_last_predictions = (self.params.skip_frames+1)*2
                     break
 
             if self.params.track_men:
                 (men_tracker_status, bbox_men) = tracker_men.result()
                 if men_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
                     status = 'Men ' + men_tracker_status
-                    bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
+                    delete_last_predictions = (self.params.skip_frames+1)*2
                     break
 
                 if men_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
                     if len(bboxes['Men']) == 0 or frame_num - max([x for x in bboxes['Men'].keys()]) >= tracking_lost_frames:
                         status = 'Men ' + men_tracker_status
-                        bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
+                        delete_last_predictions = (self.params.skip_frames+1)*2
                         break
 
             last_frame = frame
@@ -784,6 +795,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 wait = cycle_time_in_ms - (time.time() - cycle_start)*float(1000)
                 if wait > 0: time.sleep(wait/float(1000))
 
+        bboxes = self.correct_bboxes(bboxes, delete_last_predictions)
         self.__show_loading_screen(first_frame.shape)
         video.stop()
         self.logger.info(status)

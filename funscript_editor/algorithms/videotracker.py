@@ -68,6 +68,8 @@ class StaticVideoTracker:
         """
         if bbox is None:
             return False
+        if bbox[0] == 0 and bbox[1] == 0 and bbox[2] == 0 and bbox[3] == 0:
+            return False
         if supervised_tracking_area is None:
             return True
         if supervised_tracking_area[2] <= 1:
@@ -159,6 +161,9 @@ class StaticVideoTracker:
                     bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]))
                     if not StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
                         status = StaticVideoTracker.Status.FEATURE_OUTSIDE
+                        bbox = None
+                else:
+                    bbox = None
 
                 self.queue_out.put((status, bbox))
 
