@@ -64,6 +64,6 @@ If less than 120 frames have been processed, a message box should pop up with th
 
 The selection of the tracking feature is tricky and requires some practice and experience. For a good tracking result, unique features in the video should be selected near the desired tacking position.
 
-### The standalone application `funscript-editor-exe` show only a black console window
+### The standalone application `funscript-editor.exe` show only a black console window
 
-On slow hardware the application requires several seconds to load. Therefore wait at leas 60 seconds when the black console window opens!
+On slow hardware the application requires several seconds to load. Therefore wait at least 60 seconds when the black console window opens!
