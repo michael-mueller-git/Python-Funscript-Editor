@@ -773,7 +773,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     break
 
                 if men_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
-                    if len(bboxes['Men']) == 0 or frame_num -  max([x for x in bboxes['Men'].keys()]) >= tracking_lost_frames:
+                    if len(bboxes['Men']) == 0 or frame_num - max([x for x in bboxes['Men'].keys()]) >= tracking_lost_frames:
                         status = 'Men ' + men_tracker_status
                         bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
                         break
