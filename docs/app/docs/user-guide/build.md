@@ -52,6 +52,6 @@ conda activate funscript-editor
 python3 funscript-editor.py
 ```
 
-By default the latest code is used which may contain bugs. So you maybe want to switch to the latest release version with `` git checkout $(git describe --tags `git rev-list --tags --max-count=1`)  ``.
+By default the latest code is used which may contain bugs. So you maybe want to switch to the latest release version with `` git checkout $(git describe --tags `git rev-list --tags --max-count=1`)``.
 
 You can always update the application to the latest version with `git checkout main && git pull` inside the repository directory.

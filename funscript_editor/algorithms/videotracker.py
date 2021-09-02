@@ -5,6 +5,7 @@ import cv2
 import time
 import logging
 
+from dataclasses import dataclass
 from threading import Thread
 from queue import Queue
 from funscript_editor.utils.config import SETTINGS
@@ -45,6 +46,13 @@ class StaticVideoTracker:
 
 
     __logger = logging.getLogger(__name__)
+
+
+    @dataclass
+    class Status:
+        OK :str = "OK"
+        TRACKING_LOST :str = "Tracking Lost"
+        FEATURE_OUTSIDE :str = "Feature outside the specified area"
 
 
     @staticmethod
@@ -145,12 +153,12 @@ class StaticVideoTracker:
                 frame = self.queue_in.get()
                 frame_roi = frame[y0:y1, x0:x1]
                 success, bbox = self.tracker.update(frame_roi)
-                status = "Tracking Lost"
+                status = StaticVideoTracker.Status.TRACKING_LOST
                 if success:
-                    status = "OK"
+                    status = StaticVideoTracker.Status.OK
                     bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]))
                     if not StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
-                        status = "Feature outside the specified area"
+                        status = StaticVideoTracker.Status.FEATURE_OUTSIDE
 
                 self.queue_out.put((status, bbox))
 

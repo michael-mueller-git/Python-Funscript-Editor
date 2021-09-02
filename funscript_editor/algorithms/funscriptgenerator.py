@@ -48,8 +48,9 @@ class FunscriptGeneratorParameter:
     zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))
     preview_scaling: float = float(SETTINGS['preview_scaling'])
     use_kalman_filter: bool = SETTINGS['use_kalman_filter']
+    tracking_lost_time: int = max((0, SETTINGS['tracking_lost_time']))
 
-    # General
+    # General Hyperparameter
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
 
     # VR Movement in y Direction
@@ -701,6 +702,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         else:
             cycle_time_in_ms = 0
 
+        tracking_lost_frames = round(self.video_info.fps * self.params.tracking_lost_time / 1000.0)
+
         status = "End of video reached"
         self.clear_keypress_queue()
         last_frame, frame_num = None, 1 # first frame is init frame
@@ -751,17 +754,29 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     break
 
             (woman_tracker_status, bbox_woman) = tracker_woman.result()
-            if woman_tracker_status != "OK":
+            if woman_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
                 status = 'Woman ' + woman_tracker_status
-                bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*3)
+                bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
                 break
+
+            if woman_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
+                if len(bboxes['Woman']) == 0 or max([x for x in bboxes['Woman'].keys()]) < tracking_lost_frames:
+                    status = 'Woman ' + woman_tracker_status
+                    bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
+                    break
 
             if self.params.track_men:
                 (men_tracker_status, bbox_men) = tracker_men.result()
-                if men_tracker_status != "OK":
+                if men_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
                     status = 'Men ' + men_tracker_status
-                    bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*3)
+                    bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
                     break
+
+                if men_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
+                    if len(bboxes['Men']) == 0 or max([x for x in bboxes['Men'].keys()]) < tracking_lost_frames:
+                        status = 'Men ' + men_tracker_status
+                        bboxes = self.delete_last_tracking_predictions(bboxes, (self.params.skip_frames+1)*2)
+                        break
 
             last_frame = frame
 

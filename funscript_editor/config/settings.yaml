@@ -22,3 +22,6 @@ tracker: 'CSRT'
 
 # Specify the wav file to play when tracking finished (write 'off' to disable the sound notification)
 notification_sound: 'sound_notification.wav'
+
+# Time in milliseconds at which the tracking is stopped if the selected feature is not found
+tracking_lost_time: 0
