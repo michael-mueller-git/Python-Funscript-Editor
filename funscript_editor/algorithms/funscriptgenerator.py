@@ -727,12 +727,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if last_frame is not None:
                 # Process data from last step while the next tracking points get predicted.
                 # This should improve the whole processing speed, because the tracker run in a seperate thread
-                bboxes['Woman'][frame_num-1] = bbox_woman
-                last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1], color=(0,255,0))
-                if self.params.supervised_tracking:
-                    last_frame = self.draw_box(last_frame, tracking_area_woman, color=(0,255,0))
+                if bbox_woman is not None:
+                    bboxes['Woman'][frame_num-1] = bbox_woman
+                    last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1], color=(0,255,0))
+                    if self.params.supervised_tracking:
+                        last_frame = self.draw_box(last_frame, tracking_area_woman, color=(0,255,0))
 
-                if self.params.track_men:
+                if self.params.track_men and bbox_men is not None:
                     bboxes['Men'][frame_num-1] = bbox_men
                     last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1], color=(255,0,255))
                     if self.params.supervised_tracking:
