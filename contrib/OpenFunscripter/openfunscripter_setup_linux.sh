@@ -22,3 +22,6 @@ cmake ..
 make -j$(expr $(nproc) \+ 1)
 popd
 popd
+
+echo "copy lua plugin"
+cp -vf funscript_generator_linux.lua OFS/bin/data/lua
