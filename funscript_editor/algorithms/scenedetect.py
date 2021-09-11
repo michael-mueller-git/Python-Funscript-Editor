@@ -39,12 +39,12 @@ class SceneDetectFromFile:
                             # Column 2 (index 1) is Start Frame number
                             try: self.scenes.append(int(row[1]))
                             except: pass
-                        elif row[1] == 'Start Frame':
+                        elif len(row) > 1 and row[1] == 'Start Frame':
                             found_header = True
 
                     self.logger.info("Load %d scenes from %s", len(self.scenes), self.scenes_csv_path)
-            except:
-                self.logger.warning("Scenes CSV has wrong format!")
+            except Exception as ex:
+                self.logger.warning("Scenes CSV has wrong format (%s)!", str(ex))
 
 
     def is_scene_change(self, frame_number: int) -> bool:
