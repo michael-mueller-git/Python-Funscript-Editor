@@ -26,6 +26,7 @@ from funscript_editor.data.funscript import Funscript
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION, NOTIFICATION_SOUND_FILE
 from funscript_editor.utils.logging import get_logfiles_paths
 from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CONFIG_FILE
+from funscript_editor.algorithms.scenedetect import SceneDetectFromFile
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -714,10 +715,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         tracking_lost_frames = round(self.video_info.fps * self.params.tracking_lost_time / 1000.0)
 
+        sceneDetector = SceneDetectFromFile(self.params.video_path)
+
         status = "End of video reached"
         self.clear_keypress_queue()
         last_frame, frame_num = None, 1 # first frame is init frame
         delete_last_predictions = 0
+        self.clear_keypress_queue()
         while video.isOpen():
             cycle_start = time.time()
             frame = video.read()
@@ -754,12 +758,27 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         last_frame = self.draw_box(last_frame, tracking_area_men, color=(255,0,255))
 
                 last_frame = self.draw_fps(last_frame)
+                last_frame = self.draw_time(last_frame, frame_num + self.params.start_frame)
+
+                quit_flag = False
+                if sceneDetector.is_scene_change(frame_num-1 + self.params.start_frame):
+                    cv2.putText(last_frame, "Scene change detected, Press 'space' to continue tracking or press 'q' to finalize tracking",
+                            (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
+                    cv2.imshow(self.window_name, self.preview_scaling(last_frame))
+                    while True:
+                        key = cv2.waitKey(25)
+                        if self.was_space_pressed() or key == ord(' '):
+                            break
+
+                        if self.was_key_pressed('q') or key == ord('q'):
+                            quit_flag = True
+                            break
+
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
                         (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
-                last_frame = self.draw_time(last_frame, frame_num + self.params.start_frame)
                 cv2.imshow(self.window_name, self.preview_scaling(last_frame))
 
-                if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
+                if quit_flag or self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
                     delete_last_predictions = int((self.get_average_tracking_fps()+1)*2.0)
                     break
