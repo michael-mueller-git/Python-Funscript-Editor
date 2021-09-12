@@ -4,6 +4,7 @@ import cv2
 import os
 import logging
 import time
+import platform
 
 from dataclasses import dataclass
 from threading import Thread
@@ -109,12 +110,14 @@ class FFmpegStream:
             str: FFmpeg command
         """
         ffmpeg = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ffmpeg")
-        if os.path.exists(ffmpeg):
-            # use local ffmpeg
+        if platform.system() == "Windows":
+            if os.path.exists(ffmpeg + '.exe'):
+                return ffmpeg + '.exe'
+        elif os.path.exists(ffmpeg):
             return ffmpeg
-        else:
-            # use ffmpeg in $PATH
-            return "ffmpeg"
+
+        # use ffmpeg in $PATH
+        return "ffmpeg"
 
 
     @staticmethod
@@ -160,7 +163,8 @@ class FFmpegStream:
                 command,
                 stdin = sp.PIPE,
                 stdout = sp.PIPE,
-                bufsize = 3 * config['parameter']['width'] * config['parameter']['height']
+                bufsize = 3 * config['parameter']['width'] * config['parameter']['height'],
+                shell = True,
             )
 
         pipe.stdin.write(frame.tobytes())
@@ -303,7 +307,8 @@ class FFmpegStream:
                 command,
                 stdout = sp.PIPE,
                 stderr = sp.PIPE,
-                bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width']
+                bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width'],
+                shell = True
             )
 
         while not self.stopped:

@@ -39,7 +39,7 @@ jobs:
       - name: Build Application
         shell: bash -l {0}
         run: |
-          pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" --noupx --icon=icon.ico funscript-editor.py
+          pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" --noupx --noconsole --icon=icon.ico funscript-editor.py
       - name: Move Documentation to Application Build Directory
         shell: bash -l {0}
         run: |
