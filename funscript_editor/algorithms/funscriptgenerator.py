@@ -26,7 +26,7 @@ from funscript_editor.data.funscript import Funscript
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION, NOTIFICATION_SOUND_FILE
 from funscript_editor.utils.logging import get_logfiles_paths
 from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CONFIG_FILE
-from funscript_editor.algorithms.scenedetect import SceneDetectFromFile
+from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneContentDetector
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -715,7 +715,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         tracking_lost_frames = round(self.video_info.fps * self.params.tracking_lost_time / 1000.0)
 
-        sceneDetector = SceneDetectFromFile(self.params.video_path)
+        scene_detector = SceneDetectFromFile(self.params.video_path)
+        # scene_detector = SceneContentDetector(self.params.start_frame, first_frame, self.params.skip_frames, min_scene_len = self.video_info.fps*3)
 
         status = "End of video reached"
         self.clear_keypress_queue()
@@ -740,6 +741,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
             tracker_woman.update(frame)
             if self.params.track_men: tracker_men.update(frame)
+            scene_detector.update(frame)
 
             if last_frame is not None:
                 # Process data from last step while the next tracking points get predicted.
@@ -760,7 +762,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 last_frame = self.draw_time(last_frame, frame_num + self.params.start_frame)
 
                 quit_flag = False
-                if sceneDetector.is_scene_change(frame_num-1 + self.params.start_frame):
+                if scene_detector.is_scene_change(frame_num-1 + self.params.start_frame):
                     cv2.putText(last_frame, "Scene change detected, Press 'space' to continue tracking or press 'q' to finalize tracking",
                             (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
                     cv2.imshow(self.window_name, self.preview_scaling(last_frame))
@@ -777,7 +779,12 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
                 cv2.imshow(self.window_name, self.preview_scaling(last_frame))
 
-                if quit_flag or self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
+                if quit_flag:
+                    status = 'Tracking stopped at scene change'
+                    delete_last_predictions = (self.params.skip_frames+1)*2
+                    break
+
+                if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
                     delete_last_predictions = int((self.get_average_tracking_fps()+1)*2.0)
                     break
@@ -1043,7 +1050,12 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     self.scale_score(status, metric=self.params.metric)
 
             if len(self.score[self.params.metric]) < HYPERPARAMETER['min_frames']:
-                self.finished(status + ' -> Tracking time insufficient', False)
+                self.finished(
+                        status + ' -> Tracking time insufficient ({}/{} Frames)'.format(
+                            len(self.score[self.params.metric]),
+                            HYPERPARAMETER['min_frames']
+                        ), False
+                )
                 return
 
             idx_dict = self.determine_change_points(self.params.metric)

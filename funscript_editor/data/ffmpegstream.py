@@ -163,8 +163,7 @@ class FFmpegStream:
                 command,
                 stdin = sp.PIPE,
                 stdout = sp.PIPE,
-                bufsize = 3 * config['parameter']['width'] * config['parameter']['height'],
-                shell = True,
+                bufsize = 3 * config['parameter']['width'] * config['parameter']['height']
             )
 
         pipe.stdin.write(frame.tobytes())
@@ -307,8 +306,7 @@ class FFmpegStream:
                 command,
                 stdout = sp.PIPE,
                 stderr = sp.PIPE,
-                bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width'],
-                shell = True
+                bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width']
             )
 
         while not self.stopped:
