@@ -721,7 +721,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.clear_keypress_queue()
         last_frame, frame_num = None, 1 # first frame is init frame
         delete_last_predictions = 0
-        self.clear_keypress_queue()
         while video.isOpen():
             cycle_start = time.time()
             frame = video.read()

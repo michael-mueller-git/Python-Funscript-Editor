@@ -7,6 +7,7 @@ from funscript_editor.utils.logging import setup_logging
 from funscript_editor.algorithms.funscriptgenerator import FunscriptGeneratorThread, FunscriptGeneratorParameter
 from funscript_editor.data.funscript import Funscript
 from funscript_editor.ui.settings_dialog import SettingsDialog
+import funscript_editor.definitions as definitions
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -30,6 +31,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             end_time: float,
             output_file: str):
         super(FunscriptGeneratorWindow, self).__init__()
+        if os.path.exists(definitions.ICON_PATH):
+            self.setWindowIcon(QtGui.QIcon(definitions.ICON_PATH))
 
         if not isinstance(output_file, Funscript):
             output_file = os.path.abspath(output_file)

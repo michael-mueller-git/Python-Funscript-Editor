@@ -27,6 +27,8 @@ from funscript_editor.definitions import APP_DOCUMENTATION_DIR, CODE_DOCUMENTATI
 from funscript_editor.data.ffmpegstream import FFmpegStream
 from funscript_editor.ui.funscript_generator_window import FunscriptGeneratorWindow
 
+import funscript_editor.definitions as definitions
+
 class FunscriptEditorWindow(QtWidgets.QMainWindow):
     """ Funscript Editor window """
 
@@ -43,6 +45,8 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.__setup_variables()
         self.__setup_autosave_timer()
         self.setMouseTracking(True)
+        if os.path.exists(definitions.ICON_PATH):
+            self.setWindowIcon(QtGui.QIcon(definitions.ICON_PATH))
 
     __generateFunscript = QtCore.pyqtSignal()
     __openVideo = QtCore.pyqtSignal()
