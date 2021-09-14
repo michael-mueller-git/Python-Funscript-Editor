@@ -15,13 +15,20 @@ class SceneDetectFromFile:
 
     Args:
         video_path (str): path to current video file
+        frame_skip_faktor (int): the frame skip faktor of the tracking algorithms
+        min_scene_len (int): min frames between detected scene changes
     """
 
     def __init__(self,
-            video_path: str):
+            video_path: str,
+            frame_skip_faktor: int,
+            min_scene_len: int = 30):
         self.logger = logging.getLogger(__name__)
         self.__set_csv_path(video_path)
         self.__load_scenes()
+        self.min_scene_len = min_scene_len
+        self.frame_skip_faktor = frame_skip_faktor
+        self.ignore_counter = min_scene_len
 
 
     def __set_csv_path(self, video_path: str) -> None:
@@ -69,8 +76,13 @@ class SceneDetectFromFile:
             bool: True if current frame belongs to an scene change else False
 
         """
-        if frame_number in self.scenes:
+        if self.ignore_counter > 0:
+            self.ignore_counter -= 1
+            return False
+
+        if len(list(filter(lambda x: (x - frame_number) <= 0 and (x - frame_number) > -1*self.frame_skip_faktor, self.scenes))) > 0:
             self.logger.info("Detect scene change")
+            self.ignore_counter = self.min_scene_len
             return True
 
         return False
@@ -83,6 +95,7 @@ class SceneContentDetector:
     Args:
         start_frame_number (int): start frame number
         start_frame_img (np.ndarray): start frame opencv image
+        frame_skip_faktor (int): the frame skip faktor of the tracking algorithms
         threshold (float): thresold value to detect an scene change
         min_scene_len (int): min frames between detected scene changes
     """
@@ -148,8 +161,13 @@ class SceneContentDetector:
             bool: True if current frame belongs to an scene change else False
 
         """
-        if frame_number in self.scenes:
+        if self.ignore_counter > 0:
+            self.ignore_counter -= 1
+            return False
+
+        if len(list(filter(lambda x: (x - frame_number) <= 0 and (x - frame_number) > -1*self.frame_skip_faktor, self.scenes))) > 0:
             self.logger.info("Detect scene change")
+            self.ignore_counter = self.min_scene_len
             return True
 
         return False

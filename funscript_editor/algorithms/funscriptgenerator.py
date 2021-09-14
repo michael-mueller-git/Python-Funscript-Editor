@@ -715,7 +715,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         tracking_lost_frames = round(self.video_info.fps * self.params.tracking_lost_time / 1000.0)
 
-        scene_detector = SceneDetectFromFile(self.params.video_path)
+        scene_detector = SceneDetectFromFile(self.params.video_path, self.params.skip_frames)
         # scene_detector = SceneContentDetector(self.params.start_frame, first_frame, self.params.skip_frames, min_scene_len = self.video_info.fps*3)
 
         status = "End of video reached"
@@ -763,6 +763,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 quit_flag = False
                 if scene_detector.is_scene_change(frame_num-1 + self.params.start_frame):
+                    beep_thread = threading.Thread(target=self.beep)
+                    beep_thread.start()
                     cv2.putText(last_frame, "Scene change detected, Press 'space' to continue tracking or press 'q' to finalize tracking",
                             (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
                     cv2.imshow(self.window_name, self.preview_scaling(last_frame))
