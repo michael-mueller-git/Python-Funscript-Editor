@@ -730,7 +730,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 if self.params.supervised_tracking:
                     while True:
                         tracking_areas_men[tracker_number] = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Men Feature #" + str(tracker_number+1))
-                        if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_area_men): break
+                        if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_areas_men[tracker_number]): break
                         self.logger.error("Invalid supervised tracking area selected")
                     preview_frame = self.draw_box(preview_frame, tracking_areas_men[tracker_number], color=(255,0,255))
                     trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, supervised_tracking_area = tracking_areas_men[tracker_number])
@@ -742,7 +742,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 else:
                     bboxes['Men'][1][tracker_number] = bbox_men
 
-        return (first_frame, bboxes, tracking_areas_woman, tracking_areas_woman, trackers_woman, trackers_men)
+        return (first_frame, bboxes, tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men)
 
 
     def tracking(self) -> str:
@@ -767,7 +767,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 start_frame = self.params.start_frame
             )
 
-        (first_frame, bboxes, tracking_areas_woman, tracking_areas_woman, trackers_woman, trackers_men) = self.init_trackers(video)
+        (first_frame, bboxes, tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men) = self.init_trackers(video)
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):
             cycle_time_in_ms = (float(1000) / float(self.params.max_playback_fps)) * (self.params.skip_frames+1)
@@ -775,6 +775,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
             cycle_time_in_ms = 0
 
         tracking_lost_frames = round(self.video_info.fps * self.params.tracking_lost_time / 1000.0)
+        if self.params.number_of_trackers > 1:
+            self.logger.warning("Delayed Tracking Lost is currently not implemented for multiple trackers (The feature will be disabled)")
+            tracking_lost_frames = 0
 
         if self.params.scene_detector.upper() == "CONTENT":
             scene_detector = SceneContentDetector(self.params.start_frame, first_frame, self.params.skip_frames, self.video_info.fps)
@@ -879,7 +882,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     break
 
                 if woman_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
-                    if len(bboxes['Woman']) == 0 or frame_num - max([x for x in bboxes['Woman'].keys()]) >= tracking_lost_frames:
+                    if tracking_lost_frames == 0 or len(bboxes['Woman']) == 0 or frame_num - max([x for x in bboxes['Woman'].keys()]) >= tracking_lost_frames:
                         status = 'Woman ' + woman_tracker_status
                         delete_last_predictions = (self.params.skip_frames+1)*2
                         break
@@ -892,7 +895,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         break
 
                     if men_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
-                        if len(bboxes['Men']) == 0 or frame_num - max([x for x in bboxes['Men'].keys()]) >= tracking_lost_frames:
+                        if tracking_lost_frames == 0 or len(bboxes['Men']) == 0 or frame_num - max([x for x in bboxes['Men'].keys()]) >= tracking_lost_frames:
                             status = 'Men ' + men_tracker_status
                             delete_last_predictions = (self.params.skip_frames+1)*2
                             break
