@@ -384,15 +384,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
             return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
 
-        self.score['x'] = get_mean(score['x'])
-        self.score['y'] = get_mean(score['y'])
-        self.score['euclideanDistance'] = get_mean(score['euclideanDistance'])
-        self.score['roll'] = get_mean(score['roll'])
-
-        self.score['x'] = sp.scale_signal(self.score['x'], 0, 100)
-        self.score['y'] = sp.scale_signal(self.score['y'], 0, 100)
-        self.score['euclideanDistance'] = sp.scale_signal(self.score['euclideanDistance'], 0, 100)
-        self.score['roll'] = sp.scale_signal(self.score['roll'], 0, 100)
+        self.score['x'] = sp.scale_signal(get_mean(score['x']), 0, 100)
+        self.score['y'] = sp.scale_signal(get_mean(score['y']), 0, 100)
+        self.score['euclideanDistance'] = sp.scale_signal(get_mean(score['euclideanDistance']), 0, 100)
+        self.score['roll'] = sp.scale_signal(get_mean(score['roll']), 0, 100)
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:
@@ -713,7 +708,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         preview_frame = first_frame
         for tracker_number in range(self.params.number_of_trackers):
             bbox_woman = self.get_bbox(preview_frame, "Select Woman Feature #" + str(tracker_number+1))
-            preview_frame = self.draw_box(first_frame, bbox_woman, color=(255,0,255))
+            preview_frame = self.draw_box(preview_frame, bbox_woman, color=(255,0,255))
             if self.params.supervised_tracking:
                 while True:
                     tracking_areas_woman[tracker_number] = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Woman Feature #" + str(tracker_number+1))
@@ -829,9 +824,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                     if self.params.track_men and bbox_men[tracker_number] is not None:
                         if tracker_number == 0:
-                            bboxes['Men'][frame_num-1] = { tracker_number: bbox_men[0] }
+                            bboxes['Men'][frame_num-1] = { tracker_number: bbox_men[tracker_number] }
                         else:
-                            bboxes['Men'][frame_num-1][tracker_number] = bbox_men[0]
+                            bboxes['Men'][frame_num-1][tracker_number] = bbox_men[tracker_number]
                         last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1][tracker_number], color=(255,0,255))
                         if self.params.supervised_tracking:
                             last_frame = self.draw_box(last_frame, tracking_areas_men[tracker_number], color=(255,0,255))
