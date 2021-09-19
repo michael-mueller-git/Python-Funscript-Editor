@@ -357,13 +357,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     x = bboxes['Woman'][tracker_number][i][0] - bboxes['Men'][tracker_number][i][0]
                     y = bboxes['Men'][tracker_number][i][1] - bboxes['Woman'][tracker_number][i][1]
                     if x >= 0 and y >= 0:
-                        score['roll'][tracker_number].append(np.arctan(np.array(y / max((10e-3, x)))))
+                        score['roll'][tracker_number] = np.append(score['roll'][tracker_number], np.arctan(np.array(y / max((10e-3, x)))))
                     elif x >= 0 and y < 0:
-                        score['roll'][tracker_number].append(-1.0*np.arctan(np.array(y / max((10e-3, x)))))
+                        score['roll'][tracker_number] = np.append(score['roll'][tracker_number], -1.0*np.arctan(np.array(y / max((10e-3, x)))))
                     elif x < 0 and y < 0:
-                        score['roll'][tracker_number].append(math.pi + -1.0*np.arctan(np.array(y / x)))
+                        score['roll'][tracker_number] = np.append(score['roll'][tracker_number], math.pi + -1.0*np.arctan(np.array(y / x)))
                     elif x < 0 and y >= 0:
-                        score['roll'][tracker_number].append(math.pi + np.arctan(np.array(y / x)))
+                        score['roll'][tracker_number] = np.append(score['roll'][tracker_number], math.pi + np.arctan(np.array(y / x)))
                     else:
                         # this should never happen
                         self.logger.error('Calculate score not implement for x=%d, y=%d', x, y)
@@ -376,10 +376,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['x'][tracker_number] = np.array([w[0] - min([x[0] for x in bboxes['Woman'][tracker_number]]) for w in bboxes['Woman'][tracker_number]])
                 score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
 
-        max_frame_number = max([len(score['x'][i]) for i in range(self.params.number_of_trackers)])
-
-
         def get_mean(item):
+            max_frame_number = max([len(item[i]) for i in range(self.params.number_of_trackers)])
             arr = np.ma.empty((max_frame_number,self.params.number_of_trackers))
             arr.mask = True
             for tracker_number in range(self.params.number_of_trackers):
