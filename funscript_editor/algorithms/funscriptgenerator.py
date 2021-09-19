@@ -41,6 +41,7 @@ class FunscriptGeneratorParameter:
     supervised_tracking: bool
     metric: str
     projection: str
+    number_of_trackers: int = 1
 
     # Settings
     start_frame: int = 0 # default is video start (input: set current video position)
@@ -52,7 +53,6 @@ class FunscriptGeneratorParameter:
     preview_scaling: float = float(SETTINGS['preview_scaling'])
     tracking_lost_time: int = max((0, SETTINGS['tracking_lost_time']))
     scene_detector: str = SETTINGS['scene_detector']
-    number_of_trackers: int = int(SETTINGS['number_of_trackers'])
 
     # General Hyperparameter
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))

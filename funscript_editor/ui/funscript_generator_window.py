@@ -118,6 +118,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                     supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
                     metric = self.settings['trackingMetric'],
                     projection = self.settings['videoType'],
+                    number_of_trackers = int(self.settings['numberOfTrackers']),
                     start_frame = self.start_frame,
                     end_frame = self.end_frame
                 ),

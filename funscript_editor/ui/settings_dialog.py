@@ -44,6 +44,7 @@ class SettingsDialog(QtWidgets.QDialog):
             )
         self.ui.trackingMetricComboBox.currentTextChanged.connect(self.__set_tracking_metric)
         self.ui.trackingMethodComboBox.currentTextChanged.connect(lambda value: self.__set_setting('trackingMethod', value))
+        self.ui.numberOfTrackerComboBox.currentTextChanged.connect(lambda value: self.__set_setting('numberOfTrackers', value))
 
 
     def __setup_combo_boxes(self):
@@ -52,6 +53,7 @@ class SettingsDialog(QtWidgets.QDialog):
                 if 'vr' not in key.lower() or self.include_vr])
         self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman', 'Unsupervised Woman + Men', 'Supervised Woman', 'Supervised Woman + Men']) # set before tracking metric
         self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'x (left-right)', 'euclideanDistance', 'roll (rotation)'])
+        self.ui.numberOfTrackerComboBox.addItems([str(i) for i in range(1, 6)])
 
 
     def __set_tracking_metric(self, value):

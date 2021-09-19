@@ -27,7 +27,6 @@ Config Files:
 - `notification_sound` (str) Specify the wav file to play when tracking finished (write 'off' to disable the sound notification).
 - `tracking_lost_time` (int) Time in milliseconds at which the tracking is stopped if the selected feature is not found.
 - `scene_detector` (str): Specify the scene detector algorithm. Available options: `'CSV'`, `'CONTENT'`, `'THRESHOLD'`
-- `number_of_trackers` (int): Specify the number of trackers (Default should be `1`)
 
 #### `hyperparameter.yaml`
 

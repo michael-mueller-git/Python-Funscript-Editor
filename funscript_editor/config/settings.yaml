@@ -28,6 +28,3 @@ tracking_lost_time: 0
 # - 'CONTENT': Detects cuts using changes in colour and intensity between frames.
 # - 'THRESHOLD': Detects fades in video.
 scene_detector: 'CSV'
-
-# Specify the number of trackers (Default should be 1)
-number_of_trackers: 2
