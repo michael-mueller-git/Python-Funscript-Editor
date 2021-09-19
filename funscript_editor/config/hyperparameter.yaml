@@ -21,7 +21,7 @@ local_min_delta_in_percent: 0.25
 
 # Specify the minimum required frames for the tracking. Wee need this parameter to
 # ensure there is at leas two strokes in the tracking result.
-min_frames: 100
+min_frames: 90
 
 
 ##################
@@ -30,6 +30,12 @@ min_frames: 100
 
 # Specify the miniimum scene length in seconds
 min_scene_len: 2
+
+# Thresold value for the content detector to detect an scene change
+scene_content_detector_threshold: 30.0
+
+# Thresold value for the threshold detector to detect an scene change
+scene_threshold_detector_threshold: 12
 
 
 ##############################

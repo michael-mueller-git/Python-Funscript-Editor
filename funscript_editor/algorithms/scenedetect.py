@@ -125,7 +125,7 @@ class SceneContentDetector(SceneDetector):
             start_frame_img: np.ndarray,
             frame_skip_faktor: int,
             fps: float,
-            threshold: float = 30.0):
+            threshold: float = HYPERPARAMETER['scene_content_detector_threshold']):
         super().__init__(frame_skip_faktor, fps, start_frame_number)
         self.logger.info("Use Content Detector")
         self.threshold = threshold
@@ -183,7 +183,7 @@ class SceneThresholdDetector(SceneDetector):
             start_frame_number: int,
             frame_skip_faktor: int,
             fps: float,
-            threshold: int = 12):
+            threshold: int = HYPERPARAMETER['scene_threshold_detector_threshold']):
         super().__init__(frame_skip_faktor, fps, start_frame_number)
         self.logger.info("Use Threshold Detector")
         self.threshold = int(threshold)
