@@ -8,6 +8,9 @@ import math
 import json
 import logging
 import threading
+from numpy.core.fromnumeric import take
+from numpy.lib.function_base import append
+from numpy.ma.core import array
 
 from playsound import playsound
 from screeninfo import get_monitors
@@ -19,7 +22,6 @@ from matplotlib.figure import Figure
 from datetime import datetime
 from scipy.interpolate import interp1d
 
-from funscript_editor.algorithms.kalmanfilter import KalmanFilter2D
 from funscript_editor.algorithms.videotracker import StaticVideoTracker
 from funscript_editor.data.ffmpegstream import FFmpegStream
 from funscript_editor.data.funscript import Funscript
@@ -48,10 +50,9 @@ class FunscriptGeneratorParameter:
     use_zoom: bool = SETTINGS['use_zoom']
     zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))
     preview_scaling: float = float(SETTINGS['preview_scaling'])
-    use_kalman_filter: bool = SETTINGS['use_kalman_filter']
     tracking_lost_time: int = max((0, SETTINGS['tracking_lost_time']))
     scene_detector: str = SETTINGS['scene_detector']
-    number_of_trackers: int = 1
+    number_of_trackers: int = 2
 
     # General Hyperparameter
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
@@ -102,10 +103,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 'y': [],
                 'euclideanDistance': [],
                 'roll': []
-            }
-        self.bboxes = {
-                'Men': [],
-                'Woman': []
             }
 
 
@@ -228,24 +225,35 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """ Interpolate tracking boxes for skiped frames
 
         Args:
-            bboxes (dict): the new tracking box (x,y,w,h) in dict {Men: {frame_num: box, ...}, Woman: {frame_num: box, ...}}
+            bboxes (dict): the new tracking box (x,y,w,h) in dict {Men: {frame_num: tracker_number: {box, ...}}}, Woman: {tracker_number: {box, ...}}}
+
+        Returns:
+            dict: interpolated bboxes {'Men': {tracker_number: [(box_frame1),(box_frame2),....], ...} 'Woman': {tracker_number: [(box_frame1),(box_frame2),....], ...}}
         """
-        for key in bboxes:
-            x = [k for k in bboxes[key].keys()]
-            boxes = [v for v in bboxes[key].values()]
-            if len(boxes) < 2: continue
+        interpolated_bboxes = {}
+        for tracker_type in bboxes:
+            interpolated_bboxes[tracker_type] = {}
+            for tracker_number in range(self.params.number_of_trackers):
+                interpolated_bboxes[tracker_type][tracker_number] = []
+                x, boxes = [], []
+                for frame_num in bboxes[tracker_type].keys():
+                    if tracker_number in bboxes[tracker_type][frame_num]:
+                        x.append(frame_num)
+                        boxes.append(bboxes[tracker_type][frame_num][tracker_number])
+                if len(boxes) < 2: continue
 
-            # improve border interpolation
-            x_head = [x[0]-1]+x+[x[-1]+1]
-            boxes = [boxes[0]]+boxes+[boxes[-1]]
+                # improve border interpolation
+                x_head = [x[0]-1]+x+[x[-1]+1]
+                boxes = [boxes[0]]+boxes+[boxes[-1]]
 
-            fx0 = interp1d(x_head, [item[0] for item in boxes], kind = 'quadratic')
-            fy0 = interp1d(x_head, [item[1] for item in boxes], kind = 'quadratic')
-            fw  = interp1d(x_head, [item[2] for item in boxes], kind = 'quadratic')
-            fh  = interp1d(x_head, [item[3] for item in boxes], kind = 'quadratic')
+                fx0 = interp1d(x_head, [item[0] for item in boxes], kind = 'quadratic')
+                fy0 = interp1d(x_head, [item[1] for item in boxes], kind = 'quadratic')
+                fw  = interp1d(x_head, [item[2] for item in boxes], kind = 'quadratic')
+                fh  = interp1d(x_head, [item[3] for item in boxes], kind = 'quadratic')
 
-            for i in range(min(x), max(x)+1):
-                self.bboxes[key].append((float(fx0(i)), float(fy0(i)), float(fw(i)), float(fh(i))))
+                for i in range(min(x), max(x)+1):
+                    interpolated_bboxes[tracker_type][tracker_number].append((float(fx0(i)), float(fy0(i)), float(fw(i)), float(fh(i))))
+        return interpolated_bboxes
 
 
     def min_max_selector(self,
@@ -318,45 +326,70 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 self.logger.warning("Notification sound file not found (%s)", NOTIFICATION_SOUND_FILE)
 
 
-    def calculate_score(self) -> None:
+    def calculate_score(self, bboxes) -> None:
         """ Calculate the score for the predicted tracking boxes
 
         Note:
             We use x0,y0 from the predicted tracking boxes to create a diff score
+
+        Args:
+            bboxes (dict): the preprocessed bboxes
         """
-        woman_center = [ [item[0]+item[2]/2, item[1]+item[3]/2] for item in self.bboxes['Woman']]
+        score = {
+                'x':[np.array([]) for _ in range(self.params.number_of_trackers)],
+                'y':[np.array([]) for _ in range(self.params.number_of_trackers)],
+                'euclideanDistance': [np.array([]) for _ in range(self.params.number_of_trackers)],
+                'roll': [np.array([]) for _ in range(self.params.number_of_trackers)]
+        }
+        for tracker_number in range(self.params.number_of_trackers):
+            woman_center = [[item[0]+item[2]/2, item[1]+item[3]/2] for item in bboxes['Woman'][tracker_number]]
 
-        if self.params.track_men:
-            men_center = [ [item[0]+item[2]/2, item[1]+item[3]/2] for item in self.bboxes['Men']]
+            if self.params.track_men:
+                men_center = [[item[0]+item[2]/2, item[1]+item[3]/2] for item in bboxes['Men'][tracker_number]]
 
-            self.score['x'] = [w[0] - m[0] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
-            self.score['y'] = [m[1] - w[1] for w, m in zip(self.bboxes['Woman'], self.bboxes['Men'])]
+                score['x'][tracker_number] = np.array([w[0] - m[0] for w, m in zip(bboxes['Woman'][tracker_number], bboxes['Men'][tracker_number])])
+                score['y'][tracker_number] = np.array([m[1] - w[1] for w, m in zip(bboxes['Woman'][tracker_number], bboxes['Men'][tracker_number])])
 
-            self.score['euclideanDistance'] = [np.sqrt(np.sum((np.array(m) - np.array(w)) ** 2, axis=0)) \
-                    for w, m in zip(woman_center, men_center)]
+                score['euclideanDistance'][tracker_number] = np.array([np.sqrt(np.sum((np.array(m) - np.array(w)) ** 2, axis=0)) \
+                        for w, m in zip(woman_center, men_center)])
 
-            for i in range( min(( len(men_center), len(woman_center) )) ):
-                x = self.bboxes['Woman'][i][0] - self.bboxes['Men'][i][0]
-                y = self.bboxes['Men'][i][1] - self.bboxes['Woman'][i][1]
-                if x >= 0 and y >= 0:
-                    self.score['roll'].append(np.arctan(np.array(y / max((10e-3, x)))))
-                elif x >= 0 and y < 0:
-                    self.score['roll'].append(-1.0*np.arctan(np.array(y / max((10e-3, x)))))
-                elif x < 0 and y < 0:
-                    self.score['roll'].append(math.pi + -1.0*np.arctan(np.array(y / x)))
-                elif x < 0 and y >= 0:
-                    self.score['roll'].append(math.pi + np.arctan(np.array(y / x)))
-                else:
-                    # this should never happen
-                    self.logger.error('Calculate score not implement for x=%d, y=%d', x, y)
+                for i in range( min(( len(men_center), len(woman_center) )) ):
+                    x = bboxes['Woman'][tracker_number][i][0] - bboxes['Men'][tracker_number][i][0]
+                    y = bboxes['Men'][tracker_number][i][1] - bboxes['Woman'][tracker_number][i][1]
+                    if x >= 0 and y >= 0:
+                        score['roll'][tracker_number].append(np.arctan(np.array(y / max((10e-3, x)))))
+                    elif x >= 0 and y < 0:
+                        score['roll'][tracker_number].append(-1.0*np.arctan(np.array(y / max((10e-3, x)))))
+                    elif x < 0 and y < 0:
+                        score['roll'][tracker_number].append(math.pi + -1.0*np.arctan(np.array(y / x)))
+                    elif x < 0 and y >= 0:
+                        score['roll'][tracker_number].append(math.pi + np.arctan(np.array(y / x)))
+                    else:
+                        # this should never happen
+                        self.logger.error('Calculate score not implement for x=%d, y=%d', x, y)
 
-            # invert because math angle is ccw
-            self.score['roll'] = [-1.0*item for item in self.score['roll']]
+                # invert because math angle is ccw
+                score['roll'][tracker_number] = np.array([-1.0*item for item in self.score['roll']])
 
 
-        else:
-            self.score['x'] = [w[0] - min([x[0] for x in self.bboxes['Woman']]) for w in self.bboxes['Woman']]
-            self.score['y'] = [max([x[1] for x in self.bboxes['Woman']]) - w[1] for w in self.bboxes['Woman']]
+            else:
+                score['x'][tracker_number] = np.array([w[0] - min([x[0] for x in bboxes['Woman'][tracker_number]]) for w in bboxes['Woman'][tracker_number]])
+                score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
+
+        max_frame_number = max([len(score['x'][i]) for i in range(self.params.number_of_trackers)])
+
+
+        def get_mean(item):
+            arr = np.ma.empty((max_frame_number,self.params.number_of_trackers))
+            arr.mask = True
+            for tracker_number in range(self.params.number_of_trackers):
+                arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
+            return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
+
+        self.score['x'] = get_mean(score['x'])
+        self.score['y'] = get_mean(score['y'])
+        self.score['euclideanDistance'] = get_mean(score['euclideanDistance'])
+        self.score['roll'] = get_mean(score['roll'])
 
         self.score['x'] = sp.scale_signal(self.score['x'], 0, 100)
         self.score['y'] = sp.scale_signal(self.score['y'], 0, 100)
@@ -666,7 +699,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             ffmpeg_stream (FFmpegStream): The ffmpeg stream
 
         Returns:
-            tuple: (tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men)
+            tuple: (first_frame, bboxes, tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men)
         """
         bboxes = {
                 'Men': {},
@@ -681,7 +714,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         first_frame = ffmpeg_stream.read()
         preview_frame = first_frame
         for tracker_number in range(self.params.number_of_trackers):
-            bbox_woman = self.get_bbox(first_frame, "Select Woman Feature #" + str(tracker_number+1))
+            bbox_woman = self.get_bbox(preview_frame, "Select Woman Feature #" + str(tracker_number+1))
             preview_frame = self.draw_box(first_frame, bbox_woman, color=(255,0,255))
             if self.params.supervised_tracking:
                 while True:
@@ -692,7 +725,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, supervised_tracking_area = tracking_areas_woman[tracker_number])
             else:
                 trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman)
-            bboxes['Woman'][1] = bbox_woman
+
+            if tracker_number == 0:
+                bboxes['Woman'][1] = { tracker_number: bbox_woman }
+            else:
+                bboxes['Woman'][1][tracker_number] = bbox_woman
 
             if self.params.track_men:
                 bbox_men = self.get_bbox(preview_frame, "Select Men Feature #" + str(tracker_number+1))
@@ -706,7 +743,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, supervised_tracking_area = tracking_areas_men[tracker_number])
                 else:
                     trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men)
-                bboxes['Men'][1] = bbox_men
+
+                if tracker_number == 0:
+                    bboxes['Men'][1] = { tracker_number: bbox_men }
+                else:
+                    bboxes['Men'][1][tracker_number] = bbox_men
 
         return (first_frame, bboxes, tracking_areas_woman, tracking_areas_woman, trackers_woman, trackers_men)
 
@@ -730,7 +771,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 start_frame = self.params.start_frame
             )
 
-
         (first_frame, bboxes, tracking_areas_woman, tracking_areas_woman, trackers_woman, trackers_men) = self.init_trackers(video)
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):
@@ -752,6 +792,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.clear_keypress_queue()
         last_frame, frame_num = None, 1 # first frame is init frame
         delete_last_predictions = 0
+        bbox_woman = [None for _ in range(self.params.number_of_trackers)]
+        bbox_men = [None for _ in range(self.params.number_of_trackers)]
         while video.isOpen():
             cycle_start = time.time()
             frame = video.read()
@@ -777,24 +819,29 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if last_frame is not None:
                 # Process data from last step while the next tracking points get predicted.
                 # This should improve the whole processing speed, because the tracker run in a seperate thread
-                if bbox_woman is not None:
-                    bboxes['Woman'][frame_num-1] = bbox_woman
-                    last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1], color=(0,255,0))
-                    if self.params.supervised_tracking:
-                        for tracker_number in range(self.params.number_of_trackers):
+                for tracker_number in range(self.params.number_of_trackers):
+                    if bbox_woman[tracker_number] is not None:
+                        if tracker_number == 0:
+                            bboxes['Woman'][frame_num-1] = { tracker_number: bbox_woman[tracker_number] }
+                        else:
+                            bboxes['Woman'][frame_num-1][tracker_number] = bbox_woman[tracker_number]
+                        last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1][tracker_number], color=(0,255,0))
+                        if self.params.supervised_tracking:
                             last_frame = self.draw_box(last_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
 
-                if self.params.track_men and bbox_men is not None:
-                    bboxes['Men'][frame_num-1] = bbox_men
-                    last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1], color=(255,0,255))
-                    if self.params.supervised_tracking:
-                        for tracker_number in range(self.params.number_of_trackers):
+                    if self.params.track_men and bbox_men[tracker_number] is not None:
+                        if tracker_number == 0:
+                            bboxes['Men'][frame_num-1] = { tracker_number: bbox_men[0] }
+                        else:
+                            bboxes['Men'][frame_num-1][tracker_number] = bbox_men[0]
+                        last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1][tracker_number], color=(255,0,255))
+                        if self.params.supervised_tracking:
                             last_frame = self.draw_box(last_frame, tracking_areas_men[tracker_number], color=(255,0,255))
 
                 last_frame = self.draw_fps(last_frame)
                 last_frame = self.draw_time(last_frame, frame_num + self.params.start_frame)
 
-                quit_flag = False
+                scene_change_quit_flag = False
                 if scene_detector.is_scene_change(frame_num-1 + self.params.start_frame):
                     beep_thread = threading.Thread(target=self.beep)
                     beep_thread.start()
@@ -807,14 +854,14 @@ class FunscriptGeneratorThread(QtCore.QThread):
                             break
 
                         if self.was_key_pressed('q') or key == ord('q'):
-                            quit_flag = True
+                            scene_change_quit_flag = True
                             break
 
                 cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
                         (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
                 cv2.imshow(self.window_name, self.preview_scaling(last_frame))
 
-                if quit_flag:
+                if scene_change_quit_flag:
                     status = 'Tracking stopped at scene change'
                     if self.params.scene_detector.upper() == "THRESHOLD":
                         # NOTE: The threshold scene detector has delayed detection
@@ -829,7 +876,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     break
 
             for tracker_number in range(self.params.number_of_trackers):
-                (woman_tracker_status, bbox_woman) = trackers_woman[tracker_number].result()
+                (woman_tracker_status, bbox_woman[tracker_number]) = trackers_woman[tracker_number].result()
                 if woman_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
                     status = 'Woman ' + woman_tracker_status
                     delete_last_predictions = (self.params.skip_frames+1)*2
@@ -842,7 +889,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         break
 
                 if self.params.track_men:
-                    (men_tracker_status, bbox_men) = trackers_men[tracker_number].result()
+                    (men_tracker_status, bbox_men[tracker_number]) = trackers_men[tracker_number].result()
                     if men_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
                         status = 'Men ' + men_tracker_status
                         delete_last_predictions = (self.params.skip_frames+1)*2
@@ -865,9 +912,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
         video.stop()
         self.logger.info(status)
         self.logger.info('Interpolate tracking boxes')
-        self.interpolate_bboxes(bboxes)
+        interpolated_bboxes = self.interpolate_bboxes(bboxes)
         self.logger.info('Calculate score')
-        self.calculate_score()
+        self.calculate_score(interpolated_bboxes)
         return status
 
 
@@ -977,26 +1024,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return score
 
 
-    def apply_kalman_filter(self) -> None:
-        """ Apply Kalman Filter to the tracking prediction """
-        if len(self.bboxes['Woman']) < self.video_info.fps: return
-
-        # TODO: we should use the center of the tracking box not x0, y0 of the box
-
-        self.logger.info("Apply kalman filter")
-        kalman = KalmanFilter2D(self.video_info.fps)
-        kalman.init(self.bboxes['Woman'][0][0], self.bboxes['Woman'][0][1])
-        for idx, item in enumerate(self.bboxes['Woman']):
-            prediction = kalman.update(item[0], item[1])
-            self.bboxes['Woman'][idx] = (prediction[0], prediction[1], item[2], item[3])
-
-        if self.params.track_men:
-            kalman = KalmanFilter2D(self.video_info.fps)
-            kalman.init(self.bboxes['Men'][0][0], self.bboxes['Men'][0][1])
-            for idx, item in enumerate(self.bboxes['Men']):
-                prediction = kalman.update(item[0], item[1])
-                self.bboxes['Men'][idx] = (prediction[0], prediction[1], item[2], item[3])
-
 
     def determine_change_points(self, metric: str) -> dict:
         """ Determine all change points
@@ -1081,9 +1108,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 if False:
                     with open('debug.json', 'w') as f:
                         json.dump(self.score, f)
-
-                if self.params.use_kalman_filter:
-                    self.apply_kalman_filter()
 
                 if len(self.score[self.params.metric]) >= HYPERPARAMETER['min_frames']:
                     self.logger.info("Scale score")

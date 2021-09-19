@@ -19,7 +19,6 @@ Config Files:
 
 #### `settings.yaml`
 
-- `use_kalman_filter`: (bool) Enable Kalman Filter
 - `use_zoom` (bool): Enable or disable an additional step to zoom in the Video before selecting a tracking feature for the Woman or Men.
 - `zoom_factor:` (float): Set the desired zoom value which will be used when the zoom function is activated.
 - `max_playback_fps` (int): Limit the max player speed in the tracking preview window (0 = disable limit)
@@ -27,6 +26,7 @@ Config Files:
 - `tracker`: (str) Specify the tracker algorithm. Available options are `'MIL'`, `'KCF'`, `'CSRT'`.
 - `notification_sound` (str) Specify the wav file to play when tracking finished (write 'off' to disable the sound notification).
 - `tracking_lost_time` (int) Time in milliseconds at which the tracking is stopped if the selected feature is not found.
+- `scene_detector` (str): Specify the scene detector algorithm. Available options: `'CSV'`, `'CONTENT'`, `'THRESHOLD'`
 
 #### `hyperparameter.yaml`
 
@@ -41,3 +41,6 @@ Config Files:
 - `bottom_points_offset` (float): An fix offset to the bottom points (positive values move the point up and negative values move the point down). The offset respect the user defined upper and lower limit.
 - `top_threshold` (float): Define the top threshold. All top points greater than `(max - threshold)` will be set to the specified max value. Set 0.0 to disable this function.
 - `bottom_threshold` (float): Define the bottom threshold. All bottom points lower than `(min + threshold)` will be set to the specified min value. Set 0.0 to disable this function.
+- `min_scene_len` (int): Specify the miniimum scene length in seconds for the scene detector
+- `scene_content_detector_threshold` (float): Thresold value for the content detector to detect an scene change
+- `scene_threshold_detector_threshold` (int): Thresold value for the threshold detector to detect an scene change
