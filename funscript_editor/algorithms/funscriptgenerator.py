@@ -52,7 +52,7 @@ class FunscriptGeneratorParameter:
     preview_scaling: float = float(SETTINGS['preview_scaling'])
     tracking_lost_time: int = max((0, SETTINGS['tracking_lost_time']))
     scene_detector: str = SETTINGS['scene_detector']
-    number_of_trackers: int = 2
+    number_of_trackers: int = int(SETTINGS['number_of_trackers'])
 
     # General Hyperparameter
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
@@ -747,6 +747,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
     def tracking(self) -> str:
         """ Tracking function to track the features in the video
+
+        TODO:
+            Tracking lost for multiple tracker
 
         Returns:
             str: a process status message e.g. 'end of video reached'
