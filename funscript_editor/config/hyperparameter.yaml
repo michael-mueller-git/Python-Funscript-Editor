@@ -24,6 +24,14 @@ local_min_delta_in_percent: 0.25
 min_frames: 100
 
 
+##################
+# Scene Detector #
+##################
+
+# Specify the miniimum scene length in seconds
+min_scene_len: 2
+
+
 ##############################
 # VR Movement in y Direction #
 ##############################

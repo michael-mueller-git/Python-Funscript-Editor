@@ -26,7 +26,7 @@ from funscript_editor.data.funscript import Funscript
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION, NOTIFICATION_SOUND_FILE
 from funscript_editor.utils.logging import get_logfiles_paths
 from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CONFIG_FILE
-from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneContentDetector
+from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneContentDetector, SceneThresholdDetector
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
@@ -50,6 +50,7 @@ class FunscriptGeneratorParameter:
     preview_scaling: float = float(SETTINGS['preview_scaling'])
     use_kalman_filter: bool = SETTINGS['use_kalman_filter']
     tracking_lost_time: int = max((0, SETTINGS['tracking_lost_time']))
+    scene_detector: str = SETTINGS['scene_detector']
 
     # General Hyperparameter
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
@@ -715,8 +716,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         tracking_lost_frames = round(self.video_info.fps * self.params.tracking_lost_time / 1000.0)
 
-        scene_detector = SceneDetectFromFile(self.params.video_path, self.params.skip_frames)
-        # scene_detector = SceneContentDetector(self.params.start_frame, first_frame, self.params.skip_frames, min_scene_len = self.video_info.fps*3)
+        if self.params.scene_detector.upper() == "CONTENT":
+            scene_detector = SceneContentDetector(self.params.start_frame, first_frame, self.params.skip_frames, self.video_info.fps)
+        elif self.params.scene_detector.upper() == "THRESHOLD":
+            scene_detector = SceneThresholdDetector(self.params.start_frame, self.params.skip_frames, self.video_info.fps)
+        else:
+            # Fallback is SceneDetectFromFile
+            scene_detector = SceneDetectFromFile(self.params.video_path, self.params.start_frame, self.params.skip_frames, self.video_info.fps)
 
         status = "End of video reached"
         self.clear_keypress_queue()
@@ -783,7 +789,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 if quit_flag:
                     status = 'Tracking stopped at scene change'
-                    delete_last_predictions = (self.params.skip_frames+1)*2
+                    if self.params.scene_detector.upper() == "THRESHOLD":
+                        # NOTE: The threshold scene detector has delayed detection
+                        delete_last_predictions = int(self.video_info.fps)
+                    else:
+                        delete_last_predictions = (self.params.skip_frames+1)*2
                     break
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):

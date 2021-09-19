@@ -25,3 +25,9 @@ notification_sound: 'sound_notification.wav'
 
 # Time in milliseconds at which the tracking is stopped if the selected feature is not found
 tracking_lost_time: 0
+
+# Specify the scene detector algorithm. Available options:
+# - 'CSV': load scene csv file from [PySceneDetect](https://github.com/Breakthrough/PySceneDetect) if available
+# - 'CONTENT': Detects cuts using changes in colour and intensity between frames.
+# - 'THRESHOLD': Detects fades in video.
+scene_detector: 'CSV'
