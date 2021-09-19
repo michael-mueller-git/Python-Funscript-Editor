@@ -775,7 +775,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             cycle_time_in_ms = 0
 
         tracking_lost_frames = round(self.video_info.fps * self.params.tracking_lost_time / 1000.0)
-        if self.params.number_of_trackers > 1:
+        if tracking_lost_frames > 0 and self.params.number_of_trackers > 1:
             self.logger.warning("Delayed Tracking Lost is currently not implemented for multiple trackers (The feature will be disabled)")
             tracking_lost_frames = 0
 
