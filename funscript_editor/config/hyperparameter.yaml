@@ -29,7 +29,7 @@ min_frames: 90
 ##################
 
 # Specify the miniimum scene length in seconds
-min_scene_len: 2
+min_scene_len: 3
 
 # Thresold value for the content detector to detect an scene change
 scene_content_detector_threshold: 30.0
