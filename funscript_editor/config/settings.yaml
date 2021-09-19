@@ -29,5 +29,5 @@ tracking_lost_time: 0
 # - 'THRESHOLD': Detects fades in video.
 scene_detector: 'CSV'
 
-# Specify the number of trackers
+# Specify the number of trackers (Default should be 1)
 number_of_trackers: 2
