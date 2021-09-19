@@ -51,6 +51,7 @@ class FunscriptGeneratorParameter:
     use_kalman_filter: bool = SETTINGS['use_kalman_filter']
     tracking_lost_time: int = max((0, SETTINGS['tracking_lost_time']))
     scene_detector: str = SETTINGS['scene_detector']
+    number_of_trackers: int = 1
 
     # General Hyperparameter
     skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
@@ -658,6 +659,58 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return config
 
 
+    def init_trackers(self, ffmpeg_stream: FFmpegStream) -> tuple:
+        """ Initialize the trackers
+
+        Args:
+            ffmpeg_stream (FFmpegStream): The ffmpeg stream
+
+        Returns:
+            tuple: (tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men)
+        """
+        bboxes = {
+                'Men': {},
+                'Woman': {}
+            }
+
+        tracking_areas_woman = [(0,0,0,0) for _ in range(self.params.number_of_trackers)]
+        tracking_areas_men = [(0,0,0,0) for _ in range(self.params.number_of_trackers)]
+        trackers_woman = [None for _ in range(self.params.number_of_trackers)]
+        trackers_men = [None for _ in range(self.params.number_of_trackers)]
+
+        first_frame = ffmpeg_stream.read()
+        preview_frame = first_frame
+        for tracker_number in range(self.params.number_of_trackers):
+            bbox_woman = self.get_bbox(first_frame, "Select Woman Feature #" + str(tracker_number+1))
+            preview_frame = self.draw_box(first_frame, bbox_woman, color=(255,0,255))
+            if self.params.supervised_tracking:
+                while True:
+                    tracking_areas_woman[tracker_number] = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Woman Feature #" + str(tracker_number+1))
+                    if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_areas_woman[tracker_number]): break
+                    self.logger.error("Invalid supervised tracking area selected")
+                preview_frame = self.draw_box(preview_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
+                trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, supervised_tracking_area = tracking_areas_woman[tracker_number])
+            else:
+                trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman)
+            bboxes['Woman'][1] = bbox_woman
+
+            if self.params.track_men:
+                bbox_men = self.get_bbox(preview_frame, "Select Men Feature #" + str(tracker_number+1))
+                preview_frame = self.draw_box(preview_frame, bbox_men, color=(255,0,255))
+                if self.params.supervised_tracking:
+                    while True:
+                        tracking_areas_men[tracker_number] = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Men Feature #" + str(tracker_number+1))
+                        if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_area_men): break
+                        self.logger.error("Invalid supervised tracking area selected")
+                    preview_frame = self.draw_box(preview_frame, tracking_areas_men[tracker_number], color=(255,0,255))
+                    trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, supervised_tracking_area = tracking_areas_men[tracker_number])
+                else:
+                    trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men)
+                bboxes['Men'][1] = bbox_men
+
+        return (first_frame, bboxes, tracking_areas_woman, tracking_areas_woman, trackers_woman, trackers_men)
+
+
     def tracking(self) -> str:
         """ Tracking function to track the features in the video
 
@@ -677,37 +730,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 start_frame = self.params.start_frame
             )
 
-        bboxes = {
-                'Men': {},
-                'Woman': {}
-            }
 
-        first_frame = video.read()
-        bbox_woman = self.get_bbox(first_frame, "Select Woman Feature")
-        preview_frame = self.draw_box(first_frame, bbox_woman, color=(255,0,255))
-        if self.params.supervised_tracking:
-            while True:
-                tracking_area_woman = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Woman Feature")
-                if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_area_woman): break
-                self.logger.error("Invalid supervised tracking area selected")
-            preview_frame = self.draw_box(preview_frame, tracking_area_woman, color=(0,255,0))
-            tracker_woman = StaticVideoTracker(first_frame, bbox_woman, supervised_tracking_area = tracking_area_woman)
-        else:
-            tracker_woman = StaticVideoTracker(first_frame, bbox_woman)
-        bboxes['Woman'][1] = bbox_woman
-
-        if self.params.track_men:
-            bbox_men = self.get_bbox(preview_frame, "Select Men Feature")
-            preview_frame = self.draw_box(preview_frame, bbox_men, color=(255,0,255))
-            if self.params.supervised_tracking:
-                while True:
-                    tracking_area_men = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Men Feature")
-                    if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_area_men): break
-                    self.logger.error("Invalid supervised tracking area selected")
-                tracker_men = StaticVideoTracker(first_frame, bbox_men, supervised_tracking_area = tracking_area_men)
-            else:
-                tracker_men = StaticVideoTracker(first_frame, bbox_men)
-            bboxes['Men'][1] = bbox_men
+        (first_frame, bboxes, tracking_areas_woman, tracking_areas_woman, trackers_woman, trackers_men) = self.init_trackers(video)
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):
             cycle_time_in_ms = (float(1000) / float(self.params.max_playback_fps)) * (self.params.skip_frames+1)
@@ -745,8 +769,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 status = "Tracking stop at existing action point"
                 break
 
-            tracker_woman.update(frame)
-            if self.params.track_men: tracker_men.update(frame)
+            for tracker_number in range(self.params.number_of_trackers):
+                trackers_woman[tracker_number].update(frame)
+                if self.params.track_men: trackers_men[tracker_number].update(frame)
             scene_detector.update(frame)
 
             if last_frame is not None:
@@ -756,13 +781,15 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     bboxes['Woman'][frame_num-1] = bbox_woman
                     last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1], color=(0,255,0))
                     if self.params.supervised_tracking:
-                        last_frame = self.draw_box(last_frame, tracking_area_woman, color=(0,255,0))
+                        for tracker_number in range(self.params.number_of_trackers):
+                            last_frame = self.draw_box(last_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
 
                 if self.params.track_men and bbox_men is not None:
                     bboxes['Men'][frame_num-1] = bbox_men
                     last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1], color=(255,0,255))
                     if self.params.supervised_tracking:
-                        last_frame = self.draw_box(last_frame, tracking_area_men, color=(255,0,255))
+                        for tracker_number in range(self.params.number_of_trackers):
+                            last_frame = self.draw_box(last_frame, tracking_areas_men[tracker_number], color=(255,0,255))
 
                 last_frame = self.draw_fps(last_frame)
                 last_frame = self.draw_time(last_frame, frame_num + self.params.start_frame)
@@ -801,30 +828,31 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     delete_last_predictions = int((self.get_average_tracking_fps()+1)*2.0)
                     break
 
-            (woman_tracker_status, bbox_woman) = tracker_woman.result()
-            if woman_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
-                status = 'Woman ' + woman_tracker_status
-                delete_last_predictions = (self.params.skip_frames+1)*2
-                break
-
-            if woman_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
-                if len(bboxes['Woman']) == 0 or frame_num - max([x for x in bboxes['Woman'].keys()]) >= tracking_lost_frames:
+            for tracker_number in range(self.params.number_of_trackers):
+                (woman_tracker_status, bbox_woman) = trackers_woman[tracker_number].result()
+                if woman_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
                     status = 'Woman ' + woman_tracker_status
                     delete_last_predictions = (self.params.skip_frames+1)*2
                     break
 
-            if self.params.track_men:
-                (men_tracker_status, bbox_men) = tracker_men.result()
-                if men_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
-                    status = 'Men ' + men_tracker_status
-                    delete_last_predictions = (self.params.skip_frames+1)*2
-                    break
+                if woman_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
+                    if len(bboxes['Woman']) == 0 or frame_num - max([x for x in bboxes['Woman'].keys()]) >= tracking_lost_frames:
+                        status = 'Woman ' + woman_tracker_status
+                        delete_last_predictions = (self.params.skip_frames+1)*2
+                        break
 
-                if men_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
-                    if len(bboxes['Men']) == 0 or frame_num - max([x for x in bboxes['Men'].keys()]) >= tracking_lost_frames:
+                if self.params.track_men:
+                    (men_tracker_status, bbox_men) = trackers_men[tracker_number].result()
+                    if men_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
                         status = 'Men ' + men_tracker_status
                         delete_last_predictions = (self.params.skip_frames+1)*2
                         break
+
+                    if men_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
+                        if len(bboxes['Men']) == 0 or frame_num - max([x for x in bboxes['Men'].keys()]) >= tracking_lost_frames:
+                            status = 'Men ' + men_tracker_status
+                            delete_last_predictions = (self.params.skip_frames+1)*2
+                            break
 
             last_frame = frame
 
