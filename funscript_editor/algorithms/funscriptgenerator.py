@@ -46,7 +46,7 @@ class FunscriptGeneratorParameter:
     # Settings
     start_frame: int = 0 # default is video start (input: set current video position)
     end_frame: int = -1 # default is video end (-1)
-    raw_output: bool = False
+    raw_output: bool = SETTINGS["raw_output"]
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
     use_zoom: bool = SETTINGS['use_zoom']
     zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))

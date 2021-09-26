@@ -38,6 +38,7 @@ def scale_signal_with_anomalies(
         list: list with scaled signal
     """
     if len(signal) == 0: return signal
+    if len(signal) == 1: return [lower]
     a1 = np.quantile(signal, lower_quantile)
     a2 = np.quantile(signal, upper_quantile)
     anomaly_free = np.array([x for x in signal if a1 < x < a2])
