@@ -1,7 +1,6 @@
 
 configFile = ofs.ExtensionDir() .. "/config"
-pythonScript = ""
-
+pythonFunscriptGenerator = ""
 
 function funscript_generator()
     local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
@@ -25,8 +24,8 @@ function funscript_generator()
         print("nextAction: nil")
     end
 
-    local command = 'python3 "'
-            ..pythonScript
+    local command = '"'
+            ..pythonFunscriptGenerator
             ..'" --generator -s '
             ..( next_action == nil and tostring(currentTimeMs) or tostring(currentTimeMs)..' -e '..tostring(next_action.at) )
             ..' -i "'
@@ -35,9 +34,9 @@ function funscript_generator()
             ..tmpFile
             ..'"'
 
+
     print(command)
-    os.execute(command)
-    -- ofs.SilentCmd(command, true)
+    ofs.SilentCmd(command, true)
 
     local f = io.open(tmpFile)
     if not f then
@@ -73,9 +72,9 @@ function load_config()
 
     for line in f:lines() do
         for k, v in string.gmatch(line, "([^=]+)=(([^=]+))") do
-            if k == "pythonScript" then
-                print("set pythonScript to", v)
-                pythonScript = v
+            if k == "pythonFunscriptGenerator" then
+                print("set pythonFunscriptGenerator to", v)
+                pythonFunscriptGenerator = v
             end
         end
     end
@@ -87,7 +86,7 @@ end
 function save_config()
     -- print("save config to: ", configFile)
     local f = io.open(configFile, "w")
-    f:write("pythonScript="..pythonScript)
+    f:write("pythonFunscriptGenerator="..pythonFunscriptGenerator)
     f:close()
 end
 
@@ -104,7 +103,7 @@ end
 
 
 function gui()
-    pythonScript, valueChanged = ofs.Input("pythonScript", pythonScript)
+    pythonFunscriptGenerator, valueChanged = ofs.Input("pythonFunscriptGenerator", pythonFunscriptGenerator)
     if valueChanged then
         save_config()
     end
