@@ -36,7 +36,7 @@ function funscript_generator()
 
 
     print(command)
-    ofs.SilentCmd(command, true)
+    ofs.SilentCmd(command, false)
 
     local f = io.open(tmpFile)
     if not f then
@@ -44,6 +44,7 @@ function funscript_generator()
         return
     end
 
+    script = ofs.Script(ofs.ActiveIdx())
     local k = 1
     for line in f:lines() do
         -- first line is header
