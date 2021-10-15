@@ -25,7 +25,7 @@ def download_url(url, output_path):
 
 
 # NOTE: this file is currently not working for this installer!
-extension_url = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/OpenFunscripter/extensions/Funscript%20Generator%20Windows/main.lua"
+lua_extension_url = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/OpenFunscripter/extensions/Funscript%20Generator%20Windows/main.lua"
 
 if platform.system() != "Windows":
     print("ERROR: This installer only work on Windows")
@@ -34,17 +34,22 @@ if platform.system() != "Windows":
 ofs_extension_dir = os.path.expandvars(r'%APPDATA%\OFS_data\extensions')
 
 if not os.path.exists(ofs_extension_dir):
-    print("ERROR: OFS is not installed. Please download and install OFS. Befor running this installer open OFS once on your Computer")
+    print("ERROR: OFS is not installed. Please download and install OFS. Befor running this installer open OFS once!")
     print("Cancel installation")
     sys.exit()
 
 release_url = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 html_text = requests.get(release_url).text
-download_urls = { version.parse(re.search(r'v[^/]*', x).group().lower().replace("v", "")) : "https://github.com" + x \
-        for x in [link.get('href') for link in BeautifulSoup(html_text, 'html.parser').find_all('a') \
-            if link.get('href').endswith(".zip") and "/releases/" in link.get('href')]
-}
-latest = max(download_urls)
+try:
+    download_urls = { version.parse(re.search(r'v[^/]*', x).group().lower().replace("v", "")) : "https://github.com" + x \
+            for x in [link.get('href') for link in BeautifulSoup(html_text, 'html.parser').find_all('a') \
+                if link.get('href').endswith(".zip") and "/releases/" in link.get('href')]
+    }
+    latest = max(download_urls)
+except:
+    print("ERROR: download url not found")
+    sys.exit()
+
 extension_dir = os.path.join(ofs_extension_dir, "Funscript Generator Windows")
 zip_file = os.path.join(extension_dir, "funscript-editor-v" +  str(latest) + ".zip")
 dest_dir = os.path.join(os.path.dirname(zip_file), "funscript-editor")
@@ -63,4 +68,4 @@ with zipfile.ZipFile(zip_file) as zf:
         zf.extract(member, dest_dir)
 
 with open(os.path.join(extension_dir, "main.lua"), "wb") as f:
-    f.write(requests.get(extension_url).content)
+    f.write(requests.get(lua_extension_url).content)
