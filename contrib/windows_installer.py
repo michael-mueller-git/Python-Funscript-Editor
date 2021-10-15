@@ -5,6 +5,7 @@ import platform
 import zipfile
 import os
 import sys
+import shutil
 
 from packaging import version
 from bs4 import BeautifulSoup # beautifulsoup4
@@ -22,6 +23,9 @@ def download_url(url, output_path):
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
         urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
 
+
+# NOTE: this file is currently not working for this installer!
+extension_url = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/OpenFunscripter/extensions/Funscript%20Generator%20Windows/main.lua"
 
 if platform.system() != "Windows":
     print("ERROR: This installer only work on Windows")
@@ -41,15 +45,22 @@ download_urls = { version.parse(re.search(r'v[^/]*', x).group().lower().replace(
             if link.get('href').endswith(".zip") and "/releases/" in link.get('href')]
 }
 latest = max(download_urls)
-zip_file = os.path.join(ofs_extension_dir, "Funscript Generator Windows", "funscript-editor-v" +  str(latest) + ".zip")
-dest_dir = os.path.dirname(zip_file)
-os.makedirs(dest_dir, exist_ok = True)
+extension_dir = os.path.join(ofs_extension_dir, "Funscript Generator Windows")
+zip_file = os.path.join(extension_dir, "funscript-editor-v" +  str(latest) + ".zip")
+dest_dir = os.path.join(os.path.dirname(zip_file), "funscript-editor")
 
+os.makedirs(os.path.dirname(zip_file), exist_ok = True)
 if not os.path.exists(zip_file):
     download_url(download_urls[latest], zip_file)
 
+if os.path.exists(dest_dir):
+    try: shutil.rmtree(dest_dir)
+    except: print('Error while deleting old Version')
+
+os.makedirs(dest_dir, exist_ok = True)
 with zipfile.ZipFile(zip_file) as zf:
     for member in tqdm(zf.infolist(), desc='Extracting '):
-        zf.extract(member, "funscript-editor")
+        zf.extract(member, dest_dir)
 
-# TODO download the main.lua to the extension dir
+with open(os.path.join(extension_dir, "main.lua"), "wb") as f:
+    f.write(requests.get(extension_url).content)
