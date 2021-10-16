@@ -56,7 +56,7 @@ def get_download_urls():
 def is_latest_version_installed(version_file, version):
     if os.path.exists(version_file):
         with open(version_file, 'r') as f:
-            if str(f.read()).lower() == "v"+str(version):
+            if str(f.read()).strip().lower() == "v"+str(version):
                 print("You have already the latest version installed")
                 sys.exit()
 
