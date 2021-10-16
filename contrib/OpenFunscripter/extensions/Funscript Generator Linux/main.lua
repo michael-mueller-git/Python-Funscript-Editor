@@ -1,4 +1,4 @@
-
+-- Version: 0.0.1
 configFile = ofs.ExtensionDir() .. "/config"
 pythonScript = ""
 
@@ -14,21 +14,20 @@ function funscript_generator()
     print("currentScriptIdx: ", ofs.ActiveIdx())
     print("currentTimeMs: ", currentTimeMs)
 
-    local next_action = ofs.ClosestActionAfter(script, currentTimeMs)
-    if next_action and next_action.at < currentTimeMs + 500.0 then
-        next_action = ofs.ClosestActionAfter(script, next_action.at)
+    local next_action = ofs.ClosestActionAfter(script, currentTimeMs / 1000)
+    if next_action and script.actions[next_action].at < (currentTimeMs + 500) then
+        next_action = ofs.ClosestActionAfter(script, script.actions[next_action].at / 1000)
     end
 
     if next_action then
-        print("nextAction: ", next_action.at)
+        print("nextAction: ", script.actions[next_action].at)
     else
         print("nextAction: nil")
     end
-
     local command = 'python3 "'
             ..pythonScript
             ..'" --generator -s '
-            ..( next_action == nil and tostring(currentTimeMs) or tostring(currentTimeMs)..' -e '..tostring(next_action.at) )
+            ..( next_action == nil and tostring(currentTimeMs) or tostring(currentTimeMs)..' -e '..tostring(script.actions[next_action].at) )
             ..' -i "'
             ..video
             ..'" -o "'
