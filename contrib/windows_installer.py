@@ -69,9 +69,24 @@ if os.path.exists(dest_dir):
     except: print('Error while deleting old Version')
 
 os.makedirs(dest_dir, exist_ok = True)
-with zipfile.ZipFile(zip_file) as zf:
-    for member in tqdm(zf.infolist(), desc='Extracting '):
-        zf.extract(member, dest_dir)
+trial = 0
+while True:
+    try:
+        with zipfile.ZipFile(zip_file) as zf:
+            for member in tqdm(zf.infolist(), desc='Extracting '):
+                zf.extract(member, dest_dir)
+        break
+    except:
+        trial += 1
+        if trial < 2:
+            print("local version is corrupt redownloading")
+            os.remove(zip_file)
+            download_url(download_urls[latest], zip_file)
+        else:
+            print("installation failed")
+            sys.exit()
 
 with open(os.path.join(extension_dir, "main.lua"), "wb") as f:
     f.write(requests.get(lua_extension_url).content)
+
+print("installation completed")
