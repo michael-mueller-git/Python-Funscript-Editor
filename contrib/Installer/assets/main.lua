@@ -1,6 +1,6 @@
 
 configFile = ofs.ExtensionDir() .. "/config"
-pythonFunscriptGenerator = ofs.ExtensionDir .. "/funscript-editor/funscript-editor.exe"
+pythonFunscriptGenerator = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"
 
 function funscript_generator()
     local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
