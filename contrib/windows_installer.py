@@ -24,8 +24,7 @@ def download_url(url, output_path):
         urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
 
 
-# NOTE: this file is currently not working for this installer!
-lua_extension_url = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/OpenFunscripter/extensions/Funscript%20Generator%20Windows/main.lua"
+lua_extension_url = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/main.lua"
 
 if platform.system() != "Windows":
     print("ERROR: This installer only work on Windows")
@@ -53,6 +52,13 @@ except:
 extension_dir = os.path.join(ofs_extension_dir, "Funscript Generator Windows")
 zip_file = os.path.join(extension_dir, "funscript-editor-v" +  str(latest) + ".zip")
 dest_dir = os.path.join(os.path.dirname(zip_file), "funscript-editor")
+version_file = os.path.join(os.path.dirname(zip_file), "funscript-editor", "funscript_editor", "VERSION.txt")
+
+if os.path.exists(version_file):
+    with open(version_file, 'r') as f:
+        if str(f.read()).lower() == "v"+str(latest):
+            print("You have already the latest version installed")
+            sys.exit()
 
 os.makedirs(os.path.dirname(zip_file), exist_ok = True)
 if not os.path.exists(zip_file):
