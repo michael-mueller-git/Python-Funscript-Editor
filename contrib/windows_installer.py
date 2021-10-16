@@ -30,7 +30,7 @@ if platform.system() != "Windows":
     print("ERROR: This installer only work on Windows")
     sys.exit()
 
-ofs_extension_dir = os.path.expandvars(r'%APPDATA%\OFS_data\extensions')
+ofs_extension_dir = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 
 if not os.path.exists(ofs_extension_dir):
     print("ERROR: OFS is not installed. Please download and install OFS. Befor running this installer open OFS once!")
