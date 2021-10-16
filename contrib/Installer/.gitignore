@@ -1,0 +1,7 @@
+*.egg-info
+Miniconda3-latest*.sh
+__pycache__
+build
+debug*
+dist
+*.spec

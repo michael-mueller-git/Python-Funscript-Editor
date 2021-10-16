@@ -1,6 +1,11 @@
 #!/bin/env python3
 
+import traceback
 from funscript_editor.__main__ import main
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except:
+        traceback.print_exc()
+        input()

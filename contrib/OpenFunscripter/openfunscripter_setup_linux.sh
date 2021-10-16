@@ -4,6 +4,7 @@ if [ -d ./OFS ]; then
     echo "OpenFunscripter Source already downloaded"
     pushd OFS
     git pull
+    git submodule update
 else
     git clone https://github.com/OpenFunscripter/OFS.git
     pushd OFS
