@@ -1,4 +1,4 @@
-
+-- Version 0.0.1
 configFile = ofs.ExtensionDir() .. "/config"
 pythonFunscriptGenerator = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"
 
@@ -14,13 +14,13 @@ function funscript_generator()
     print("currentScriptIdx: ", ofs.ActiveIdx())
     print("currentTimeMs: ", currentTimeMs)
 
-    local next_action = ofs.ClosestActionAfter(script, currentTimeMs)
-    if next_action and next_action.at < currentTimeMs + 500.0 then
-        next_action = ofs.ClosestActionAfter(script, next_action.at)
+    local next_action = ofs.ClosestActionAfter(script, currentTimeMs / 1000)
+    if next_action and script.actions[next_action].at < (currentTimeMs + 500) then
+        next_action = ofs.ClosestActionAfter(script, script.actions[next_action].at / 1000)
     end
 
     if next_action then
-        print("nextAction: ", next_action.at) -- TODO is this in seconds?
+        print("nextAction: ", script.actions[next_action].at)
     else
         print("nextAction: nil")
     end
@@ -28,7 +28,7 @@ function funscript_generator()
     local command = '"'
             ..pythonFunscriptGenerator
             ..'" --generator -s '
-            ..( next_action == nil and tostring(currentTimeMs) or tostring(currentTimeMs)..' -e '..tostring(next_action.at) )
+            ..( next_action == nil and tostring(currentTimeMs) or tostring(currentTimeMs)..' -e '..tostring(script.actions[next_action].at) )
             ..' -i "'
             ..video
             ..'" -o "'
@@ -36,12 +36,12 @@ function funscript_generator()
             ..'"'
 
 
-    print(command)
+    print("cmd: ", command)
     ofs.SilentCmd(command, false)
 
     local f = io.open(tmpFile)
     if not f then
-        print('lua: funscript generator output file not found')
+        print('Funscript Generator output file not found')
         return
     end
 
