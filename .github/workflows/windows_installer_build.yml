@@ -1,9 +1,9 @@
-name: Create Windows Executable using Miniconda
+name: Release MTFG OFS Extension Installer Executable
 
 on:
   push:
-    # tags:
-    #   - '*'
+    tags:
+      - '*'
 
 jobs:
   miniconda:
@@ -27,7 +27,7 @@ jobs:
         run: |
           conda info
           conda env export
-      - name: Get Application Version
+      - name: Get Version
         id: get_version
         uses: battila7/get-version-action@v2
       - name: Build Installer

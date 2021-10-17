@@ -1,4 +1,4 @@
-name: Create Windows Executable using Miniconda
+name: Release Windows Executable
 
 on:
   push:
