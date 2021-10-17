@@ -31,3 +31,6 @@ scene_detector: 'CSV'
 
 # Output an position for each frame. This option disable post processing!
 raw_output: False
+
+# Insert change points at high second derivative
+additional_changepoints: True

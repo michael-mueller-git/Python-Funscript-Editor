@@ -23,6 +23,12 @@ local_min_delta_in_percent: 0.1
 # ensure there is at leas two strokes in the tracking result.
 min_frames: 90
 
+# threshold value tor get additional change points by comparing second derivative with the rolling standard deviation and given threshold
+changepoint_detection_threshold: 1.2
+
+# threshold value in milliseconds to merge additional change points
+additional_changepoints_merge_threshold_in_ms: 100
+
 
 ##################
 # Scene Detector #
@@ -31,10 +37,10 @@ min_frames: 90
 # Specify the miniimum scene length in seconds
 min_scene_len: 3
 
-# Thresold value for the content detector to detect an scene change
+# Threshold value for the content detector to detect an scene change
 scene_content_detector_threshold: 30.0
 
-# Thresold value for the threshold detector to detect an scene change
+# Threshold value for the threshold detector to detect an scene change
 scene_threshold_detector_threshold: 12
 
 

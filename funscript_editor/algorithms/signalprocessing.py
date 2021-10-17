@@ -1,7 +1,8 @@
 """ Signal Processing Algorithms """
 
 import numpy as np
-from funscript_editor.utils.config import HYPERPARAMETER
+import logging
+from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
 
 def scale_signal(signal :list, lower: float = 0, upper: float = 99) -> list:
     """ Scale an signal (list of float or int) between given lower and upper value
@@ -66,6 +67,69 @@ def moving_average(x :list, w: int) -> list:
             +[avg[-1] for _ in range(len(avg)+w,len(x))]
 
 
+def moving_standard_deviation(x: list, w: int) -> list:
+    """ Get 2 seconds moving standard deviation of given signal
+
+    Args:
+        x (list): input signal
+        w (int): window size
+
+    Returns:
+        list: moving standard deviation
+    """
+    w = round(w)
+    std = [np.std(x[ii-w:ii+w+1]) for ii in range(w,len(x)-w)]
+    # TODO use extrapolation function
+    return [std[0] for _ in range(w)]\
+            +list(std)\
+            +[std[-1] for _ in range(w)]
+
+
+def second_derivative(x: list, w: int = 1) -> list:
+    """ Get second derivative of given signal
+
+    Args:
+        x (list): input signal
+        w (int): window size for signal smothing
+
+    Returns:
+        list: second derivative
+    """
+    if w < 0: w = 1
+    if w % 2 == 0: w += 1
+    return moving_average(np.diff(moving_average(np.diff(x, 1).tolist(), w), 1).tolist(), w)
+
+
+def get_changepoints(score: list, fps: int, alpha: float) -> list:
+    """ Get change points by comparing second derivative with the rolling standard deviation
+
+    Args:
+        score (list): list with float or int signal values
+        fps (int): rounded fps of the video
+        alpha (float): threshold value for standard deviation comparing
+
+    Returns:
+        list: idx list with changepoints
+    """
+    dx2 = second_derivative(score)
+    std = moving_standard_deviation(dx2, round(fps * HYPERPARAMETER['avg_sec_for_local_min_max_extraction']))
+    dx2_abs = abs(np.array(dx2))
+    tmp_max_idx = -1
+    changepoints = []
+    for pos in range(len(dx2_abs)):
+        if abs(dx2_abs[pos]) > alpha*std[pos]:
+            if tmp_max_idx < 0: tmp_max_idx = pos
+            elif dx2_abs[tmp_max_idx] <= dx2_abs[pos]: tmp_max_idx = pos
+        elif tmp_max_idx >= 0:
+            changepoints.append(tmp_max_idx)
+            tmp_max_idx = -1
+
+    #if tmp_max_idx > 0:
+    #    changepoints.append((tmp_max_idx))
+
+    return changepoints
+
+
 def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_max :int = 0) -> dict:
     """ Get the local max and min positions in given signal
 
@@ -78,6 +142,7 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
     Returns:
         dict: dict with 2 lists with all local max and min indexes ({'min':[], 'max':[]})
     """
+    logger = logging.getLogger("changepoints")
     avg = moving_average(score, w=round(fps * HYPERPARAMETER['avg_sec_for_local_min_max_extraction']))
     changepoints = {'min': [], 'max': []}
     tmp_min_idx, tmp_max_idx = -1, -1
@@ -96,6 +161,12 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
             changepoints['max'].append(tmp_max_idx)
             tmp_max_idx = -1
 
+    #if tmp_min_idx > 0:
+    #    changepoints['min'].append((tmp_min_idx))
+
+    #if tmp_max_idx > 0:
+    #    changepoints['max'].append((tmp_max_idx))
+
     delta_max = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_max_delta_in_percent'])))
     delta_min = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_min_delta_in_percent'])))
 
@@ -111,6 +182,26 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
         while new_pos+1 < len(score) and score[idx] - delta_max < score[new_pos+1]:
             new_pos += 1
         changepoints['max'][k] = new_pos
+
+
+    if SETTINGS['additional_changepoints']:
+        logger.info("add additional change points")
+        merge_threshold = max(1, round(fps * float(HYPERPARAMETER['additional_changepoints_merge_threshold_in_ms']) / 1000.0))
+        additional_changepoints = get_changepoints(score, fps, float(HYPERPARAMETER['changepoint_detection_threshold']))
+        for cp_idx in additional_changepoints:
+            if len(list(filter(lambda x: abs(cp_idx - x) <= merge_threshold, changepoints['min']))) > 0:
+                continue
+
+            if len(list(filter(lambda x: abs(cp_idx - x) <= merge_threshold, changepoints['max']))) > 0:
+                continue
+
+            if score[cp_idx] < avg[cp_idx]:
+                logger.debug("add additional min changepoint at idx %d", cp_idx)
+                changepoints['min'].append(cp_idx)
+            else:
+                logger.debug("add additional max changepoint at idx %d", cp_idx)
+                changepoints['max'].append(cp_idx)
+
 
     # apply manual shift
     if shift_min != 0:

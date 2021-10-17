@@ -1,4 +1,4 @@
-# Build from Source
+# Build Application from Source
 
 For Windows user i recommend to use the release version from [github release page](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases)
 
@@ -55,3 +55,13 @@ python3 funscript-editor.py
 By default the latest code is used which may contain bugs. So you maybe want to switch to the latest release version with `` git checkout $(git describe --tags `git rev-list --tags --max-count=1`)``.
 
 You can always update the application to the latest version with `git checkout main && git pull` inside the repository directory.
+
+## Arch Linux and Arch-Based Distributions
+
+My development platform is Arch Linux. The code should run therefore without problems. When installing the dependencies, make sure you install the following packages from the repositories, as the wrapper will have problems if the versions differ from the pip packages and the local C, C++ libraries.
+
+```bash
+sudo pacman -Sy python-opencv python-pyqt5
+```
+
+All other required python packages can be installed from pip.
