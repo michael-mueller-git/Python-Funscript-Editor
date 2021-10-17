@@ -1,5 +1,7 @@
 # MTFG OFS Extension Installer
 
+**I have not released this install yet!**
+
 ## Usage
 
 1. Download OFS from https://github.com/OpenFunscripter/OFS/releases.
