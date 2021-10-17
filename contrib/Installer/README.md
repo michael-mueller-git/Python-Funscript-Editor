@@ -21,7 +21,7 @@ If you want to build this installer from source use miniconda environment to bui
 First download and install miniconda (If you have already anaconda installed on your computer you can skip this step). Then run the following commands in the project root directory:
 
 ```
-conda env create -f environment_windows.yaml
+conda env create -f environment.yaml
 conda activate build-installer
 build.bat
 ```
