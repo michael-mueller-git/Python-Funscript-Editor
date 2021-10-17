@@ -5,6 +5,7 @@ import platform
 import zipfile
 import os
 import sys
+import time
 import traceback
 import shutil
 
@@ -41,16 +42,20 @@ def is_ofs_installed():
 
 
 def get_download_urls():
-    try:
-        html_text = requests.get(FUNSCRIPT_GENERATOR_RELEASE_URL).text
-        download_urls = { version.parse(re.search(r'v[^/]*', x).group().lower().replace("v", "")) : "https://github.com" + x \
-                for x in [link.get('href') for link in BeautifulSoup(html_text, 'html.parser').find_all('a') \
-                    if link.get('href').endswith(".zip") and "/releases/" in link.get('href')]
-        }
-        latest = max(download_urls)
-        return download_urls, latest
-    except:
-        error("Download URL not found (" + FUNSCRIPT_GENERATOR_RELEASE_URL + ")")
+    # sometimes requests failed to fetch the url so we try up to 3 times
+    for i in range(3):
+        try:
+            html_text = requests.get(FUNSCRIPT_GENERATOR_RELEASE_URL).text
+            download_urls = { version.parse(re.search(r'v[^/]*', x).group().lower().replace("v", "")) : "https://github.com" + x \
+                    for x in [link.get('href') for link in BeautifulSoup(html_text, 'html.parser').find_all('a') \
+                        if link.get('href').endswith(".zip") and "/releases/" in link.get('href')]
+            }
+            latest = max(download_urls)
+            return download_urls, latest
+        except:
+            time.sleep(2)
+            if i == 2:
+                error("Download URL not found (" + FUNSCRIPT_GENERATOR_RELEASE_URL + ")")
 
 
 def is_latest_version_installed(version_file, version):
@@ -105,6 +110,7 @@ if __name__ == "__main__":
         if platform.system() != "Windows":
             error("This installer only work on Windows")
 
+        print("Start MTFG installation")
         is_ofs_installed()
         download_urls, latest = get_download_urls()
         update(download_urls, latest)
