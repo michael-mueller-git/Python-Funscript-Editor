@@ -6,12 +6,13 @@ pythonScript = ""
 function funscript_generator()
     local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
     local video = player.CurrentVideo()
-    local script = ofs.Script(ofs.ActiveIdx())
+    local scriptIdx = ofs.ActiveIdx()
+    local script = ofs.Script(scriptIdx)
     local currentTimeMs = player.CurrentTime() * 1000
 
     print("tmpFile: ", tmpFile)
     print("video: ", video)
-    print("currentScriptIdx: ", ofs.ActiveIdx())
+    print("currentScriptIdx: ", scriptIdx)
     print("currentTimeMs: ", currentTimeMs)
 
     local next_action = ofs.ClosestActionAfter(script, currentTimeMs / 1000)
@@ -34,17 +35,16 @@ function funscript_generator()
             ..tmpFile
             ..'"'
 
-    print(command)
-    os.execute(command)
-    -- ofs.SilentCmd(command, false)
+    print("cmd: ", command)
+    ofs.SilentCmd(command, false)
 
     local f = io.open(tmpFile)
     if not f then
-        print('lua: funscript generator output file not found')
+        print('Funscript Generator output file not found')
         return
     end
 
-    script = ofs.Script(ofs.ActiveIdx())
+    script = ofs.Script(scriptIdx)
     local k = 1
     for line in f:lines() do
         -- first line is header
