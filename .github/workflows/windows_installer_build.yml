@@ -1,0 +1,57 @@
+name: Create Windows Executable using Miniconda
+
+on:
+  push:
+    # tags:
+    #   - '*'
+
+jobs:
+  miniconda:
+    name: Miniconda ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: ["windows-latest"]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: build-installer
+          environment-file: ./contrib/Installer/environment.yaml
+          python-version: 3.9
+          auto-activate-base: false
+      - name: Collect Conda Info
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda env export
+      - name: Get Application Version
+        id: get_version
+        uses: battila7/get-version-action@v2
+      - name: Build Installer
+        shell: bash -l {0}
+        working-directory: ./contrib/Installer
+        run: |
+          pyinstaller --add-data="assets/*;./" --noupx --onefile mtfg-ofs-extension-installer.py
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: ${{ steps.get_version.outputs.version }}
+          draft: true
+          prerelease: true
+      - name: Upload Installer
+        id: upload-release-asset-1
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
+          asset_name: mtfg-ofs-extension-installer.exe
+          asset_content_type: application/octet-stream

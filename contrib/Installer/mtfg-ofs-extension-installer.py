@@ -13,6 +13,7 @@ from packaging import version
 from bs4 import BeautifulSoup # beautifulsoup4
 from tqdm import tqdm
 
+VERSION = "v0.0.1"
 LUA_EXTENSION_URL = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/main.lua"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
@@ -106,11 +107,11 @@ def update(download_urls, latest):
 
 
 if __name__ == "__main__":
+    print("MTFG OFS Extension Installer ", VERSION)
     try:
         if platform.system() != "Windows":
             error("This installer only work on Windows")
 
-        print("Start MTFG installation")
         is_ofs_installed()
         download_urls, latest = get_download_urls()
         update(download_urls, latest)
