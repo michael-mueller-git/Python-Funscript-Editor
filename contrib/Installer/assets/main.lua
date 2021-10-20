@@ -1,15 +1,16 @@
--- Version 0.0.1
-configFile = ofs.ExtensionDir() .. "/config"
-pythonFunscriptGenerator = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"
+-- Version 0.0.2
+processHandle = nil
+scriptIdx = 0
 
-function funscript_generator()
+function start_funscript_generator()
+    scriptIdx = ofs.ActiveIdx()
     local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
     local video = player.CurrentVideo()
-    local scriptIdx = ofs.ActiveIdx()
     local script = ofs.Script(scriptIdx)
     local currentTimeMs = player.CurrentTime() * 1000
+    local cmd = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"
 
-    print("funscriptGenerator", pythonFunscriptGenerator)
+    print("cmd: ", cmd)
     print("tmpFile: ", tmpFile)
     print("video: ", video)
     print("currentScriptIdx: ", scriptIdx)
@@ -20,26 +21,29 @@ function funscript_generator()
         next_action = ofs.ClosestActionAfter(script, script.actions[next_action].at / 1000)
     end
 
-    if next_action then
-        print("nextAction: ", script.actions[next_action].at)
+    print("nextAction: ", next_action and tostring(script.actions[next_action].at) or "nil")
+
+   if next_action then
+        processHandle = ofs.CreateProcess(
+            cmd, "--generator",
+            "-s", tostring(currentTimeMs),
+            "-e", tostring(script.actions[next_action].at),
+            "-i", video,
+            "-o", tmpFile
+        )
     else
-        print("nextAction: nil")
+        processHandle = ofs.CreateProcess(
+            cmd, "--generator",
+            "-s", tostring(currentTimeMs),
+            "-i", video,
+            "-o", tmpFile
+        )
     end
-
-    local command = '"'
-            ..pythonFunscriptGenerator
-            ..'" --generator -s '
-            ..( next_action == nil and tostring(currentTimeMs) or tostring(currentTimeMs)..' -e '..tostring(script.actions[next_action].at) )
-            ..' -i "'
-            ..video
-            ..'" -o "'
-            ..tmpFile
-            ..'"'
+end
 
 
-    print("cmd: ", command)
-    ofs.SilentCmd(command, false)
-
+function import_funscript_generator_result()
+    local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
     local f = io.open(tmpFile)
     if not f then
         print('Funscript Generator output file not found')
@@ -66,12 +70,16 @@ end
 
 
 function init()
-    ofs.Bind("funscript_generator", "execute the funcript generator")
+    ofs.Bind("start_funscript_generator", "execute the funcript generator")
 end
 
 
 function update(delta)
-
+    if processHandle and not ofs.IsProcessAlive(processHandle) then
+        print('funscript generator completed, try import result')
+        processHandle = nil
+        import_funscript_generator_result()
+    end
 end
 
 

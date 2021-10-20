@@ -15,6 +15,7 @@ def show_editor() -> None:
     """ Show the Funscript Editor Main Window """
     setup_logging()
     logging.info("Python Funscript Editor %s", VERSION)
+    logging.info("Startup Path: %s", str(os.getcwd()))
     app = QtWidgets.QApplication(sys.argv)
     widget = FunscriptEditorWindow()
     widget.show()
