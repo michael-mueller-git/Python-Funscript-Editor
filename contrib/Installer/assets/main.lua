@@ -1,6 +1,7 @@
--- Version 0.0.2
+
 processHandle = nil
 scriptIdx = 0
+status = "MTFG not running"
 
 function start_funscript_generator()
     scriptIdx = ofs.ActiveIdx()
@@ -39,10 +40,12 @@ function start_funscript_generator()
             "-o", tmpFile
         )
     end
+    status = "MTFG running"
 end
 
 
 function import_funscript_generator_result()
+    status = "MTFG not running"
     local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
     local f = io.open(tmpFile)
     if not f then
@@ -68,7 +71,6 @@ function import_funscript_generator_result()
 end
 
 
-
 function init()
     ofs.Bind("start_funscript_generator", "execute the funcript generator")
 end
@@ -76,7 +78,7 @@ end
 
 function update(delta)
     if processHandle and not ofs.IsProcessAlive(processHandle) then
-        print('funscript generator completed, try import result')
+        print('funscript generator completed import result')
         processHandle = nil
         import_funscript_generator_result()
     end
@@ -84,5 +86,11 @@ end
 
 
 function gui()
-
+    ofs.Text(status)
+    if not processHandle then
+        ofs.SameLine()
+        if ofs.Button("Start MTFG") then
+            start_funscript_generator()
+        end
+    end
 end
