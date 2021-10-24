@@ -343,10 +343,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 'roll': [np.array([]) for _ in range(self.params.number_of_trackers)]
         }
         for tracker_number in range(self.params.number_of_trackers):
-            woman_center = [[item[0]+item[2]/2, item[1]+item[3]/2] for item in bboxes['Woman'][tracker_number]]
+            woman_center = [self.get_center(item) for item in bboxes['Woman'][tracker_number]]
 
             if self.params.track_men:
-                men_center = [[item[0]+item[2]/2, item[1]+item[3]/2] for item in bboxes['Men'][tracker_number]]
+                men_center = [self.get_center(item) for item in bboxes['Men'][tracker_number]]
 
                 score['x'][tracker_number] = np.array([w[0] - m[0] for w, m in zip(bboxes['Woman'][tracker_number], bboxes['Men'][tracker_number])])
                 score['y'][tracker_number] = np.array([m[1] - w[1] for w, m in zip(bboxes['Woman'][tracker_number], bboxes['Men'][tracker_number])])
@@ -494,8 +494,23 @@ class FunscriptGeneratorThread(QtCore.QThread):
         figure.savefig(fname=name, dpi=dpi, bbox_inches='tight')
 
 
+    def get_center(self, box: tuple) -> tuple:
+        """ Get the cencter point of an box
+
+        Args:
+            box (tuple): the predicted bounding box
+
+        Returns:
+            tuple (x,y) of the current point
+        """
+        return ( round(box[0] + box[2]/2), round(box[1] + box[3]/2) )
+
+
     def correct_bboxes(self, bboxes: dict, num :int) -> dict:
         """ Delete the latest tracking predictions e.g. to clear bad tracking values
+
+        TODO:
+            Delete only from the point where min or max from data before `num` were exceeded or fallen below
 
         Args:
             bboxes (dict): the raw bboxes
