@@ -24,7 +24,7 @@ Config Files:
 - `max_playback_fps` (int): Limit the max player speed in the tracking preview window (0 = disable limit)
 - `preview_scaling` (float): Set the preview image scaling factor. With a value of `1.0`, the window should fill the height or width of the screen depending on the aspect ratio of the video.
 - `tracker`: (str) Specify the tracker algorithm. Available options are `'MIL'`, `'KCF'`, `'CSRT'`.
-- `notification_sound` (str) Specify the wav file to play when tracking finished (write 'off' to disable the sound notification).
+- `notification_sound` (str) Specify the `wav` file to play when tracking finished (write 'off' to disable the sound notification).
 - `tracking_lost_time` (int) Time in milliseconds at which the tracking is stopped if the selected feature is not found.
 - `scene_detector` (str): Specify the scene detector algorithm. Available options: `'CSV'`, `'CONTENT'`, `'THRESHOLD'`
 - `raw_output` (bool): Output an position for each frame. This option disable post processing!
