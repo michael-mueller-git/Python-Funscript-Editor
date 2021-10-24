@@ -872,7 +872,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
                     status = 'Tracking stopped by user'
-                    delete_last_predictions = int((self.get_average_tracking_fps()+1)*2.0)
+                    delete_last_predictions = max((1, int((self.get_average_tracking_fps()+1)*HYPERPARAMETER['user_reaction_time_in_milliseconds']/1000.0)))
                     break
 
             for tracker_number in range(self.params.number_of_trackers):

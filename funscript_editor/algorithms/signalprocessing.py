@@ -60,6 +60,8 @@ def moving_average(x :list, w: int) -> list:
         list: moving average for signal x
     """
     w = round(w)
+    if len(x) == 0: return []
+    if len(x) <= w+1: return[np.mean(x) for _ in range(len(x))]
     avg = np.convolve(x, np.ones(int(w*2)), 'valid') / int(w*2)
     # TODO use extrapolation function
     return [avg[0] for _ in range(int(w))]\
@@ -78,6 +80,8 @@ def moving_standard_deviation(x: list, w: int) -> list:
         list: moving standard deviation
     """
     w = round(w)
+    if len(x) == 0: return []
+    if len(x)-w <= w: return[np.std(x) for _ in range(len(x))]
     std = [np.std(x[ii-w:ii+w+1]) for ii in range(w,len(x)-w)]
     # TODO use extrapolation function
     return [std[0] for _ in range(w)]\
