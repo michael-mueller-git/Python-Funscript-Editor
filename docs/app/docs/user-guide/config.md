@@ -39,6 +39,7 @@ Config Files:
 - `min_frames` (int): Specify the minimum required frames for the tracking. Wee need this parameter to ensure there is at leas two strokes in the tracking result.
 - `changepoint_detection_threshold` (float): threshold value tor get additional change points by comparing second derivative with the rolling standard deviation and given threshold
 - `additional_changepoints_merge_threshold_in_ms` (int): threshold value in milliseconds to merge additional change points
+- `user_reaction_time_in_milliseconds` (int): reaction time of the user to stop the tracking when scene changed or tracking box shifts
 - `shift_top_points` (int): Shift predicted top points by given frame number. Positive values delay the position and negative values result in an earlier position.
 - `shift_bottom_points` (int): Shift predicted bottom points by given frame number. Positive values delay the position and negative values result in an earlier position.
 - `top_points_offset` (float): An fix offset to the top points (positive values move the point up and negative values move the point down). The offset respect the user defined upper and lower limit.
