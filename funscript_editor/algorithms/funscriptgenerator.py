@@ -41,11 +41,12 @@ class FunscriptGeneratorParameter:
     supervised_tracking: bool
     metric: str
     projection: str
+    invert: bool
+    start_frame: int
+    end_frame: int = -1 # default is video end (-1)
     number_of_trackers: int = 1
 
     # Settings
-    start_frame: int = 0 # default is video start (input: set current video position)
-    end_frame: int = -1 # default is video end (-1)
     raw_output: bool = SETTINGS["raw_output"]
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
     use_zoom: bool = SETTINGS['use_zoom']
@@ -101,7 +102,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.score = {
                 'x': [],
                 'y': [],
-                'euclideanDistance': [],
+                'distance': [],
                 'roll': []
             }
 
@@ -338,7 +339,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         score = {
                 'x':[np.array([]) for _ in range(self.params.number_of_trackers)],
                 'y':[np.array([]) for _ in range(self.params.number_of_trackers)],
-                'euclideanDistance': [np.array([]) for _ in range(self.params.number_of_trackers)],
+                'distance': [np.array([]) for _ in range(self.params.number_of_trackers)],
                 'roll': [np.array([]) for _ in range(self.params.number_of_trackers)]
         }
         for tracker_number in range(self.params.number_of_trackers):
@@ -350,7 +351,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['x'][tracker_number] = np.array([w[0] - m[0] for w, m in zip(bboxes['Woman'][tracker_number], bboxes['Men'][tracker_number])])
                 score['y'][tracker_number] = np.array([m[1] - w[1] for w, m in zip(bboxes['Woman'][tracker_number], bboxes['Men'][tracker_number])])
 
-                score['euclideanDistance'][tracker_number] = np.array([np.sqrt(np.sum((np.array(m) - np.array(w)) ** 2, axis=0)) \
+                score['distance'][tracker_number] = np.array([np.sqrt(np.sum((np.array(m) - np.array(w)) ** 2, axis=0)) \
                         for w, m in zip(woman_center, men_center)])
 
                 for i in range( min(( len(men_center), len(woman_center) )) ):
@@ -386,7 +387,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         self.score['x'] = sp.scale_signal(get_mean(score['x']), 0, 100)
         self.score['y'] = sp.scale_signal(get_mean(score['y']), 0, 100)
-        self.score['euclideanDistance'] = sp.scale_signal(get_mean(score['euclideanDistance']), 0, 100)
+        self.score['distance'] = sp.scale_signal(get_mean(score['distance']), 0, 100)
         self.score['roll'] = sp.scale_signal(get_mean(score['roll']), 0, 100)
 
 
@@ -1129,6 +1130,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 self.plot_y_score('debug.png', idx_list)
 
             self.create_funscript(idx_dict)
+            if self.params.invert:
+                self.funscript.invert_actions()
             self.finished(status, True)
         except Exception as ex:
             self.logger.critical("The program crashed die to a fatal error", exc_info=ex)

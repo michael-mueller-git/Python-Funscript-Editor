@@ -52,7 +52,8 @@ class SettingsDialog(QtWidgets.QDialog):
                 for key in PROJECTION.keys() \
                 if 'vr' not in key.lower() or self.include_vr])
         self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman', 'Unsupervised Woman + Men', 'Supervised Woman', 'Supervised Woman + Men']) # set before tracking metric
-        self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'x (left-right)', 'euclideanDistance', 'roll (rotation)'])
+        self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'y inverted (down-up)', 'x (left-right)', 'x inverted (right-left)', 'distance (p1-p2)', 'distance inverted (p2-p1)', 'roll (rotation)', 'roll inverted (rotation)'])
+
         self.ui.numberOfTrackerComboBox.addItems([str(i) for i in range(1, 6)])
 
 
@@ -60,7 +61,7 @@ class SettingsDialog(QtWidgets.QDialog):
         value = value.split('(')[0].strip()
         current_tracking_method_items = [self.ui.trackingMethodComboBox.itemText(i) for i in range(self.ui.trackingMethodComboBox.count())]
 
-        if value in ['x', 'y']:
+        if value in ['x', 'y', 'x inverted', 'y inverted']:
             if 'Unsupervised Woman' not in current_tracking_method_items:
                 self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman', 'Supervised Woman'])
         else:
