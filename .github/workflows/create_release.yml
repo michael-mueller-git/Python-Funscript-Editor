@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Get Application Version
+        id: get_version
+        uses: battila7/get-version-action@v2
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
