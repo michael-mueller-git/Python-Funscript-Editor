@@ -5,7 +5,8 @@
 ## Usage
 
 1. Download OFS from https://github.com/OpenFunscripter/OFS/releases.
-2. Install OFS if you prefer the installer version (`exe`) else extract the OFS archive.
+   <br> ![OFS Download](./docs/ofs_installation_01.jpg)
+2. Install OFS
 3. Start OFS at least one and close it again.
 4. Download the MTFG OFS Extension Installer from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
 5. Execute the downloaded executable. Wait for the installation to complete.
