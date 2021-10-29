@@ -4,7 +4,7 @@
 
 ## Usage
 
-1. Download OFS from https://github.com/OpenFunscripter/OFS/releases.
+1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. (min required OFS Version 1.4.2)
    <br> ![OFS Download](./docs/ofs_installation_01.jpg)
 2. Install OFS
 3. Start OFS at least one and close it again.
