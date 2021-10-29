@@ -9,7 +9,7 @@
 3. Start OFS at least one and close it again.
 4. Download the MTFG OFS Extension Installer from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
 5. Execute the downloaded executable. Wait for the installation to complete.
-6. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button. On slow computers, the program may take several seconds to start!
+6. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!
    <br> ![Activate Extension](./docs/ofs_extension_02.jpg)
 7. **Optional**: Add global key binding for the extension in OFS.
    <br> ![Assign an Shortcut](./docs/ofs_extension_03.jpg)
