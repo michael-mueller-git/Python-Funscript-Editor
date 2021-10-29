@@ -13,10 +13,11 @@ from packaging import version
 from bs4 import BeautifulSoup # beautifulsoup4
 from tqdm import tqdm
 
-VERSION = "v0.0.1"
+VERSION = "v0.0.2"
 LUA_EXTENSION_URL = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/main.lua"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
+LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
 
 
 class DownloadProgressBar(tqdm):
@@ -52,11 +53,29 @@ def get_download_urls():
                         if link.get('href').endswith(".zip") and "/releases/" in link.get('href')]
             }
             latest = max(download_urls)
-            return download_urls, latest
+            return download_urls, latest, ""
         except:
             time.sleep(2)
             if i == 2:
                 error("Download URL not found (" + FUNSCRIPT_GENERATOR_RELEASE_URL + ")")
+
+
+def get_download_urls_with_api():
+    # sometimes requests failed to fetch the url so we try up to 3 times
+    for i in range(3):
+        try:
+            response = requests.get(LATEST_RELEASE_API_URL).json()
+            assets_download_urls = ([x['browser_download_url'] for x in response['assets'] if 'browser_download_url' in x])
+            program_download_url = [x for x in assets_download_urls if x.lower().endswith('.zip')]
+            if len(program_download_url) == 0:
+                error("MTFG Release not found")
+
+            latest = response['tag_name'].lower().replace("v", "")
+            return {latest: program_download_url[0]}, latest, response['body']
+        except:
+            time.sleep(2)
+            if i == 2:
+                error("Download URL not found (" + LATEST_RELEASE_API_URL + ")")
 
 
 def is_latest_version_installed(version_file, version):
@@ -67,13 +86,18 @@ def is_latest_version_installed(version_file, version):
                 sys.exit()
 
 
-def update(download_urls, latest):
+def update(download_urls, latest, release_notes):
     extension_dir = os.path.join(OFS_EXTENSION_DIR, "Funscript Generator Windows")
     zip_file = os.path.join(extension_dir, "funscript-editor-v" +  str(latest) + ".zip")
     dest_dir = os.path.join(os.path.dirname(zip_file), "funscript-editor")
     version_file = os.path.join(os.path.dirname(zip_file), "funscript-editor", "funscript_editor", "VERSION.txt")
 
     is_latest_version_installed(version_file, latest)
+
+    print('New Version is available')
+    print('')
+    print('Release notes:')
+    print(release_notes)
 
     trial = 0
     while True:
@@ -113,8 +137,8 @@ if __name__ == "__main__":
             error("This installer only work on Windows")
 
         is_ofs_installed()
-        download_urls, latest = get_download_urls()
-        update(download_urls, latest)
+        download_urls, latest, release_notes = get_download_urls_with_api()
+        update(download_urls, latest, release_notes)
 
         print("Installation completed")
 
