@@ -1,4 +1,4 @@
-name: Release MTFG OFS Extension Installer Executable
+name: Release MTFG OFS Extension Installer
 
 on:
   push:

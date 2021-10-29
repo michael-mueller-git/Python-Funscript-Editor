@@ -1,4 +1,4 @@
-name: Release
+name: Create Release
 
 on:
   push:
@@ -21,4 +21,4 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.version }}
           release_name: ${{ steps.get_version.outputs.version }}
           draft: true
-          prerelease: true
+          prerelease: false
