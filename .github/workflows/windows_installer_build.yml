@@ -35,23 +35,18 @@ jobs:
         working-directory: ./contrib/Installer
         run: |
           pyinstaller --add-data="assets/*;./" --noupx --onefile mtfg-ofs-extension-installer.py
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Gets latest release info
+        id: latest_release
+        uses: jossef/action-latest-release-info@v1.1.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.get_version.outputs.version }}
-          release_name: ${{ steps.get_version.outputs.version }}
-          draft: true
-          prerelease: true
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Upload Installer
         id: upload-release-asset-1
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.latest_release.outputs.upload_url }}
           asset_path: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
           asset_name: mtfg-ofs-extension-installer.exe
           asset_content_type: application/octet-stream

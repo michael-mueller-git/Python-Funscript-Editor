@@ -54,23 +54,18 @@ jobs:
           files: dist/funscript-editor
           recursive: true
           dest: funscript-editor_${{ steps.get_version.outputs.version }}.zip
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Gets latest release info
+        id: latest_release
+        uses: jossef/action-latest-release-info@v1.1.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.get_version.outputs.version }}
-          release_name: ${{ steps.get_version.outputs.version }}
-          draft: true
-          prerelease: true
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Upload Windows Build Asset
         id: upload-release-asset-1
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.latest_release.outputs.upload_url }}
           asset_path: ./funscript-editor_${{ steps.get_version.outputs.version }}.zip
           asset_name: funscript-editor_${{ steps.get_version.outputs.version }}.zip
           asset_content_type: application/zip
@@ -80,7 +75,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.latest_release.outputs.upload_url }}
           asset_path: ./contrib/OpenFunscripter/funscript_generator_windows.lua
           asset_name: funscript_generator_windows.lua
           asset_content_type: application/octet-stream
