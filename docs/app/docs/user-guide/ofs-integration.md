@@ -1,14 +1,8 @@
 # Open Funscripter Integration
 
-We use a `lua` script to communicate between the Python Funscript Generator and the Open Funscripter.
+## Installation Windows Option 1 (Easy)
 
-## Installation (Windows)
-
-**Installation Option 1 coming soon, please use Installation Option 2 for now.**
-
-### Installation Option 1 (Easy)
-
-1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.2)**
+1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.2!)**
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
 2. Install OFS
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
@@ -23,7 +17,9 @@ We use a `lua` script to communicate between the Python Funscript Generator and 
 7. **Optional**: Add global key binding for the extension in OFS.
    <br> ![Assign an Shortcut](./images/ofs_extension_04.jpg)
 
-### Installation Option 2
+## Installation Windows Option 2
+
+We use a `lua` script to communicate between the Python Funscript Generator and the Open Funscripter.
 
 1. Download and install [Open Funscripter (OFS)](https://github.com/OpenFunscripter/OFS/releases). Please memorize the specified installation path, you will need it later.
    <br> ![OFS installation Step 1](./images/ofs_installation_01.jpg)
