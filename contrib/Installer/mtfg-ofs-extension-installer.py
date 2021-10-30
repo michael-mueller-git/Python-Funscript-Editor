@@ -68,7 +68,7 @@ def get_download_urls_with_api():
             assets_download_urls = ([x['browser_download_url'] for x in response['assets'] if 'browser_download_url' in x])
             program_download_url = [x for x in assets_download_urls if x.lower().endswith('.zip') and "funscript-editor" in x ]
             if len(program_download_url) == 0:
-                error("MTFG Release not found")
+                error("MTFG latest release not found (Try again later)")
 
             latest = response['tag_name'].lower().replace("v", "")
             return {latest: program_download_url[0]}, latest, response['body']
