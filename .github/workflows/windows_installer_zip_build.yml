@@ -1,9 +1,7 @@
-name: Release MTFG OFS Extension Installer
+name: Release MTFG OFS Extension Installer ZIP
 
 on:
   push:
-    tags:
-      - '*'
 
 jobs:
   miniconda:
@@ -34,13 +32,19 @@ jobs:
         shell: bash -l {0}
         working-directory: ./contrib/Installer
         run: |
-          pyinstaller --add-data="assets/*;./" --noupx --onefile mtfg-ofs-extension-installer.py
+          pyinstaller --add-data="assets/*;./" --noupx mtfg-ofs-extension-installer.py
+      - name: Create Asset Archive
+        uses: papeloto/action-zip@v1
+        with:
+          files: ./contrib/Installer/dist/mtfg-ofs-extension-installer
+          recursive: true
+          dest: mtfg-ofs-extension-installer.zip
       - name: Upload Installer
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
-          asset_name: mtfg-ofs-extension-installer.exe
+          file: mtfg-ofs-extension-installer.zip
+          asset_name: mtfg-ofs-extension-installer.zip
           tag: ${{ github.ref }}
           overwrite: true
 

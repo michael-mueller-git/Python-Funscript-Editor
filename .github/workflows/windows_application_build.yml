@@ -1,4 +1,4 @@
-name: Release Windows Executable
+name: Release MTFG Windows Executable
 
 on:
   push:
@@ -54,11 +54,6 @@ jobs:
           files: dist/funscript-editor
           recursive: true
           dest: funscript-editor_${{ steps.get_version.outputs.version }}.zip
-      - name: Gets latest release info
-        id: latest_release
-        uses: jossef/action-latest-release-info@v1.1.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - name: Upload Windows Build Asset
         uses: svenstaro/upload-release-action@v2
         with:
