@@ -5,7 +5,7 @@ dependencies:
   - altgraph=0.17=pyhd3eb1b0_0
   - beautifulsoup4=4.10.0=pyh06a4308_0
   - brotlipy=0.7.0=py39h2bbff1b_1003
-  - ca-certificates=2021.9.30=haa95532_1
+  - ca-certificates=2021.10.26=haa95532_2
   - certifi=2021.10.8=py39haa95532_0
   - cffi=1.14.6=py39h2bbff1b_0
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
