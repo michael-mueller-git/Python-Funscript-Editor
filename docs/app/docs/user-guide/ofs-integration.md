@@ -4,6 +4,23 @@ We use a `lua` script to communicate between the Python Funscript Generator and 
 
 ## Installation (Windows)
 
+**Installation Option 1 coming soon, please use Installation Option 2 for now.**
+
+### Installation Option 1 (Easy)
+
+1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.2)**
+   <br> ![OFS Download](./images/ofs_installation_01.jpg)
+2. Install OFS
+3. Start OFS at least one and close it again.
+4. Download the MTFG OFS Extension Installer from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
+5. Execute the downloaded executable. Wait for the installation to complete.
+6. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!
+   <br> ![Activate Extension](./images/ofs_extension_02.jpg)
+7. **Optional**: Add global key binding for the extension in OFS.
+   <br> ![Assign an Shortcut](./images/ofs_extension_03.jpg)
+
+### Installation Option 2
+
 1. Download and install [Open Funscripter (OFS)](https://github.com/OpenFunscripter/OFS/releases). Please memorize the specified installation path, you will need it later.
    <br> ![OFS installation Step 1](./images/ofs_installation_01.jpg)
    <br> ![OFS installation Step 2](./images/ofs_installation_02.jpg)
