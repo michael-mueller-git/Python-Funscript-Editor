@@ -66,7 +66,7 @@ def get_download_urls_with_api():
         try:
             response = requests.get(LATEST_RELEASE_API_URL).json()
             assets_download_urls = ([x['browser_download_url'] for x in response['assets'] if 'browser_download_url' in x])
-            program_download_url = [x for x in assets_download_urls if x.lower().endswith('.zip')]
+            program_download_url = [x for x in assets_download_urls if x.lower().endswith('.zip') and "funscript-editor" in x ]
             if len(program_download_url) == 0:
                 error("MTFG Release not found")
 
