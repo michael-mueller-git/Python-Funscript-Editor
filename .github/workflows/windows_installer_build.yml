@@ -41,12 +41,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload Installer
-        id: upload-release-asset-1
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.latest_release.outputs.upload_url }}
-          asset_path: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
           asset_name: mtfg-ofs-extension-installer.exe
-          asset_content_type: application/octet-stream
+          tag: ${{ github.ref }}
+          overwrite: true
+

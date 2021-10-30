@@ -60,22 +60,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload Windows Build Asset
-        id: upload-release-asset-1
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.latest_release.outputs.upload_url }}
-          asset_path: ./funscript-editor_${{ steps.get_version.outputs.version }}.zip
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./funscript-editor_${{ steps.get_version.outputs.version }}.zip
           asset_name: funscript-editor_${{ steps.get_version.outputs.version }}.zip
-          asset_content_type: application/zip
+          tag: ${{ github.ref }}
+          overwrite: true
       - name: Upload OFS Integration Asset
-        id: upload-release-asset-2
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.latest_release.outputs.upload_url }}
-          asset_path: ./contrib/OpenFunscripter/funscript_generator_windows.lua
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./contrib/OpenFunscripter/funscript_generator_windows.lua
           asset_name: funscript_generator_windows.lua
-          asset_content_type: application/octet-stream
+          tag: ${{ github.ref }}
+          overwrite: true
