@@ -105,7 +105,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
             self.__logger.info("Save result to %s", self.output_file)
             if not success: self.__show_message(msg, error=True)
-            sys.exit()
+            os._exit(os.EX_OK)
 
 
     def run(self) -> None:
