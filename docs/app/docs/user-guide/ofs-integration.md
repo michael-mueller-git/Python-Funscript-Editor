@@ -1,6 +1,6 @@
 # Open Funscripter Integration
 
-We use a lua script to communicate between the Python Funscript Generator and the Open Funscripter.
+We use a `lua` script to communicate between the Python Funscript Generator and the Open Funscripter.
 
 ## Installation (Windows)
 
