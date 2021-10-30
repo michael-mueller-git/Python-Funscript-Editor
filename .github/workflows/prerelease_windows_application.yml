@@ -1,8 +1,7 @@
-name: Prerelease MTFG Windows Executable
+name: Prerelease MTFG
 
 on:
-  push: {}
-  pull_request: {}
+  workflow_dispatch:
 
 jobs:
   miniconda:

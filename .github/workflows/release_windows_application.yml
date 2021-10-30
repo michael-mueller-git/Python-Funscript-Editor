@@ -1,4 +1,4 @@
-name: Release MTFG Windows Executable
+name: Release MTFG
 
 on:
   push:
