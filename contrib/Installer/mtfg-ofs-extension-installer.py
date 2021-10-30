@@ -137,6 +137,7 @@ if __name__ == "__main__":
             error("This installer only work on Windows")
 
         is_ofs_installed()
+        print('Fetch latest release data from github.com')
         download_urls, latest, release_notes = get_download_urls_with_api()
         update(download_urls, latest, release_notes)
 

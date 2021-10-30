@@ -296,8 +296,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         cv2.putText(image, "Use 'space' to quit and set the trackbar values",
             (self.x_text_start, 100), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
 
-        # beep_thread = threading.Thread(target=self.beep)
-        # beep_thread.start()
+        self.beep()
         self.clear_keypress_queue()
         trackbarValueMin = lower_limit
         trackbarValueMax = upper_limit
@@ -320,13 +319,17 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
     def beep(self) -> None:
         """ Play an sound to signal an event """
-        if False:
-            # we have problems on windows with this
-            if NOTIFICATION_SOUND_FILE is not None:
-                if os.path.exists(NOTIFICATION_SOUND_FILE):
-                    playsound(NOTIFICATION_SOUND_FILE)
-                else:
-                    self.logger.warning("Notification sound file not found (%s)", NOTIFICATION_SOUND_FILE)
+        if NOTIFICATION_SOUND_FILE is not None:
+            if os.path.exists(NOTIFICATION_SOUND_FILE):
+                def play_beep():
+                    try: playsound(NOTIFICATION_SOUND_FILE)
+                    except: pass
+                try:
+                    self.beep_thread = threading.Thread(target=play_beep)
+                    self.beep_thread.start()
+                except: pass
+            else:
+                self.logger.warning("Notification sound file not found (%s)", NOTIFICATION_SOUND_FILE)
 
 
     def calculate_score(self, bboxes) -> None:
@@ -860,8 +863,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 scene_change_quit_flag = False
                 if scene_detector.is_scene_change(frame_num-1 + self.params.start_frame):
-                    # beep_thread = threading.Thread(target=self.beep)
-                    # beep_thread.start()
+                    self.beep()
                     cv2.putText(last_frame, "Scene change detected, Press 'space' to continue tracking or press 'q' to finalize tracking",
                             (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
                     cv2.imshow(self.window_name, self.preview_scaling(last_frame))
