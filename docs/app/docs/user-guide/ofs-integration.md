@@ -11,13 +11,17 @@ We use a `lua` script to communicate between the Python Funscript Generator and 
 1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.2)**
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
 2. Install OFS
+   <br> ![Install OFS](./images/ofs_installation_03.jpg)
 3. Start OFS at least one and close it again.
+   <br> ![Start OFS](./images/ofs_installation_04.jpg)
 4. Download the MTFG OFS Extension Installer from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
+   <br> ![Download MTFG Extension](./images/ofs_extension_01.jpg)
 5. Execute the downloaded executable. Wait for the installation to complete.
+   <br> ![Run Extension Installer](./images/ofs_extension_02.jpg)
 6. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!
-   <br> ![Activate Extension](./images/ofs_extension_02.jpg)
+   <br> ![Activate MTFG Extension](./images/ofs_extension_03.jpg)
 7. **Optional**: Add global key binding for the extension in OFS.
-   <br> ![Assign an Shortcut](./images/ofs_extension_03.jpg)
+   <br> ![Assign an Shortcut](./images/ofs_extension_04.jpg)
 
 ### Installation Option 2
 

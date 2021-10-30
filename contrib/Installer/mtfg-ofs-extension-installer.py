@@ -131,7 +131,7 @@ def update(download_urls, latest, release_notes):
 
 
 if __name__ == "__main__":
-    print("MTFG OFS Extension Installer ", VERSION)
+    print("MTFG OFS Extension Installer", VERSION)
     try:
         if platform.system() != "Windows":
             error("This installer only work on Windows")
@@ -141,6 +141,7 @@ if __name__ == "__main__":
         update(download_urls, latest, release_notes)
 
         print("Installation completed")
+        time.sleep(4)
 
     except SystemExit as e:
         input()
