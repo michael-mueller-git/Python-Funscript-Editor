@@ -1,5 +1,6 @@
 
 processHandle = nil
+processHandleConfigDir = nil
 scriptIdx = 0
 status = "MTFG not running"
 
@@ -92,5 +93,9 @@ function gui()
         if ofs.Button("Start MTFG") then
             start_funscript_generator()
         end
+    end
+    ofs.SameLine()
+    if ofs.Button("Open Config Directory") then
+        processHandleConfigDir = ofs.CreateProcess("explorer.exe", ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\config")
     end
 end
