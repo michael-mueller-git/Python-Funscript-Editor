@@ -67,13 +67,13 @@ If you have problems with the OFS integration setup first test if the app work i
 
 If the standalone application works, look for your problem in the issues listed below. If the standalone application not work or your issue was not solved by a point listed below, open an issue with a detailed problem description and the full terminal window output if available.
 
-#### Noting happens when i press the Shortcut for the Funscript Generator
+### Noting happens when i press the Shortcut for the Funscript Generator
 
 In most cases, the variable `Settings.FunscriptGenerator` in the `funscript_generator.lua` script was not set correctly.
 
 **Important:** You have to use use `/` or `\\` for the `\` symbols in your path!
 
-#### When press shortcut the message "C:\\Users\\...” is not recognized as an internal or external command, operable program or batch file appears in the terminal output.
+### When press shortcut the message "C:\\Users\\...” is not recognized as an internal or external command, operable program or batch file appears in the terminal output.
 
 The path you have set in `Settings.FunscriptGenerator` does not exist. You have an typo in the path or forget an parent directory. Double check the complete path string!
 
