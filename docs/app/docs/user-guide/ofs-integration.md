@@ -12,7 +12,7 @@
    <br> ![Download MTFG Extension](./images/ofs_extension_01.jpg)
 5. Execute the downloaded executable. Wait for the installation to complete.
    <br> ![Run Extension Installer](./images/ofs_extension_02.jpg)
-6. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!
+6. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!. Before you press the _Start MTFG_ Button you have to open a video in OFS else you get only the Message Box "Video file was not specified!".
    <br> ![Activate MTFG Extension](./images/ofs_extension_03.jpg)
 7. **Optional**: Add global key binding for the extension in OFS.
    <br> ![Assign an Shortcut](./images/ofs_extension_04.jpg)
