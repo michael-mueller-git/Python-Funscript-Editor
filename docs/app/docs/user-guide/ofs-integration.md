@@ -19,6 +19,9 @@
 8. **Troubleshot**: If you have any problems that can not be solved with the Troubleshot section below please post an screenshot of the following log output window after you have try to run the Generator at least once:
    <br> ![OFS Log](./images/ofs_troubleshot_001.jpg)
 
+<br>
+<br>
+
 ## Installation Windows Option 2
 
 We use a `lua` script to communicate between the Python Funscript Generator and the Open Funscripter.
@@ -46,6 +49,9 @@ We use a `lua` script to communicate between the Python Funscript Generator and 
 9. Navigate to `Options : Keys : Dynamic` and insert a shortcut for the funscript generator.
    <br> ![Assign an Shortcut](./images/ofs_integration_08.jpg)
 10. Now you can use the shortcut in OFS at any position in the video to start the funscript generator.
+
+<br>
+<br>
 
 ## Troubleshot for all Installation Options
 
