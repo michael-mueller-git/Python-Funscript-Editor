@@ -18,7 +18,7 @@ handlers:
         formatter: standard
         filename: /tmp/funscript_editor.log
         maxBytes: 10485760 # 10MB
-        backupCount: 10
+        backupCount: 2
         encoding: utf8
 
 root:
