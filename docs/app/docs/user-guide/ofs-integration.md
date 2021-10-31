@@ -16,6 +16,8 @@
    <br> ![Activate MTFG Extension](./images/ofs_extension_03.jpg)
 7. **Optional**: Add global key binding for the extension in OFS.
    <br> ![Assign an Shortcut](./images/ofs_extension_04.jpg)
+8. **Troubleshot**: If you have any problems that can not be solved with the Troubleshot section below please post an screenshot of the following log output window:
+   <br> ![OFS Log](./images/ofs_troubleshot_001.jpg)
 
 ## Installation Windows Option 2
 
