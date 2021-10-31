@@ -2,6 +2,8 @@
 
 ## Installation Windows Option 1 (Easy)
 
+If you use an older version, i recommend to first delete the `funscript_generator_windows.lua` script from `C:\Program Files\OpenFunscripter\data\lua`.
+
 1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.2!)**
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
 2. Install OFS
