@@ -106,12 +106,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
             self.__logger.info("Save result to %s", self.output_file)
             if not success: self.__show_message(msg, error=True)
-            if False:
-                if platform.system() == "Windows":
-                    # On windows i have problems to close the process
-                    # Workaround we kill with taskkill
-                    os.system('taskkill /f /im funscript-editor.exe')
-                os._exit(os.EX_OK)
+            # os._exit(os.EX_OK)
             sys.exit()
 
 
