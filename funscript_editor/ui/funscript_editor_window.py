@@ -276,7 +276,8 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         file_name = QtWidgets.QFileDialog.getOpenFileName(
                 None,
                 caption="Select Video File",
-                directory=QtCore.QDir.currentPath())
+                options=QtWidgets.QFileDialog.DontUseNativeDialog # required to get correct path in flatpak
+        )
         if len(file_name) < 1: return
         if not any(file_name[0].lower().endswith(x) for x in ['.mkv', '.mp4']): return
 
@@ -294,6 +295,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.ui.seekBar.setMaximum(max((0, self.video_player.get_length-2)))
         self.ui.seekBar.setValue(0)
         self.ui.timestamp.setText(FFmpegStream.millisec_to_timestamp(0)+' ')
+        self.__logger.info("Load Video: %s (%s)" , file_name[0], "True" if os.path.exists(file_name[0]) else "False")
 
     def __new_funscript(self):
         self.funscript = Funscript(fps=self.video_player.get_fps)

@@ -12,3 +12,6 @@ funscript-editor*.AppImage
 funscript-editor.spec
 funscript_actions.csv
 linuxdeploy*.AppImage
+build-dir
+.flatpak-builder
+repo
