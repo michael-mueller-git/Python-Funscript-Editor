@@ -14,3 +14,4 @@ funscript_actions.csv
 linuxdeploy*.AppImage
 build-dir
 .flatpak-builder
+repo
