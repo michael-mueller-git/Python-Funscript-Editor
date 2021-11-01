@@ -9,6 +9,7 @@ from funscript_editor.algorithms.funscriptgenerator import FunscriptGeneratorThr
 from funscript_editor.data.funscript import Funscript
 from funscript_editor.ui.settings_dialog import SettingsDialog
 import funscript_editor.definitions as definitions
+from funscript_editor.ui.theme import setup_theme
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -32,6 +33,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             end_time: float,
             output_file: str):
         super(FunscriptGeneratorWindow, self).__init__()
+        setup_theme()
         if os.path.exists(definitions.ICON_PATH):
             self.setWindowIcon(QtGui.QIcon(definitions.ICON_PATH))
 

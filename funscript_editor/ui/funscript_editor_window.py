@@ -21,11 +21,11 @@ from funscript_editor.ui.funscript_editor_view import Ui_MainWindow
 from funscript_editor.ui.video_player import VideoPlayer
 from funscript_editor.ui.funscript_visualizer import FunscriptVisualizer
 from funscript_editor.data.funscript import Funscript
-from funscript_editor.algorithms.funscriptgenerator import FunscriptGeneratorThread, FunscriptGeneratorParameter
-from funscript_editor.utils.config import UI_CONFIG, VERSION
-from funscript_editor.definitions import APP_DOCUMENTATION_DIR, CODE_DOCUMENTATION_DIR
+from funscript_editor.utils.config import UI_CONFIG, VERSION, SETTINGS
+from funscript_editor.definitions import APP_DOCUMENTATION_DIR
 from funscript_editor.data.ffmpegstream import FFmpegStream
 from funscript_editor.ui.funscript_generator_window import FunscriptGeneratorWindow
+from funscript_editor.ui.theme import setup_theme
 
 import funscript_editor.definitions as definitions
 
@@ -34,6 +34,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(FunscriptEditorWindow, self).__init__()
+        setup_theme()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.__setup_video_player()

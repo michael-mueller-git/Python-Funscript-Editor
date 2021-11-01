@@ -12,7 +12,7 @@ To verify that the build was successful, run the following:
 
 ```bash
 flatpak --user remote-add --no-gpg-verify local-repo repo
-flatpak --user install local-repo org.flatpak.PythonFunscriptEditor
+flatpak --user install -y local-repo org.flatpak.PythonFunscriptEditor
 flatpak run org.flatpak.PythonFunscriptEditor
 flatpak --user remote-delete local-repo
 ```
