@@ -1,17 +1,22 @@
 {
   "app-id": "org.flatpak.PythonFunscriptEditor",
-  "runtime": "org.freedesktop.Platform",
-  "runtime-version": "21.08",
-  "sdk": "org.freedesktop.Sdk",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "3.38",
+  "sdk": "org.gnome.Sdk",
   "command": "runner.sh",
   "finish-args": [
+    "--share=ipc",
+    "--socket=fallback-x11",
+    "--socket=wayland",
     "--device=all",
     "--share=network",
-    "--share=ipc",
-    "--socket=x11",
-    "--socket=wayland",
     "--socket=pulseaudio",
-    "--filesystem=home:rw"
+    "--filesystem=xdg-pictures",
+    "--filesystem=home:rw",
+    "--talk-name=org.gtk.vfs",
+    "--talk-name=org.gtk.vfs.*",
+    "--talk-name=org.gnome.SettingsDaemon.MediaKeys",
+    "--env=LC_NUMERIC=C"
   ],
   "modules": [
     {
@@ -22,14 +27,15 @@
       },
       "build-commands": [
         "export CONDA_ALWAYS_YES=\"true\"",
-        "bash Miniconda3-latest-Linux-x86_64.sh -b -p /app/bin/conda -f",
+        "bash Miniconda3-py38_4.10.3-Linux-x86_64.sh -b -p /app/bin/conda -f",
         "/app/bin/conda/bin/activate",
         "/app/bin/conda/bin/conda env update -f environment_flatpak.yaml"
       ],
       "sources": [
         {
           "type": "file",
-          "path": "Miniconda3-latest-Linux-x86_64.sh"
+          "url": "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh",
+          "sha256": "935d72deb16e42739d69644977290395561b7a6db059b316958d97939e9bdf3d"
         },
         {
           "type": "file",
