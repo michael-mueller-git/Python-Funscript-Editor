@@ -17,3 +17,19 @@ If you want to contribute to the project and make it better, your help is very w
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
+## Flatpak
+
+```bash
+sudo sysctl kernel.unprivileged_userns_clone=1
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub org.freedesktop.Platform//21.08 org.freedesktop.Sdk//21.08
+flatpak-builder build-dir org.flatpak.PythonFunscriptEditor.json --force-clean
+flatpak-builder --run build-dir org.flatpak.PythonFunscriptEditor.json runner.sh
+```
+
+### Debugging
+
+```bash
+flatpak-builder --run build-dir org.flatpak.PythonFunscriptEditor.json /bin/bash
+```

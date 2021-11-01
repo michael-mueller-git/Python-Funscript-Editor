@@ -403,6 +403,7 @@ class VideoPlayer(QtCore.QThread):
         self.player.pause = True
         cap = cv2.VideoCapture(video_file)
         self.fps = cap.get(cv2.CAP_PROP_FPS)
+        if self.fps == 0: self.fps = 30
         self.height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.duration = cap.get(cv2.CAP_PROP_FRAME_COUNT) / self.fps
