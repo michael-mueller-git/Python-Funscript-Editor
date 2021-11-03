@@ -114,6 +114,10 @@ def update(download_urls, latest, release_notes):
             download_url(download_urls[latest], zip_file)
 
         try:
+            if os.path.exists(dest_dir + "_update"):
+                try: shutil.rmtree(dest_dir + "_update")
+                except: error('Error while deleting old update Version (Restart you computer and try again)')
+
             os.makedirs(dest_dir + "_update", exist_ok = True)
             with zipfile.ZipFile(zip_file) as zf:
                 for member in tqdm(zf.infolist(), desc='Extracting '):
