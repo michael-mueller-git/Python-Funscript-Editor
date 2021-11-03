@@ -1,0 +1,41 @@
+name: Prerelease MTFG Installer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  miniconda:
+    name: Miniconda ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: ["windows-latest"]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: build-installer
+          environment-file: ./contrib/Installer/environment.yaml
+          python-version: 3.9
+          auto-activate-base: false
+      - name: Collect Conda Info
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda env export
+      - name: Get Version
+        id: get_version
+        uses: battila7/get-version-action@v2
+      - name: Build Installer
+        shell: bash -l {0}
+        working-directory: ./contrib/Installer
+        run: |
+          pyinstaller --add-data="assets/*;./" --noupx --onefile mtfg-ofs-extension-installer.py
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mtfg-ofs-extension-installer.exe
+          path: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
+          retention-days: 7
+
