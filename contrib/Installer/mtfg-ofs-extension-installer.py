@@ -8,6 +8,7 @@ import sys
 import time
 import traceback
 import shutil
+import subprocess
 
 from packaging import version
 from bs4 import BeautifulSoup # beautifulsoup4
@@ -76,6 +77,13 @@ def get_download_urls_with_api():
             time.sleep(2)
             if i == 2:
                 error("Download URL not found (" + LATEST_RELEASE_API_URL + ")")
+
+
+def process_exists(process_name):
+    call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
+    output = subprocess.check_output(call).decode()
+    last_line = output.strip().split('\r\n')[-1]
+    return last_line.lower().startswith(process_name.lower())
 
 
 def is_latest_version_installed(version_file, version):
