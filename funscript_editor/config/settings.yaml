@@ -18,8 +18,7 @@ preview_scaling: 0.6
 tracker: 'CSRT'
 
 # Specify the wav file to play when tracking finished (write 'off' to disable the sound notification)
-# This feature was removed in v0.1.1 due to problems on windows
-notification_sound: 'sound_notification.wav'
+notification_sound: 'off'
 
 # Time in milliseconds at which the tracking is stopped if the selected feature is not found
 # THIS feature is not available since v0.1.2

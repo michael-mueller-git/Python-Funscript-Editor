@@ -896,19 +896,25 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         delete_last_predictions = max((1, int((self.get_average_tracking_fps()+1)*0.5*HYPERPARAMETER['user_reaction_time_in_milliseconds']/1000.0)))
                         break
 
+                stop_tracking = False
                 for tracker_number in range(self.params.number_of_trackers):
                     (woman_tracker_status, bbox_woman[tracker_number]) = trackers_woman[tracker_number].result()
                     if woman_tracker_status != StaticVideoTracker.Status.OK:
                         status = 'Woman ' + woman_tracker_status
-                        delete_last_predictions = (self.params.skip_frames+1)*2
+                        delete_last_predictions = (self.params.skip_frames+1)
+                        stop_tracking = True
                         break
 
                     if self.params.track_men:
                         (men_tracker_status, bbox_men[tracker_number]) = trackers_men[tracker_number].result()
                         if men_tracker_status != StaticVideoTracker.Status.OK:
                             status = 'Men ' + men_tracker_status
-                            delete_last_predictions = (self.params.skip_frames+1)*2
+                            delete_last_predictions = (self.params.skip_frames+1)
+                            stop_tracking = True
                             break
+
+                if stop_tracking:
+                    break
 
                 last_frame = frame
 
