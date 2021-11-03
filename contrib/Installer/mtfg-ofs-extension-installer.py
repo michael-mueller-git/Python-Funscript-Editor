@@ -128,6 +128,9 @@ def update(download_urls, latest, release_notes):
             else:
                 error("Installation failed")
 
+    if process_exists("OpenFunscripter.exe"):
+        error("OpenFunscripter is currently running, please close OpenFunscripter and execute this installer again, to update the MTFG Extension")
+
     if os.path.exists(dest_dir):
         try: shutil.rmtree(dest_dir)
         except: error('Error while deleting old Version (Is OFS currenty running?)')
