@@ -5,9 +5,14 @@ processHandleLogFile = nil
 logfileExist = false
 updateCounter = 0
 scriptIdx = 0
+mtfgVersion = "0.0.0"
 status = "MTFG not running"
 
 function start_funscript_generator()
+    if processHandleMTFG then
+        print('MTFG already running')
+    end
+
     scriptIdx = ofs.ActiveIdx()
     local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
     local video = player.CurrentVideo()
@@ -77,6 +82,14 @@ end
 
 function init()
     ofs.Bind("start_funscript_generator", "execute the funcript generator")
+    local f = io.open(ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\VERSION.txt")
+    if f then
+        for line in f:lines() do
+            if string.find(string.lower(line), "v") then
+                mtfgVersion = string.lower(line):gsub("v", "")
+            end
+        end
+    end
 end
 
 
@@ -99,13 +112,17 @@ end
 
 
 function gui()
-    ofs.Text(status)
+    ofs.Text("Status: "..status)
+    ofs.Text("Version: "..mtfgVersion)
+    ofs.Text("Action:")
+
     if not processHandleMTFG then
         ofs.SameLine()
         if ofs.Button("Start MTFG") then
             start_funscript_generator()
         end
     end
+
     ofs.SameLine()
     if ofs.Button("Open Config") then
         processHandleConfigDir = ofs.CreateProcess("explorer.exe", ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\config")
@@ -117,4 +134,6 @@ function gui()
              processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
           end
     end
+
+    
 end
