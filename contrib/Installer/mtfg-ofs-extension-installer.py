@@ -137,8 +137,17 @@ def update(download_urls, latest, release_notes):
 
     shutil.move(dest_dir + "_update", dest_dir)
 
-    with open(os.path.join(extension_dir, "main.lua"), "wb") as f:
-        f.write(requests.get(LUA_EXTENSION_URL).content)
+    # sometimes requests failed to fetch the url so we try up to 3 times
+    for i in range(3):
+        try:
+            with open(os.path.join(extension_dir, "main.lua"), "wb") as f:
+                f.write(requests.get(LUA_EXTENSION_URL).content)
+            break
+        except:
+            if os.path.exists(dest_dir):
+                try: shutil.rmtree(dest_dir)
+                except: pass
+            error('main.lua insallation failed')
 
 
 if __name__ == "__main__":
