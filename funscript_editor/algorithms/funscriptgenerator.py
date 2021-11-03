@@ -814,117 +814,110 @@ class FunscriptGeneratorThread(QtCore.QThread):
         delete_last_predictions = 0
         bbox_woman = [None for _ in range(self.params.number_of_trackers)]
         bbox_men = [None for _ in range(self.params.number_of_trackers)]
-        while video.isOpen():
-            cycle_start = time.time()
-            frame = video.read()
-            frame_num += 1
+        try:
+            while video.isOpen():
+                cycle_start = time.time()
+                frame = video.read()
+                frame_num += 1
 
-            if frame is None:
-                status = 'Reach a corrupt video frame' if video.isOpen() else 'End of video reached'
-                break
+                if frame is None:
+                    status = 'Reach a corrupt video frame' if video.isOpen() else 'End of video reached'
+                    break
 
-            # NOTE: Use != 1 to ensure that the first difference is equal to the folowing (reqired for the interpolation)
-            if self.params.skip_frames > 0 and frame_num % (self.params.skip_frames + 1) != 1:
-                continue
+                # NOTE: Use != 1 to ensure that the first difference is equal to the folowing (reqired for the interpolation)
+                if self.params.skip_frames > 0 and frame_num % (self.params.skip_frames + 1) != 1:
+                    continue
 
-            if self.params.end_frame > 0 and frame_num + self.params.start_frame >= self.params.end_frame:
-                status = "Tracking stop at existing action point"
-                break
+                if self.params.end_frame > 0 and frame_num + self.params.start_frame >= self.params.end_frame:
+                    status = "Tracking stop at existing action point"
+                    break
 
-            for tracker_number in range(self.params.number_of_trackers):
-                trackers_woman[tracker_number].update(frame)
-                if self.params.track_men: trackers_men[tracker_number].update(frame)
-            scene_detector.update(frame)
-
-            if last_frame is not None:
-                # Process data from last step while the next tracking points get predicted.
-                # This should improve the whole processing speed, because the tracker run in a seperate thread
                 for tracker_number in range(self.params.number_of_trackers):
-                    if bbox_woman[tracker_number] is not None:
-                        if tracker_number == 0:
-                            bboxes['Woman'][frame_num-1] = { tracker_number: bbox_woman[tracker_number] }
-                        else:
-                            bboxes['Woman'][frame_num-1][tracker_number] = bbox_woman[tracker_number]
-                        last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1][tracker_number], color=(0,255,0))
-                        if self.params.supervised_tracking:
-                            last_frame = self.draw_box(last_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
+                    trackers_woman[tracker_number].update(frame)
+                    if self.params.track_men: trackers_men[tracker_number].update(frame)
+                scene_detector.update(frame)
 
-                    if self.params.track_men and bbox_men[tracker_number] is not None:
-                        if tracker_number == 0:
-                            bboxes['Men'][frame_num-1] = { tracker_number: bbox_men[tracker_number] }
-                        else:
-                            bboxes['Men'][frame_num-1][tracker_number] = bbox_men[tracker_number]
-                        last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1][tracker_number], color=(255,0,255))
-                        if self.params.supervised_tracking:
-                            last_frame = self.draw_box(last_frame, tracking_areas_men[tracker_number], color=(255,0,255))
+                if last_frame is not None:
+                    # Process data from last step while the next tracking points get predicted.
+                    # This should improve the whole processing speed, because the tracker run in a seperate thread
+                    for tracker_number in range(self.params.number_of_trackers):
+                        if bbox_woman[tracker_number] is not None:
+                            if tracker_number == 0:
+                                bboxes['Woman'][frame_num-1] = { tracker_number: bbox_woman[tracker_number] }
+                            else:
+                                bboxes['Woman'][frame_num-1][tracker_number] = bbox_woman[tracker_number]
+                            last_frame = self.draw_box(last_frame, bboxes['Woman'][frame_num-1][tracker_number], color=(0,255,0))
+                            if self.params.supervised_tracking:
+                                last_frame = self.draw_box(last_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
 
-                last_frame = self.draw_fps(last_frame)
-                last_frame = self.draw_time(last_frame, frame_num + self.params.start_frame)
+                        if self.params.track_men and bbox_men[tracker_number] is not None:
+                            if tracker_number == 0:
+                                bboxes['Men'][frame_num-1] = { tracker_number: bbox_men[tracker_number] }
+                            else:
+                                bboxes['Men'][frame_num-1][tracker_number] = bbox_men[tracker_number]
+                            last_frame = self.draw_box(last_frame, bboxes['Men'][frame_num-1][tracker_number], color=(255,0,255))
+                            if self.params.supervised_tracking:
+                                last_frame = self.draw_box(last_frame, tracking_areas_men[tracker_number], color=(255,0,255))
 
-                scene_change_quit_flag = False
-                if scene_detector.is_scene_change(frame_num-1 + self.params.start_frame):
-                    self.beep()
-                    cv2.putText(last_frame, "Scene change detected, Press 'space' to continue tracking or press 'q' to finalize tracking",
+                    last_frame = self.draw_fps(last_frame)
+                    last_frame = self.draw_time(last_frame, frame_num + self.params.start_frame)
+
+                    scene_change_quit_flag = False
+                    if scene_detector.is_scene_change(frame_num-1 + self.params.start_frame):
+                        self.logger.info("Scene change detected, Pause tracking")
+                        self.beep()
+                        cv2.putText(last_frame, "Scene change detected, Press 'space' to continue tracking or press 'q' to finalize tracking",
+                                (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
+                        cv2.imshow(self.window_name, self.preview_scaling(last_frame))
+                        while True:
+                            key = cv2.waitKey(25)
+                            if self.was_space_pressed() or key == ord(' '):
+                                break
+
+                            if self.was_key_pressed('q') or key == ord('q'):
+                                scene_change_quit_flag = True
+                                break
+
+                    cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
                             (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
                     cv2.imshow(self.window_name, self.preview_scaling(last_frame))
-                    while True:
-                        key = cv2.waitKey(25)
-                        if self.was_space_pressed() or key == ord(' '):
-                            break
 
-                        if self.was_key_pressed('q') or key == ord('q'):
-                            scene_change_quit_flag = True
-                            break
+                    if scene_change_quit_flag:
+                        status = 'Tracking stopped at scene change'
+                        if self.params.scene_detector.upper() == "THRESHOLD":
+                            # NOTE: The threshold scene detector has delayed detection
+                            delete_last_predictions = int(self.video_info.fps)
+                        else:
+                            delete_last_predictions = (self.params.skip_frames+1)*2
+                        break
 
-                cv2.putText(last_frame, "Press 'q' if the tracking point shifts or a video cut occured",
-                        (self.x_text_start, 75), cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (255,0,0), 2)
-                cv2.imshow(self.window_name, self.preview_scaling(last_frame))
+                    if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
+                        status = 'Tracking stopped by user'
+                        delete_last_predictions = max((1, int((self.get_average_tracking_fps()+1)*0.5*HYPERPARAMETER['user_reaction_time_in_milliseconds']/1000.0)))
+                        break
 
-                if scene_change_quit_flag:
-                    status = 'Tracking stopped at scene change'
-                    if self.params.scene_detector.upper() == "THRESHOLD":
-                        # NOTE: The threshold scene detector has delayed detection
-                        delete_last_predictions = int(self.video_info.fps)
-                    else:
-                        delete_last_predictions = (self.params.skip_frames+1)*2
-                    break
-
-                if self.was_key_pressed('q') or cv2.waitKey(1) == ord('q'):
-                    status = 'Tracking stopped by user'
-                    delete_last_predictions = max((1, int((self.get_average_tracking_fps()+1)*HYPERPARAMETER['user_reaction_time_in_milliseconds']/1000.0)))
-                    break
-
-            for tracker_number in range(self.params.number_of_trackers):
-                (woman_tracker_status, bbox_woman[tracker_number]) = trackers_woman[tracker_number].result()
-                if woman_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
-                    status = 'Woman ' + woman_tracker_status
-                    delete_last_predictions = (self.params.skip_frames+1)*2
-                    break
-
-                if woman_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
-                    if tracking_lost_frames == 0 or len(bboxes['Woman']) == 0 or frame_num - max([x for x in bboxes['Woman'].keys()]) >= tracking_lost_frames:
+                for tracker_number in range(self.params.number_of_trackers):
+                    (woman_tracker_status, bbox_woman[tracker_number]) = trackers_woman[tracker_number].result()
+                    if woman_tracker_status != StaticVideoTracker.Status.OK:
                         status = 'Woman ' + woman_tracker_status
                         delete_last_predictions = (self.params.skip_frames+1)*2
                         break
 
-                if self.params.track_men:
-                    (men_tracker_status, bbox_men[tracker_number]) = trackers_men[tracker_number].result()
-                    if men_tracker_status == StaticVideoTracker.Status.FEATURE_OUTSIDE:
-                        status = 'Men ' + men_tracker_status
-                        delete_last_predictions = (self.params.skip_frames+1)*2
-                        break
-
-                    if men_tracker_status == StaticVideoTracker.Status.TRACKING_LOST:
-                        if tracking_lost_frames == 0 or len(bboxes['Men']) == 0 or frame_num - max([x for x in bboxes['Men'].keys()]) >= tracking_lost_frames:
+                    if self.params.track_men:
+                        (men_tracker_status, bbox_men[tracker_number]) = trackers_men[tracker_number].result()
+                        if men_tracker_status != StaticVideoTracker.Status.OK:
                             status = 'Men ' + men_tracker_status
                             delete_last_predictions = (self.params.skip_frames+1)*2
                             break
 
-            last_frame = frame
+                last_frame = frame
 
-            if cycle_time_in_ms > 0:
-                wait = cycle_time_in_ms - (time.time() - cycle_start)*float(1000)
-                if wait > 0: time.sleep(wait/float(1000))
+                if cycle_time_in_ms > 0:
+                    wait = cycle_time_in_ms - (time.time() - cycle_start)*float(1000)
+                    if wait > 0: time.sleep(wait/float(1000))
+        except Exception as ex:
+            self.logger.critical("The program crashed due to a fatal error", exc_info=ex)
+            return "program crashed"
 
         bboxes = self.correct_bboxes(bboxes, delete_last_predictions)
         self.__show_loading_screen(first_frame.shape)
@@ -1153,7 +1146,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 self.funscript.invert_actions()
             self.finished(status, True)
         except Exception as ex:
-            self.logger.critical("The program crashed die to a fatal error", exc_info=ex)
+            self.logger.critical("The program crashed due to a fatal error", exc_info=ex)
             # self.logger.critical("The program crashed due to a fatal error. " \
             #         + "Please open an issue on github with the corresponding log file (" \
             #         + ','.join(get_logfiles_paths()) + ") and application configuration (" \

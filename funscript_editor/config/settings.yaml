@@ -22,6 +22,7 @@ tracker: 'CSRT'
 notification_sound: 'sound_notification.wav'
 
 # Time in milliseconds at which the tracking is stopped if the selected feature is not found
+# THIS feature is not available since v0.1.2
 tracking_lost_time: 0
 
 # Specify the scene detector algorithm. Available options:
