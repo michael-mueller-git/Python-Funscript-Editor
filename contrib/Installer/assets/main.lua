@@ -116,10 +116,15 @@ function gui()
     ofs.Text("Version: "..mtfgVersion)
     ofs.Text("Action:")
 
+    ofs.SameLine()
     if not processHandleMTFG then
-        ofs.SameLine()
+        
         if ofs.Button("Start MTFG") then
             start_funscript_generator()
+        end
+    else
+        if ofs.Button("Kill MTFG") then
+            os.execute("taskkill /f /im funscript-editor.exe")
         end
     end
 
