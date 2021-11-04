@@ -26,8 +26,11 @@ jobs:
           conda info
           conda env export
       - name: Get Version
-        id: get_version
-        uses: battila7/get-version-action@v2
+        shell: bash -l {0}
+        run: |
+          echo "INSTALLER_VERSION=$(grep '^VERSION' ./contrib/Installer/mtfg-ofs-extension-installer.py | cut -d '=' -f 2 | sed 's/\"//g' | sed 's/ //g')" >> $GITHUB_ENV
+      - name: Print Version
+        run: echo $INSTALLER_VERSION
       - name: Build Installer
         shell: bash -l {0}
         working-directory: ./contrib/Installer
@@ -35,7 +38,7 @@ jobs:
           pyinstaller --add-data="assets/*;./" --noupx --onefile mtfg-ofs-extension-installer.py
       - uses: actions/upload-artifact@v2
         with:
-          name: mtfg-ofs-extension-installer.exe
+          name: mtfg-ofs-extension-installer-${{INSTALLER_VERSION}}.exe
           path: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
           retention-days: 7
 
