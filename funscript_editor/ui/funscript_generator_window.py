@@ -74,7 +74,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__logger.info("Set End Time to Frame Number %d", self.end_frame)
 
         self.settings = {}
-        self.settings_dialog = SettingsDialog(self.settings, include_vr = self.is_sbs_vr_video)
+        self.settings_dialog = SettingsDialog(self.settings, include_vr = True)
         self.settings_dialog.applySettings.connect(self.run)
         self.settings_dialog.show()
 
