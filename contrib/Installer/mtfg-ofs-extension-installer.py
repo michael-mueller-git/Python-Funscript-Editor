@@ -9,17 +9,31 @@ import time
 import traceback
 import shutil
 import subprocess
+import ctypes
 
 from packaging import version
 from bs4 import BeautifulSoup # beautifulsoup4
 from tqdm import tqdm
 
-VERSION = "v0.0.2"
+VERSION = "v0.0.3"
 LUA_EXTENSION_URL = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/main.lua"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
 
+
+def Mbox(title, text, style):
+    """
+    ##  Styles:
+    ##  0 : OK
+    ##  1 : OK | Cancel
+    ##  2 : Abort | Retry | Ignore
+    ##  3 : Yes | No | Cancel
+    ##  4 : Yes | No
+    ##  5 : Retry | Cancel
+    ##  6 : Cancel | Try Again | Continue
+    """
+    return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
 class DownloadProgressBar(tqdm):
     def update_to(self, b=1, bsize=1, tsize=None):
