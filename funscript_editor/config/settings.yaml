@@ -38,3 +38,6 @@ additional_changepoints: True
 
 # Force dark ui theme
 dark_theme: False
+
+# enable the tracking plausiblity check
+tracking_plausibility_check: True

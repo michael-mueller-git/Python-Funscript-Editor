@@ -736,9 +736,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_areas_woman[tracker_number]): break
                     self.logger.error("Invalid supervised tracking area selected")
                 preview_frame = self.draw_box(preview_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
-                trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, supervised_tracking_area = tracking_areas_woman[tracker_number])
+                trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, self.video_info.fps, supervised_tracking_area = tracking_areas_woman[tracker_number])
             else:
-                trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman)
+                trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, self.video_info.fps)
 
             if tracker_number == 0:
                 bboxes['Woman'][1] = { tracker_number: bbox_woman }
@@ -754,9 +754,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_areas_men[tracker_number]): break
                         self.logger.error("Invalid supervised tracking area selected")
                     preview_frame = self.draw_box(preview_frame, tracking_areas_men[tracker_number], color=(255,0,255))
-                    trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, supervised_tracking_area = tracking_areas_men[tracker_number])
+                    trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, self.video_info.fps, supervised_tracking_area = tracking_areas_men[tracker_number])
                 else:
-                    trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men)
+                    trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, self.video_info.fps)
 
                 if tracker_number == 0:
                     bboxes['Men'][1] = { tracker_number: bbox_men }

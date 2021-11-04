@@ -8,7 +8,7 @@ import logging
 from dataclasses import dataclass
 from threading import Thread
 from queue import Queue
-from funscript_editor.utils.config import SETTINGS
+from funscript_editor.utils.config import SETTINGS, HYPERPARAMETER
 
 import numpy as np
 
@@ -21,6 +21,7 @@ class StaticVideoTracker:
     Args:
         first_frame (np.ndarray): open cv image representing the start frame
         tracking_bbox (tuple): tuple with (x,y,w,h) of the init tracking box
+        fps (float): video fps
         limit_searchspace (dict) : only insert the specified region around the init box
         supervised_tracking_area (tuple, optional): tuple with (x,y,w,h) of the supervised tracking area
         queue_size (int): in (work) and out (result) queue size
@@ -29,6 +30,7 @@ class StaticVideoTracker:
     def __init__(self,
             first_frame: np.ndarray,
             tracking_bbox: tuple,
+            fps: float,
             limit_searchspace : dict = {'h': 0.45, 'w':0.4},
             supervised_tracking_area: tuple = None,
             queue_size : int = 2):
@@ -36,6 +38,7 @@ class StaticVideoTracker:
         self.limit_searchspace = limit_searchspace
         self.first_tracking_bbox = tracking_bbox
         self.supervised_tracking_area = supervised_tracking_area
+        self.fps = max((1,fps))
         self.stopped = False
         self.sleep_time = 0.001
         self.queue_in = Queue(maxsize=queue_size)
@@ -43,6 +46,11 @@ class StaticVideoTracker:
         self.thread = Thread(target=self.run, args=())
         self.thread.daemon = True
         self.thread.start()
+        self.tracking_points = []
+        self.tracking_counter = 0
+        self.cluster_center = [0, 0]
+        self.plausibility_thresholds = [0, 0]
+
 
 
     __logger = logging.getLogger(__name__)
@@ -53,6 +61,7 @@ class StaticVideoTracker:
         OK :str = "OK"
         TRACKING_LOST :str = "Tracking Lost"
         FEATURE_OUTSIDE :str = "Feature outside the specified area"
+        IMPLAUSIBLE :str = "Tracking point is not plausible"
 
 
     @staticmethod
@@ -126,6 +135,47 @@ class StaticVideoTracker:
             self.tracker = cv2.TrackerCSRT_create()
 
 
+    def __is_plausible(self, box) -> bool:
+        tracking_init_phase_in_sec = HYPERPARAMETER['tracking_init_phase_in_sec']
+        tracking_plausibility_factor_x = HYPERPARAMETER['tracking_plausibility_factor_x']
+        tracking_plausibility_factor_y = HYPERPARAMETER['tracking_plausibility_factor_y']
+        if self.tracking_counter <= round(self.fps * tracking_init_phase_in_sec):
+            self.tracking_points.append([box[0] + box[2]/2, box[1] + box[3]/2])
+            if self.tracking_counter == round(self.fps * tracking_init_phase_in_sec):
+                self.__logger.info("Determine Plausibility Threshold for Tracker")
+                self.cluster_center = np.mean(np.array(self.tracking_points), axis = 0)
+                distances_x = [abs(self.cluster_center[0] - point[0]) for point in self.tracking_points]
+                distances_y = [abs(self.cluster_center[1] - point[1]) for point in self.tracking_points]
+                self.plausibility_thresholds = [ \
+                        max(distances_x) * tracking_plausibility_factor_x, \
+                        max(distances_y) * tracking_plausibility_factor_y \
+                ]
+        else:
+            point = [box[0] + box[2]/2, box[1] + box[3]/2]
+            if abs(point[0] - self.cluster_center[0]) > self.plausibility_thresholds[0]:
+                self.__logger.warning(
+                        "Tracking point x is not plausible (%d > %d +- %d)",
+                        round(point[0]),
+                        round(self.cluster_center[0]),
+                        round(self.plausibility_thresholds[0])
+                    )
+                return False
+
+            if abs(point[1] - self.cluster_center[1]) > self.plausibility_thresholds[1]:
+                self.__logger.warning(
+                        "Tracking point y is not plausible (%d > %d +- %d)",
+                        round(point[1]),
+                        round(self.cluster_center[1]),
+                        round(self.plausibility_thresholds[1])
+                    )
+                return False
+
+            self.cluster_center[0] = (self.cluster_center[0] * self.tracking_counter + point[0]) / (self.tracking_counter + 1)
+            self.cluster_center[1] = (self.cluster_center[1] * self.tracking_counter + point[1]) / (self.tracking_counter + 1)
+
+        return True
+
+
     def run(self) -> None:
         """ The Video Tracker Thread Function """
         self.__setup_tracker()
@@ -155,15 +205,18 @@ class StaticVideoTracker:
                 frame = self.queue_in.get()
                 frame_roi = frame[y0:y1, x0:x1]
                 success, bbox = self.tracker.update(frame_roi)
+                self.tracking_counter += 1
                 status = StaticVideoTracker.Status.TRACKING_LOST
-                if success:
+                if not success or bbox is None:
+                    bbox = None
+                else:
                     status = StaticVideoTracker.Status.OK
                     bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]))
                     if not StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
                         status = StaticVideoTracker.Status.FEATURE_OUTSIDE
-                        bbox = None
-                else:
-                    bbox = None
+                    elif SETTINGS['tracking_plausibility_check']:
+                        if not self.__is_plausible(bbox):
+                            status = StaticVideoTracker.Status.IMPLAUSIBLE
 
                 self.queue_out.put((status, bbox))
 

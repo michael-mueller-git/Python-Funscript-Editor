@@ -37,7 +37,7 @@ user_reaction_time_in_milliseconds: 1000
 # Scene Detector #
 ##################
 
-# Specify the miniimum scene length in seconds
+# Specify the minimum scene length in seconds
 min_scene_len: 3
 
 # Threshold value for the content detector to detect an scene change
@@ -45,6 +45,20 @@ scene_content_detector_threshold: 30.0
 
 # Threshold value for the threshold detector to detect an scene change
 scene_threshold_detector_threshold: 12
+
+
+###########
+# Tracker #
+###########
+
+# Specify the init phase for the tracker (currently only used for the plausible check)
+tracking_init_phase_in_sec: 6
+
+# plausiblity factor to veriify a correct tracking position
+tracking_plausibility_factor_x: 4.0
+
+# plausiblity factor to veriify a correct tracking position
+tracking_plausibility_factor_y: 2.5
 
 
 ##############################
