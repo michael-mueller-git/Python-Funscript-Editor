@@ -28,8 +28,11 @@ jobs:
           conda info
           conda env export
       - name: Get Version
-        id: get_version
-        uses: battila7/get-version-action@v2
+        shell: bash -l {0}
+        run: |
+          echo "INSTALLER_VERSION=$(grep '^VERSION' ./contrib/Installer/mtfg-ofs-extension-installer.py | cut -d '=' -f 2 | sed 's/\"//g' | sed 's/ //g')" >> $GITHUB_ENV
+      - name: Print Version
+        run: echo $INSTALLER_VERSION
       - name: Build Installer
         shell: bash -l {0}
         working-directory: ./contrib/Installer
@@ -40,7 +43,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
-          asset_name: mtfg-ofs-extension-installer.exe
+          asset_name: mtfg-ofs-extension-installer-${{env.INSTALLER_VERSION}}.exe
           tag: ${{ github.ref }}
           overwrite: true
 
