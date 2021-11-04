@@ -38,7 +38,7 @@ jobs:
           pyinstaller --add-data="assets/*;./" --noupx --onefile mtfg-ofs-extension-installer.py
       - uses: actions/upload-artifact@v2
         with:
-          name: mtfg-ofs-extension-installer-${{INSTALLER_VERSION}}.exe
+          name: mtfg-ofs-extension-installer-${{env.INSTALLER_VERSION}}.exe
           path: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe
           retention-days: 7
 
