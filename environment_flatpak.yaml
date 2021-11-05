@@ -20,7 +20,6 @@ dependencies:
   - cryptography=3.4.7=py38hd23ed53_0
   - dbus=1.13.18=hb2f20db_0
   - expat=2.4.1=h2531618_2
-  - ffmpeg=4.3.1=hca11adc_2
   - fontconfig=2.13.1=h6c09931_0
   - freetype=2.10.4=h5ab3b9f_0
   - gettext=0.19.8.1=h0b5b191_1005
