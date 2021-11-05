@@ -583,6 +583,16 @@ class FunscriptGeneratorThread(QtCore.QThread):
         if image.shape[0] > 3000 or image.shape[1] > 3000:
             image = cv2.resize(image, None, fx=0.5, fy=0.5)
 
+        ui_texte = []
+        if "keys" in config.keys():
+            for param in config['keys'].keys():
+                if param in config['parameter'].keys() and all(x in config["keys"][param].keys() for x in ["increase", "decrease"]):
+                    ui_texte.append("Use '{}', '{}' to increase/decrease {}".format(
+                        config["keys"][param]["increase"],
+                        config["keys"][param]["decrease"],
+                        param)
+                    )
+
         self.clear_keypress_queue()
         parameter_changed, selected = True, False
         while not selected:
@@ -590,26 +600,41 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 parameter_changed = False
                 preview = FFmpegStream.get_projection(image, config)
 
-                preview = self.draw_text(preview, "Press 'q' to use current selected region of interest)",
+                preview = self.draw_text(preview, "Press 'space' to use current selected region of interest)",
                         y = 50, color = (255, 0, 0))
-                preview = self.draw_text(preview, "VR Projection: Use 'w', 's' to move up/down to the region of interest",
-                        y = 75, color = (0, 255, 0))
+                preview = self.draw_text(preview, "Press '0' (NULL) to reset view)",
+                        y = 75, color = (255, 0, 0))
+                for line, txt in enumerate(ui_texte):
+                    preview = self.draw_text(preview, txt, y = 100 + (line * 25), color = (0, 255, 0))
 
             cv2.imshow(self.window_name, self.preview_scaling(preview))
 
             while self.keypress_queue.qsize() > 0:
                 pressed_key = '{0}'.format(self.keypress_queue.get())
-                if pressed_key == "'q'":
+                if pressed_key == "Key.space":
                     selected = True
                     break
-                elif pressed_key == "'w'":
-                    config['parameter']['phi'] = min((80, config['parameter']['phi'] + 5))
-                    parameter_changed = True
-                elif pressed_key == "'s'":
-                    config['parameter']['phi'] = max((-80, config['parameter']['phi'] - 5))
-                    parameter_changed = True
 
-            if cv2.waitKey(1) in [ord('q')]: break
+                if pressed_key == "'0'":
+                    config = copy.deepcopy(PROJECTION[self.params.projection])
+                    parameter_changed = True
+                    break
+
+                if "keys" not in config.keys():
+                    break
+
+                for param in config['keys'].keys():
+                    if param in config['parameter'].keys() and all(x in config["keys"][param].keys() for x in ["increase", "decrease"]):
+                        if pressed_key == "'" + config["keys"][param]["increase"] + "'":
+                            config['parameter'][param] += 5
+                            parameter_changed = True
+                            break
+                        elif pressed_key == "'" + config["keys"][param]["decrease"] + "'":
+                            config['parameter'][param] -= 5
+                            parameter_changed = True
+                            break
+
+            if cv2.waitKey(1) in [ord(' ')]: break
 
         self.__show_loading_screen(preview.shape)
         return config
