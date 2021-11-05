@@ -21,8 +21,6 @@ If you use an older version, i recommend to first delete the `funscript_generato
 8. **Troubleshot**: If you have any problems that can not be solved with the Troubleshot section below please post an screenshot of the following log output window after you have try to run the Generator at least once:
    <br> ![OFS Log](./images/ofs_troubleshot_001.jpg)
 
-**Important note for advanced users:** The config files for MTFG are located in `%appdata%/OFS_data/extensions/Funscript Generator Windows/funscript-editor/funscript_editor/config`. The configuration will be overwritten when you update the application with the MTFG OFS Extension Installer.
-
 <br>
 <br>
 
