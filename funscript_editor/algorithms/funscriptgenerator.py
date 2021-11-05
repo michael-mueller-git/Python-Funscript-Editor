@@ -950,8 +950,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
             self.logger.critical("The program crashed due to a fatal error", exc_info=ex)
             return "program crashed"
 
-        bboxes = self.correct_bboxes(bboxes, delete_last_predictions)
         self.__show_loading_screen(first_frame.shape)
+        bboxes = self.correct_bboxes(bboxes, delete_last_predictions)
         video.stop()
         self.logger.info(status)
         self.logger.info('Interpolate tracking boxes')
