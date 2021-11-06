@@ -1,6 +1,6 @@
 """ Video Tracker """
 
-from os import supports_effective_ids
+from os import supports_effective_ids, wait
 import cv2
 import time
 import logging
@@ -199,8 +199,15 @@ class StaticVideoTracker:
             )
 
         while not self.stopped:
+            wait_counter = 0
             if self.queue_in.qsize() == 0 or self.queue_out.full():
                 time.sleep(self.sleep_time)
+                wait_counter += 1
+                if wait_counter == 2000:
+                    if self.queue_in.qsize() == 0:
+                        self.__logger.error("Video Tracker still waiting for Input")
+                    else:
+                        self.__logger.error("Video Tracker output queue overrun!!!")
             else:
                 frame = self.queue_in.get()
                 frame_roi = frame[y0:y1, x0:x1]
@@ -219,4 +226,5 @@ class StaticVideoTracker:
                             status = StaticVideoTracker.Status.IMPLAUSIBLE
 
                 self.queue_out.put((status, bbox))
+        self.__logger.info("Video Tracker Stoped")
 
