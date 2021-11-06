@@ -24,3 +24,10 @@ flatpak-builder --user --install --force-clean build-dir org.flatpak.PythonFunsc
 flatpak run org.flatpak.PythonFunscriptEditor
 flatpak uninstall org.flatpak.PythonFunscriptEditor
 ```
+
+To install the `*.flatpak` bundle from build script you can use:
+
+```bash
+flatpak install --user PythonFunscriptEditor.flatpak
+flatpak run org.flatpak.PythonFunscriptEditor
+```
