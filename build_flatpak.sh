@@ -11,6 +11,7 @@ if [ "$option" = "--install" ]; then
     flatpak-builder --user --install --force-clean build-dir org.flatpak.PythonFunscriptEditor.json
 else
     flatpak-builder --repo=repo --force-clean build-dir org.flatpak.PythonFunscriptEditor.json
+    rm -rf PythonFunscriptEditor.flatpak
     flatpak build-bundle repo PythonFunscriptEditor.flatpak org.flatpak.PythonFunscriptEditor
 fi
 
