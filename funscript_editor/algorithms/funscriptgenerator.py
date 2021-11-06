@@ -951,6 +951,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             return "program crashed"
 
         self.__show_loading_screen(first_frame.shape)
+        self.logger.info("Raw tracking data: %d Tracking points for %d seconds of the video", len(bboxes["Woman"]), int(len(bboxes["Woman"])*(self.params.skip_frames + 1)/self.video_info.fps))
         bboxes = self.correct_bboxes(bboxes, delete_last_predictions)
         video.stop()
         self.logger.info(status)

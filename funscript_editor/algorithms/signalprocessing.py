@@ -189,7 +189,7 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
 
 
     if SETTINGS['additional_changepoints']:
-        logger.info("add additional change points")
+        logger.info("Add additional change points")
         merge_threshold = max(1, round(fps * float(HYPERPARAMETER['additional_changepoints_merge_threshold_in_ms']) / 1000.0))
         additional_changepoints = get_changepoints(score, fps, float(HYPERPARAMETER['changepoint_detection_threshold']))
         for cp_idx in additional_changepoints:
