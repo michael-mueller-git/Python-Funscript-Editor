@@ -13,6 +13,7 @@ from queue import Queue
 import subprocess as sp
 import numpy as np
 
+from funscript_editor.utils.watchdog import Watchdog
 
 @dataclass
 class VideoInfo:
@@ -31,13 +32,15 @@ class FFmpegStream:
         config (dict): conversion parameter
         start_frame (int): start frame number
         queue_size (int): size of frame buffer
+        watchdog_timeout (int): watchdog timeout in seconds
     """
 
     def __init__(self,
             video_path :str,
             config :dict,
             start_frame :int = 0,
-            queue_size :int = 256):
+            queue_size :int = 256,
+            watchdog_timeout :int = 4):
 
         self.video_path = video_path
         self.config = config
@@ -45,18 +48,37 @@ class FFmpegStream:
         self.queue_size = queue_size
 
         self.stopped = False
+        self.timeout = False
         self.current_frame = 0
         self.sleep_time = 0.001
 
         self.video_info = self.get_video_info(video_path)
         self.frame_buffer = Queue(maxsize=queue_size)
 
+        self.watchdog = Watchdog(watchdog_timeout, self.watchdog_timeout)
         self.thread = Thread(target=self.run, args=())
         self.thread.daemon = True
         self.thread.start()
 
 
+    def __del__(self):
+        self.watchdog.stop()
+
+
     logger = logging.getLogger(__name__)
+
+
+    def watchdog_timeout(self):
+        """ Watchdog timeout for ffmpeg stream """
+        self.logger.error("FFmpegStream Timeout")
+        self.timeout = True
+        self.stopped = True
+        try: self.pipe.terminate()
+        except: pass
+        try: self.pipe.stdout.close()
+        except: pass
+        try: self.pipe.stderr.close()
+        except: pass
 
 
     @staticmethod
@@ -261,6 +283,15 @@ class FFmpegStream:
         return self.more() or not self.stopped
 
 
+    def isTimeout(self) -> bool:
+        """ Check if FFmpeg video stream has an timeout
+
+        Returns:
+            bool: True if ffmpeg video stream has an timeout else False
+        """
+        return self.timeout
+
+
     def more(self) -> bool:
         """ Check if frames in the frame bufer are available
 
@@ -278,59 +309,73 @@ class FFmpegStream:
     def run(self) -> None:
         """ Function to read transformed frames from ffmpeg video stream into a queue """
 
-        video_filter = self.config['video_filter']
-        for k, v in self.config['parameter'].items():
-            video_filter = video_filter.replace('${' + k + '}', str(v))
+        try:
+            video_filter = self.config['video_filter']
+            for k, v in self.config['parameter'].items():
+                video_filter = video_filter.replace('${' + k + '}', str(v))
 
-        seek = FFmpegStream.frame_to_timestamp(self.start_frame, self.video_info.fps)
+            seek = FFmpegStream.frame_to_timestamp(self.start_frame, self.video_info.fps)
 
-        command = [
-                FFmpegStream.get_ffmpeg_command(),
-                '-hide_banner',
-                '-loglevel', 'warning',
-                '-ss', str(seek),
-                '-hwaccel', 'auto',
-                '-i', self.video_path,
-                '-f', 'image2pipe',
-                '-pix_fmt', 'bgr24',
-                '-vsync', '0',
-                '-vcodec', 'rawvideo',
-                '-an',
-                '-sn',
-                '-vf', video_filter,
-                '-'
-            ]
+            command = [
+                    FFmpegStream.get_ffmpeg_command(),
+                    '-hide_banner',
+                    '-loglevel', 'warning',
+                    '-ss', str(seek),
+                    '-hwaccel', 'auto',
+                    '-i', self.video_path,
+                    '-f', 'image2pipe',
+                    '-pix_fmt', 'bgr24',
+                    '-vsync', '0',
+                    '-vcodec', 'rawvideo',
+                    '-an',
+                    '-sn',
+                    '-vf', video_filter,
+                    '-'
+                ]
 
-        self.logger.info("Open FFmpeg Stream")
-        pipe = sp.Popen(
-                command,
-                stdout = sp.PIPE,
-                stderr = sp.PIPE,
-                bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width']
-            )
-
-        while not self.stopped:
-            data = pipe.stdout.read(self.config['parameter']['width'] * self.config['parameter']['height'] * 3)
-            if not data:
-                break
-
-            frame = np.frombuffer(data, dtype='uint8').reshape(
-                    (self.config['parameter']['height'], self.config['parameter']['width'], 3)
+            self.watchdog.start()
+            self.logger.info("FFmpeg Stream Watchdog started")
+            self.logger.info("Open FFmpeg Stream")
+            self.pipe = sp.Popen(
+                    command,
+                    stdout = sp.PIPE,
+                    stderr = sp.PIPE,
+                    bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width']
                 )
-            if frame is None:
-                break
 
-            while self.frame_buffer.full() and not self.stopped:
-                time.sleep(self.sleep_time)
+            while not self.stopped:
+                self.watchdog.trigger()
+                data = self.pipe.stdout.read(self.config['parameter']['width'] * self.config['parameter']['height'] * 3)
+                if not data:
+                    break
 
-            self.frame_buffer.put(frame)
-            self.current_frame += 1
+                frame = np.frombuffer(data, dtype='uint8').reshape(
+                        (self.config['parameter']['height'], self.config['parameter']['width'], 3)
+                    )
+                if frame is None:
+                    break
 
-        self.stopped = True
-        self.logger.info('Close FFmpeg Stream')
-        pipe.terminate()
-        try: pipe.stdout.close()
-        except: pass
-        try: pipe.stderr.close()
-        except: pass
+                wait_counter = 0
+                while self.frame_buffer.full() and not self.stopped:
+                    self.watchdog.trigger()
+                    time.sleep(self.sleep_time)
+                    wait_counter += 1
+                    if wait_counter == 2000:
+                        self.logger.error("FFmpeg Frame Buffer overrun!!!")
+
+                self.frame_buffer.put(frame)
+                self.current_frame += 1
+
+            self.stopped = True
+            self.logger.info('Close FFmpeg Stream')
+            self.watchdog.stop()
+            self.logger.info("FFmpeg Stream Watchdog stoped")
+            self.pipe.terminate()
+            try: self.pipe.stdout.close()
+            except: pass
+            try: self.pipe.stderr.close()
+            except: pass
+        except Exception as ex:
+            self.stopped = True
+            self.logger.critical("FFmpegStream crashed due to a fatal error", exc_info=ex)
 
