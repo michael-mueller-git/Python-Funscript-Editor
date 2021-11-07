@@ -40,4 +40,4 @@ additional_changepoints: True
 dark_theme: False
 
 # enable the tracking plausiblity check
-tracking_plausibility_check: True
+tracking_plausibility_check: False
