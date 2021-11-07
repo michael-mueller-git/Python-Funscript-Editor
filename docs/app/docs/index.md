@@ -7,5 +7,6 @@ A Python program that use Computer Vision to predict the funscript actions for s
 - [Algorithms](user-guide/algorithms.html)
 - [Build Application from Source](user-guide/build.html)
 - [Application Config](user-guide/config.html)
-- [OFS Integration](user-guide/ofs-integration.html)
+- [OFS Integration (Installation)](user-guide/ofs-integration.html)
+- [Usage](user-guide/usage.html)
 - [Build in UI](user-guide/ui.html)
