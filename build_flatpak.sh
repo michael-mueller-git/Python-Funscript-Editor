@@ -15,4 +15,4 @@ else
     flatpak build-bundle repo PythonFunscriptEditor.flatpak org.flatpak.PythonFunscriptEditor
 fi
 
-sudo sysctl kernel.unprivileged_userns_clone=0
+# sudo sysctl kernel.unprivileged_userns_clone=0
