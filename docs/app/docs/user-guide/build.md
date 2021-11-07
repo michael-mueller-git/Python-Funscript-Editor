@@ -65,3 +65,14 @@ sudo pacman -Sy python-opencv python-pyqt5
 ```
 
 All other required python packages can be installed from pip.
+
+## Flatpak
+
+The repository contains an flatpak build recipe that can be used to build an flatpak app. You can build the flatpak with the `build_flatpak.sh` script in the project root directory. The build script generate the `PythonFunscriptEditor.flatpak` package that can be installed with `flatpak install --user PythonFunscriptEditor.flatpak` on the system.
+
+Limitation of the flatpak application:
+
+- No public release in a flatpak repository available. You have to build the flatpak local.
+- Slow build process.
+- Flatpak need non-privileged user namespaces enabled (`sysctl kernel.unprivileged_userns_clone=1'`).
+- The System-Theme is not applied to the application. The problem is that my recipe use conda packages which isolates the python packages inside the flatpak sandbox and we have no access to the system theme. To fix this we have to build all python packages in the flatpak recipe from source and include the system theme inside the flatpak.

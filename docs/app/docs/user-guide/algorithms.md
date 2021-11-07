@@ -22,8 +22,8 @@ Idea: By using [OpenCV Tracker](https://learnopencv.com/object-tracking-using-op
 
 ### Improvements
 
-- You can change the OpenCV tracker in the source code which predicts the position. OpenCV offers several trackers which differ in prediction accuracy and processing speed. See also [OpenCV Tracker](https://learnopencv.com/object-tracking-using-opencv-cpp-python/).
+- You can change the OpenCV tracker which predicts the position. OpenCV offers several trackers which differ in prediction accuracy and processing speed. See also [OpenCV Tracker](https://learnopencv.com/object-tracking-using-opencv-cpp-python/).
 
 - You can set the number of frames that are interpolated by the `skip_frames` parameter. 0 means that the OpenCV tracker delivers a prediction for each frame. This is slower but more accurate. Or if greater than zero, the individual frames are skipped and then the tracking boxes are interpolated, which increases the processing speed but decreases the accuracy. I have set the value to 1, i.e. every 2nd frame is skipped and interpolated. Which provides a good mix of accuracy and speed.
 
-- It is recommended to use a low resolution video e.g. 4K for generating the funscript actions, as the processing speed is higher.
+- It is recommended to use a low resolution video e.g. 1080p or 4K for generating the funscript actions, as the processing speed is higher.
