@@ -360,7 +360,7 @@ class FFmpegStream:
                     self.watchdog.trigger()
                     time.sleep(self.sleep_time)
                     wait_counter += 1
-                    if wait_counter == 2000:
+                    if self.current_frame > 2 and wait_counter == 2500:
                         self.logger.error("FFmpeg Frame Buffer overrun!!!")
 
                 self.frame_buffer.put(frame)
