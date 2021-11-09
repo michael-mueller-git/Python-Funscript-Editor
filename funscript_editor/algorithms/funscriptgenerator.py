@@ -159,9 +159,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             np.ndarray: opencv image with FPS Text
         """
+        SMOOT_FACTOR = 100
         annotated_img = img.copy()
-        fps = (self.params.skip_frames+1)*cv2.getTickFrequency()/(cv2.getTickCount()-self.timer)
-        self.tracking_fps.append(fps)
+        self.tracking_fps.append((self.params.skip_frames+1)*cv2.getTickFrequency()/(cv2.getTickCount()-self.timer))
+        fps = np.mean((self.tracking_fps[-SMOOT_FACTOR:] if len(self.tracking_fps) < SMOOT_FACTOR else self.tracking_fps))
         cv2.putText(annotated_img, str(int(fps)) + ' fps', (self.x_text_start, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, self.font_size, (0,0,255), 2)
         self.timer = cv2.getTickCount()
