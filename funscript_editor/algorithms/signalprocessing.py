@@ -17,7 +17,9 @@ def scale_signal(signal :list, lower: float = 0, upper: float = 99) -> list:
     """
     if len(signal) == 0: return signal
     if len(signal) == 1: return [lower]
-    return [(float(upper) - float(lower)) * (x - min(signal)) / (max(signal) - min(signal)) + float(lower) for x in signal]
+    signal_min = min(signal)
+    signal_max = max(signal)
+    return [(float(upper) - float(lower)) * (x - signal_min) / (signal_max - signal_min) + float(lower) for x in signal]
 
 
 def scale_signal_with_anomalies(

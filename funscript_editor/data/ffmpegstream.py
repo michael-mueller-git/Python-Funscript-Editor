@@ -70,15 +70,16 @@ class FFmpegStream:
 
     def watchdog_timeout(self):
         """ Watchdog timeout for ffmpeg stream """
-        self.logger.error("FFmpegStream Timeout")
-        self.timeout = True
-        self.stopped = True
-        try: self.pipe.terminate()
-        except: pass
-        try: self.pipe.stdout.close()
-        except: pass
-        try: self.pipe.stderr.close()
-        except: pass
+        if not self.stopped:
+            self.logger.error("FFmpegStream Timeout")
+            self.timeout = True
+            self.stopped = True
+            try: self.pipe.terminate()
+            except: pass
+            try: self.pipe.stdout.close()
+            except: pass
+            try: self.pipe.stderr.close()
+            except: pass
 
 
     @staticmethod

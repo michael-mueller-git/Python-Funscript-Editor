@@ -32,6 +32,7 @@ from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneCo
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
+import multiprocessing as mp
 
 @dataclass
 class FunscriptGeneratorParameter:
@@ -73,6 +74,32 @@ class FunscriptGeneratorParameter:
     max_points_offset: float = float(HYPERPARAMETER['max_points_offset'])
     min_threshold: float = float(HYPERPARAMETER['min_threshold'])
     max_threshold: float = float(HYPERPARAMETER['max_threshold'])
+
+
+def merge_score(item: list, number_of_trackers: int) -> list:
+    """ Merge score for given number of trackers
+
+    Note:
+        Python multiprocessing methods use a mp.SimpleQueue to pass tasks to the worker processes.
+        Everything that goes through the mp.SimpleQueue must be pickable.
+        In python functions are only picklable if they are defined at the top-level of a module.
+
+    Args:
+        item (list): score for each tracker
+        number_of_trackers (int): number of used tracker (pairs)
+
+    Returns:
+        list: merged score
+    """
+    if number_of_trackers == 1:
+        return item[0] if len(item) > 0 else []
+    else:
+        max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
+        arr = np.ma.empty((max_frame_number,number_of_trackers))
+        arr.mask = True
+        for tracker_number in range(number_of_trackers):
+            arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
+        return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
 
 
 class FunscriptGeneratorThread(QtCore.QThread):
@@ -301,6 +328,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.clear_keypress_queue()
         trackbarValueMin = lower_limit
         trackbarValueMax = upper_limit
+        self.logger.info("Waiting for user input for max and min action position")
         while True:
             try:
                 preview = image.copy()
@@ -314,6 +342,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 trackbarValueMax = cv2.getTrackbarPos("Max", self.window_name)
             except: pass
 
+        self.logger.info("Receive values for max and min action position")
         self.__show_loading_screen(preview.shape)
         return (trackbarValueMin, trackbarValueMax) if trackbarValueMin < trackbarValueMax else (trackbarValueMax, trackbarValueMin)
 
@@ -348,6 +377,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 'distance': [np.array([]) for _ in range(self.params.number_of_trackers)],
                 'roll': [np.array([]) for _ in range(self.params.number_of_trackers)]
         }
+        self.logger.info("Calculate score for %d Tracker(s)", self.params.number_of_trackers)
         for tracker_number in range(self.params.number_of_trackers):
             woman_center = [self.get_center(item) for item in bboxes['Woman'][tracker_number]]
 
@@ -383,21 +413,19 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['x'][tracker_number] = np.array([w[0] - min([x[0] for x in bboxes['Woman'][tracker_number]]) for w in bboxes['Woman'][tracker_number]])
                 score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
 
-        def get_mean(item, number_of_trackers) -> list:
-            if number_of_trackers == 1:
-                return item[0] if len(item) > 0 else []
-            else:
-                max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
-                arr = np.ma.empty((max_frame_number,number_of_trackers))
-                arr.mask = True
-                for tracker_number in range(number_of_trackers):
-                    arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
-                return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
+        self.logger.info("Merge Scores")
+        pool, handle = {}, {}
+        for metric in score.keys():
+            pool[metric] = mp.Pool(1)
+            handle[metric] = pool[metric].starmap_async(merge_score, [(score[metric], self.params.number_of_trackers)])
 
-        self.score['x'] = sp.scale_signal(get_mean(score['x'], self.params.number_of_trackers), 0, 100)
-        self.score['y'] = sp.scale_signal(get_mean(score['y'], self.params.number_of_trackers), 0, 100)
-        self.score['distance'] = sp.scale_signal(get_mean(score['distance'], self.params.number_of_trackers), 0, 100)
-        self.score['roll'] = sp.scale_signal(get_mean(score['roll'], self.params.number_of_trackers), 0, 100)
+        for metric in score.keys():
+            score[metric] = handle[metric].get()[0]
+            pool[metric].close()
+
+        self.logger.info("Scale Score to 0 - 100")
+        for metric in score.keys():
+            self.score[metric] = sp.scale_signal(score[metric], 0, 100)
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:
@@ -456,6 +484,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             desired_min = 0
             desired_max = 99
 
+        self.logger.info("Scale score %s to user input", metric)
         self.score[metric] = sp.scale_signal(self.score[metric], desired_min, desired_max)
 
 
@@ -959,12 +988,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         self.__show_loading_screen(first_frame.shape)
         self.logger.info("Raw tracking data: %d Tracking points for %d seconds of the video", len(bboxes["Woman"]), int(len(bboxes["Woman"])*(self.params.skip_frames + 1)/self.video_info.fps))
-        bboxes = self.correct_bboxes(bboxes, delete_last_predictions)
         video.stop()
+        bboxes = self.correct_bboxes(bboxes, delete_last_predictions)
         self.logger.info(status)
         self.logger.info('Interpolate tracking boxes')
         interpolated_bboxes = self.interpolate_bboxes(bboxes)
-        self.logger.info('Calculate score')
         self.calculate_score(interpolated_bboxes)
         return status
 
@@ -1161,7 +1189,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         json.dump(self.score, f)
 
                 if len(self.score[self.params.metric]) >= HYPERPARAMETER['min_frames']:
-                    self.logger.info("Scale score")
                     self.scale_score(status, metric=self.params.metric)
 
             if len(self.score[self.params.metric]) < HYPERPARAMETER['min_frames']:

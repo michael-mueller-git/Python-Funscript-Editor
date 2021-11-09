@@ -311,7 +311,6 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         start_time = self.video_player.get_current_timestamp_in_millis
         next_action = self.funscript.get_next_action(self.video_player.get_current_timestamp_in_millis+100)
         end_time = next_action['at'] if next_action['at'] > self.video_player.get_current_timestamp_in_millis+100 else -1.0
-        self.__logger.info("Stop at {}".format(end_time))
 
         self.funscript_generator_window = FunscriptGeneratorWindow(
                 self.video_player.get_video_file,
