@@ -383,18 +383,21 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['x'][tracker_number] = np.array([w[0] - min([x[0] for x in bboxes['Woman'][tracker_number]]) for w in bboxes['Woman'][tracker_number]])
                 score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
 
-        def get_mean(item):
-            max_frame_number = max([len(item[i]) for i in range(self.params.number_of_trackers)])
-            arr = np.ma.empty((max_frame_number,self.params.number_of_trackers))
-            arr.mask = True
-            for tracker_number in range(self.params.number_of_trackers):
-                arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
-            return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
+        def get_mean(item, number_of_trackers) -> list:
+            if number_of_trackers == 1:
+                return item[0] if len(item) > 0 else []
+            else:
+                max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
+                arr = np.ma.empty((max_frame_number,number_of_trackers))
+                arr.mask = True
+                for tracker_number in range(number_of_trackers):
+                    arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
+                return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
 
-        self.score['x'] = sp.scale_signal(get_mean(score['x']), 0, 100)
-        self.score['y'] = sp.scale_signal(get_mean(score['y']), 0, 100)
-        self.score['distance'] = sp.scale_signal(get_mean(score['distance']), 0, 100)
-        self.score['roll'] = sp.scale_signal(get_mean(score['roll']), 0, 100)
+        self.score['x'] = sp.scale_signal(get_mean(score['x'], self.params.number_of_trackers), 0, 100)
+        self.score['y'] = sp.scale_signal(get_mean(score['y'], self.params.number_of_trackers), 0, 100)
+        self.score['distance'] = sp.scale_signal(get_mean(score['distance'], self.params.number_of_trackers), 0, 100)
+        self.score['roll'] = sp.scale_signal(get_mean(score['roll'], self.params.number_of_trackers), 0, 100)
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:
