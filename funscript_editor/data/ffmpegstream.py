@@ -74,12 +74,12 @@ class FFmpegStream:
             self.logger.error("FFmpegStream Timeout")
             self.timeout = True
             self.stopped = True
-            try: self.pipe.terminate()
-            except: pass
-            try: self.pipe.stdout.close()
-            except: pass
-            try: self.pipe.stderr.close()
-            except: pass
+        try: self.pipe.terminate()
+        except: pass
+        try: self.pipe.stdout.close()
+        except: pass
+        try: self.pipe.stderr.close()
+        except: pass
 
 
     @staticmethod
