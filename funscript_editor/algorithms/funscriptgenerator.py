@@ -76,7 +76,7 @@ class FunscriptGeneratorParameter:
     max_threshold: float = float(HYPERPARAMETER['max_threshold'])
 
 
-def merge_score(item: list, number_of_trackers: int) -> list:
+def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue) -> None:
     """ Merge score for given number of trackers
 
     Note:
@@ -92,14 +92,14 @@ def merge_score(item: list, number_of_trackers: int) -> list:
         list: merged score
     """
     if number_of_trackers == 1:
-        return item[0] if len(item) > 0 else []
+        return_queue.put(item[0] if len(item) > 0 else [])
     else:
         max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
         arr = np.ma.empty((max_frame_number,number_of_trackers))
         arr.mask = True
         for tracker_number in range(number_of_trackers):
             arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
-        return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
+        return_queue.put(list(filter(None.__ne__, arr.mean(axis=1).tolist())))
 
 
 class FunscriptGeneratorThread(QtCore.QThread):
@@ -414,14 +414,15 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
 
         self.logger.info("Merge Scores")
-        pool, handle = {}, {}
+        pool, queue = {}, {}
         for metric in score.keys():
-            pool[metric] = mp.Pool(1)
-            handle[metric] = pool[metric].starmap_async(merge_score, [(score[metric], self.params.number_of_trackers)])
+            queue[metric] = mp.Queue()
+            pool[metric] = mp.Process(target=merge_score, args=(score[metric], self.params.number_of_trackers, queue[metric], ))
+            pool[metric].start()
 
         for metric in score.keys():
-            score[metric] = handle[metric].get()[0]
-            pool[metric].close()
+            pool[metric].join()
+            score[metric] = queue[metric].get()
 
         self.logger.info("Scale Score to 0 - 100")
         for metric in score.keys():
