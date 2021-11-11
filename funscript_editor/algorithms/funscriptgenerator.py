@@ -87,6 +87,7 @@ def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue) -> 
     Args:
         item (list): score for each tracker
         number_of_trackers (int): number of used tracker (pairs)
+        return_queue (mp.Queue): queue for return value
 
     Returns:
         list: merged score
