@@ -33,6 +33,7 @@ from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneCo
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
 import multiprocessing as mp
+import threading
 
 @dataclass
 class FunscriptGeneratorParameter:
@@ -418,7 +419,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         pool, queue = {}, {}
         for metric in score.keys():
             queue[metric] = mp.Queue()
-            pool[metric] = mp.Process(target=merge_score, args=(score[metric], self.params.number_of_trackers, queue[metric], ))
+            pool[metric] = threading.Thread(target=merge_score, args=(score[metric], self.params.number_of_trackers, queue[metric], ))
             pool[metric].start()
 
         for metric in score.keys():
