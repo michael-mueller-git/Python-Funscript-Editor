@@ -1,6 +1,6 @@
 """ Video Tracker """
 
-from os import supports_effective_ids, wait
+import os
 import cv2
 import time
 import logging
