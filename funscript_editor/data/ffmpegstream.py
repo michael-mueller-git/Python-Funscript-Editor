@@ -80,6 +80,7 @@ class FFmpegStream:
         except: pass
         try: self.pipe.stderr.close()
         except: pass
+        self.watchdog.stop()
 
 
     @staticmethod
