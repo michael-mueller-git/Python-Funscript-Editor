@@ -32,8 +32,6 @@ from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneCo
 
 import funscript_editor.algorithms.signalprocessing as sp
 import numpy as np
-import multiprocessing as mp
-import threading
 
 @dataclass
 class FunscriptGeneratorParameter:
@@ -77,7 +75,7 @@ class FunscriptGeneratorParameter:
     max_threshold: float = float(HYPERPARAMETER['max_threshold'])
 
 
-def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue) -> None:
+def merge_score(item: list, number_of_trackers: int) -> list:
     """ Merge score for given number of trackers
 
     Note:
@@ -88,20 +86,19 @@ def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue) -> 
     Args:
         item (list): score for each tracker
         number_of_trackers (int): number of used tracker (pairs)
-        return_queue (mp.Queue): queue for return value
 
     Returns:
         list: merged score
     """
     if number_of_trackers == 1:
-        return_queue.put(item[0] if len(item) > 0 else [])
+        return item[0] if len(item) > 0 else []
     else:
         max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
         arr = np.ma.empty((max_frame_number,number_of_trackers))
         arr.mask = True
         for tracker_number in range(number_of_trackers):
             arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
-        return_queue.put(list(filter(None.__ne__, arr.mean(axis=1).tolist())))
+        return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
 
 
 class FunscriptGeneratorThread(QtCore.QThread):
@@ -416,6 +413,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
 
         self.logger.info("Merge Scores")
+        """
         pool, queue = {}, {}
         for metric in score.keys():
             queue[metric] = mp.Queue()
@@ -425,6 +423,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
         for metric in score.keys():
             pool[metric].join()
             score[metric] = queue[metric].get()
+        """
+
+        for metric in score.keys():
+            score[metric] = merge_score(score[metric], self.params.number_of_trackers)
 
         self.logger.info("Scale Score to 0 - 100")
         for metric in score.keys():
@@ -988,6 +990,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         if video.isTimeout():
             status = "Reach a corrupt video frame"
+
+        for i in range(self.params.number_of_trackers):
+            trackers_woman[i].stop()
+            if self.params.track_men:
+                trackers_men[i].stop()
 
         self.__show_loading_screen(first_frame.shape)
         self.logger.info("Raw tracking data: %d Tracking points for %d seconds of the video", len(bboxes["Woman"]), int(len(bboxes["Woman"])*(self.params.skip_frames + 1)/self.video_info.fps))
