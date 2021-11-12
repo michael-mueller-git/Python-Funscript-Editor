@@ -75,7 +75,30 @@ class FunscriptGeneratorParameter:
     max_threshold: float = float(HYPERPARAMETER['max_threshold'])
 
 
+def merge_score(item: list, number_of_trackers: int) -> list:
+    """ Merge score for given number of trackers
 
+    Note:
+        Python multiprocessing methods use a mp.SimpleQueue to pass tasks to the worker processes.
+        Everything that goes through the mp.SimpleQueue must be pickable.
+        In python functions are only picklable if they are defined at the top-level of a module.
+
+    Args:
+        item (list): score for each tracker
+        number_of_trackers (int): number of used tracker (pairs)
+
+    Returns:
+        list: merged score
+    """
+    if number_of_trackers == 1:
+        return item[0] if len(item) > 0 else []
+    else:
+        max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
+        arr = np.ma.empty((max_frame_number,number_of_trackers))
+        arr.mask = True
+        for tracker_number in range(number_of_trackers):
+            arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
+        return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
 
 
 class FunscriptGeneratorThread(QtCore.QThread):
@@ -390,26 +413,17 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
 
         self.logger.info("Merge Scores")
+        """
+        pool, queue = {}, {}
+        for metric in score.keys():
+            queue[metric] = mp.Queue()
+            pool[metric] = threading.Thread(target=merge_score, args=(score[metric], self.params.number_of_trackers, queue[metric], ))
+            pool[metric].start()
 
-        def merge_score(item: list, number_of_trackers: int) -> list:
-            """ Merge score for given number of trackers
-
-            Args:
-                item (list): score for each tracker
-                number_of_trackers (int): number of used tracker (pairs)
-
-            Returns:
-                list: merged score
-            """
-            if number_of_trackers == 1:
-                return item[0] if len(item) > 0 else []
-            else:
-                max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
-                arr = np.ma.empty((max_frame_number,number_of_trackers))
-                arr.mask = True
-                for tracker_number in range(number_of_trackers):
-                    arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
-                return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
+        for metric in score.keys():
+            pool[metric].join()
+            score[metric] = queue[metric].get()
+        """
 
         for metric in score.keys():
             score[metric] = merge_score(score[metric], self.params.number_of_trackers)
