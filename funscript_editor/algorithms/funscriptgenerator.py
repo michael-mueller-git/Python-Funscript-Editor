@@ -341,7 +341,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 trackbarValueMax = cv2.getTrackbarPos("Max", self.window_name)
             except: pass
 
-        self.logger.info("Receive values for max and min action position")
+        # do not log here this cause problems on windows
         self.__show_loading_screen(preview.shape)
         return (trackbarValueMin, trackbarValueMax) if trackbarValueMin < trackbarValueMax else (trackbarValueMax, trackbarValueMin)
 
