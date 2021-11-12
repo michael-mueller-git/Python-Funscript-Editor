@@ -209,7 +209,7 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
                 changepoints['max'].append(cp_idx)
 
 
-    # apply manual shift
+    logger.info("apply manual shift")
     if shift_min != 0:
         for k, idx in enumerate(changepoints['min']):
             changepoints['min'][k] = max((0, min((len(score)-1, idx+shift_min)) ))
