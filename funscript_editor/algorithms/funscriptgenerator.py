@@ -32,6 +32,7 @@ from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CO
 from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneContentDetector, SceneThresholdDetector
 
 import funscript_editor.algorithms.signalprocessing as sp
+import multiprocessing as mp
 import numpy as np
 
 @dataclass
@@ -76,7 +77,7 @@ class FunscriptGeneratorParameter:
     max_threshold: float = float(HYPERPARAMETER['max_threshold'])
 
 
-def merge_score(item: list, number_of_trackers: int) -> list:
+def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue = None) -> list:
     """ Merge score for given number of trackers
 
     Note:
@@ -87,19 +88,26 @@ def merge_score(item: list, number_of_trackers: int) -> list:
     Args:
         item (list): score for each tracker
         number_of_trackers (int): number of used tracker (pairs)
+        return_queue (mp.Queue, optional): return queue to return values via queue
 
     Returns:
         list: merged score
     """
     if number_of_trackers == 1:
-        return item[0] if len(item) > 0 else []
+        if return_queue is not None:
+            return_queue.put(item[0] if len(item) > 0 else [])
+        else:
+            return item[0] if len(item) > 0 else []
     else:
         max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
         arr = np.ma.empty((max_frame_number,number_of_trackers))
         arr.mask = True
         for tracker_number in range(number_of_trackers):
             arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
-        return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
+        if return_queue is not None:
+            return_queue.put(list(filter(None.__ne__, arr.mean(axis=1).tolist())))
+        else:
+            return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
 
 
 class FunscriptGeneratorThread(QtCore.QThread):
@@ -416,20 +424,20 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
 
         self.logger.info("Merge Scores")
-        """
-        pool, queue = {}, {}
-        for metric in score.keys():
-            queue[metric] = mp.Queue()
-            pool[metric] = threading.Thread(target=merge_score, args=(score[metric], self.params.number_of_trackers, queue[metric], ))
-            pool[metric].start()
 
-        for metric in score.keys():
-            pool[metric].join()
-            score[metric] = queue[metric].get()
-        """
+        if True:
+            pool, queue = {}, {}
+            for metric in score.keys():
+                queue[metric] = mp.Queue()
+                pool[metric] = threading.Thread(target=merge_score, args=(score[metric], self.params.number_of_trackers, queue[metric], ))
+                pool[metric].start()
 
-        for metric in score.keys():
-            score[metric] = merge_score(score[metric], self.params.number_of_trackers)
+            for metric in score.keys():
+                pool[metric].join()
+                score[metric] = queue[metric].get()
+        else:
+            for metric in score.keys():
+                score[metric] = merge_score(score[metric], self.params.number_of_trackers)
 
         self.logger.info("Scale Score to 0 - 100")
         for metric in score.keys():
