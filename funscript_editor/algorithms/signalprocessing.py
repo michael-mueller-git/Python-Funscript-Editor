@@ -2,6 +2,7 @@
 
 import numpy as np
 import logging
+import platform
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
 
 def scale_signal(signal :list, lower: float = 0, upper: float = 99) -> list:
@@ -148,7 +149,10 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
     Returns:
         dict: dict with 2 lists with all local max and min indexes ({'min':[], 'max':[]})
     """
-    logger = logging.getLogger("changepoints")
+    if platform.system() != 'Windows':
+        # TODO logging here on windows cause open background process
+        logger = logging.getLogger("changepoints")
+
     avg = moving_average(score, w=round(fps * HYPERPARAMETER['avg_sec_for_local_min_max_extraction']))
     changepoints = {'min': [], 'max': []}
     tmp_min_idx, tmp_max_idx = -1, -1
@@ -191,7 +195,9 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
 
 
     if SETTINGS['additional_changepoints']:
-        logger.info("Add additional change points")
+        if platform.system() != 'Windows':
+            # TODO logging here on windows cause open background process
+            logger.info("Add additional change points")
         merge_threshold = max(1, round(fps * float(HYPERPARAMETER['additional_changepoints_merge_threshold_in_ms']) / 1000.0))
         additional_changepoints = get_changepoints(score, fps, float(HYPERPARAMETER['changepoint_detection_threshold']))
         for cp_idx in additional_changepoints:
@@ -202,14 +208,14 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
                 continue
 
             if score[cp_idx] < avg[cp_idx]:
-                logger.debug("add additional min changepoint at idx %d", cp_idx)
                 changepoints['min'].append(cp_idx)
             else:
-                logger.debug("add additional max changepoint at idx %d", cp_idx)
                 changepoints['max'].append(cp_idx)
 
 
-    logger.info("apply manual shift")
+    if platform.system() != 'Windows':
+        # TODO logging here on windows cause open background process
+        logger.info("Apply manual shift")
     if shift_min != 0:
         for k, idx in enumerate(changepoints['min']):
             changepoints['min'][k] = max((0, min((len(score)-1, idx+shift_min)) ))
