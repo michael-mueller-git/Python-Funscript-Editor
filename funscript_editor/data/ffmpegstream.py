@@ -30,7 +30,7 @@ class FFmpegStream:
     Args:
         video_path (str): path to video file
         config (dict): conversion parameter
-        skip_frames (int): skip given number of frames between queued frames
+        skip_frames (int): skip given number of frames between preview frames
         start_frame (int): start frame number
         queue_size (int): size of frame buffer
         watchdog_timeout (int): watchdog timeout in seconds
