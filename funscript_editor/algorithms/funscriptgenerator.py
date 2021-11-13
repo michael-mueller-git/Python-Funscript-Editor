@@ -859,6 +859,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         video = FFmpegStream(
                 video_path = self.params.video_path,
                 config = projection_config,
+                skip_frames = self.params.skip_frames,
                 start_frame = self.params.start_frame
             )
 
@@ -892,15 +893,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
             while video.isOpen():
                 cycle_start = time.time()
                 frame = video.read()
-                frame_num += 1
+                frame_num += (self.params.skip_frames+1)
 
                 if frame is None:
                     status = 'Reach a corrupt video frame' if video.isOpen() else 'End of video reached'
                     break
-
-                # NOTE: Use != 1 to ensure that the first difference is equal to the folowing (reqired for the interpolation)
-                if self.params.skip_frames > 0 and frame_num % (self.params.skip_frames + 1) != 1:
-                    continue
 
                 if self.params.end_frame > 0 and frame_num + self.params.start_frame >= self.params.end_frame:
                     status = "Tracking stop at existing action point"

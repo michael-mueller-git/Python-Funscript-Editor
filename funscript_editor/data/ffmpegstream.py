@@ -30,6 +30,7 @@ class FFmpegStream:
     Args:
         video_path (str): path to video file
         config (dict): conversion parameter
+        skip_frames (int): skip given number of frames between queued frames
         start_frame (int): start frame number
         queue_size (int): size of frame buffer
         watchdog_timeout (int): watchdog timeout in seconds
@@ -38,6 +39,7 @@ class FFmpegStream:
     def __init__(self,
             video_path :str,
             config :dict,
+            skip_frames :int = 0,
             start_frame :int = 0,
             queue_size :int = 256,
             watchdog_timeout :int = 4):
@@ -51,6 +53,7 @@ class FFmpegStream:
         self.timeout = False
         self.current_frame = 0
         self.sleep_time = 0.001
+        self.skip_frames = skip_frames
 
         self.video_info = self.get_video_info(video_path)
         self.frame_buffer = Queue(maxsize=queue_size)
@@ -357,12 +360,18 @@ class FFmpegStream:
                 if frame is None:
                     break
 
+                self.current_frame += 1
+
+                # NOTE: Use != 1 to ensure that the first difference is equal to the folowing (reqired for the interpolation)
+                if self.skip_frames > 0 and self.current_frame % (self.skip_frames + 1) != 1:
+                    continue
+
                 wait_counter = 0
                 while self.frame_buffer.full() and not self.stopped:
                     self.watchdog.trigger()
                     time.sleep(self.sleep_time)
                     wait_counter += 1
-                    if self.current_frame - self.queue_size > 2 and wait_counter == 2500:
+                    if self.current_frame - (self.skip_frames + 1)*self.queue_size > 3 and wait_counter == 2500:
                         self.logger.error("FFmpeg Frame Buffer overrun!!!")
 
                 if 'zoom' in self.config.keys():
@@ -375,7 +384,6 @@ class FFmpegStream:
                     frame = cv2.resize(frame, self.config['resize'])
 
                 self.frame_buffer.put(frame)
-                self.current_frame += 1
 
             self.stopped = True
             self.logger.info('Close FFmpeg Stream')
