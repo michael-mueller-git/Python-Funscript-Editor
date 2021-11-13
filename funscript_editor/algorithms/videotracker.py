@@ -4,6 +4,7 @@ import os
 import cv2
 import time
 import logging
+import platform
 
 from dataclasses import dataclass
 from threading import Thread
@@ -226,5 +227,8 @@ class StaticVideoTracker:
                             status = StaticVideoTracker.Status.IMPLAUSIBLE
 
                 self.queue_out.put((status, bbox))
-        self.__logger.info("Video Tracker Stoped")
+
+        if platform.system() != 'Windows':
+            # TODO logging here on windows cause open background process
+            self.__logger.info("Video Tracker Stoped")
 

@@ -7,6 +7,7 @@ import time
 import math
 import json
 import logging
+import platform
 import threading
 from numpy.core.fromnumeric import take
 from numpy.lib.function_base import append
@@ -327,7 +328,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.clear_keypress_queue()
         trackbarValueMin = lower_limit
         trackbarValueMax = upper_limit
-        self.logger.info("Waiting for user input for max and min action position")
+        self.logger.info("Waiting for user input")
         while True:
             try:
                 preview = image.copy()
@@ -341,7 +342,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 trackbarValueMax = cv2.getTrackbarPos("Max", self.window_name)
             except: pass
 
-        # do not log here this cause problems on windows
+        if platform.system() != 'Windows':
+            # TODO logging here on windows cause open background process
+            self.logger.info("Receive User Input")
         self.__show_loading_screen(preview.shape)
         return (trackbarValueMin, trackbarValueMax) if trackbarValueMin < trackbarValueMax else (trackbarValueMax, trackbarValueMin)
 
