@@ -34,6 +34,7 @@ class FFmpegStream:
         start_frame (int): start frame number
         queue_size (int): size of frame buffer
         watchdog_timeout (int): watchdog timeout in seconds
+        log_queue_overrun (bool): log queue overruns
     """
 
     def __init__(self,
@@ -42,18 +43,20 @@ class FFmpegStream:
             skip_frames :int = 0,
             start_frame :int = 0,
             queue_size :int = 256,
-            watchdog_timeout :int = 4):
+            watchdog_timeout :int = 4,
+            log_queue_overrun :bool = False):
 
         self.video_path = video_path
         self.config = config
+        self.skip_frames = skip_frames
         self.start_frame = start_frame
         self.queue_size = queue_size
+        self.log_queue_overrun = log_queue_overrun
 
         self.stopped = False
         self.timeout = False
         self.current_frame = 0
         self.sleep_time = 0.001
-        self.skip_frames = skip_frames
 
         self.video_info = self.get_video_info(video_path)
         self.frame_buffer = Queue(maxsize=queue_size)
@@ -372,7 +375,8 @@ class FFmpegStream:
                     time.sleep(self.sleep_time)
                     wait_counter += 1
                     if self.current_frame - (self.skip_frames + 1)*self.queue_size > 3 and wait_counter == 2500:
-                        self.logger.error("FFmpeg Frame Buffer overrun!!!")
+                        if self.log_queue_overrun:
+                            self.logger.error("FFmpeg Frame Buffer overrun!!!")
 
                 if 'zoom' in self.config.keys():
                     frame = frame[
