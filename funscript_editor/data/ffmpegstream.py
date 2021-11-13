@@ -365,7 +365,13 @@ class FFmpegStream:
                     if self.current_frame - self.queue_size > 2 and wait_counter == 2500:
                         self.logger.error("FFmpeg Frame Buffer overrun!!!")
 
-                self.frame_buffer.put(frame)
+                if 'zoom' in self.config.keys():
+                    self.frame_buffer.put(frame[
+                        int(self.config['zoom'][1]):int(self.config['zoom'][1]+self.config['zoom'][3]),
+                        int(self.config['zoom'][0]):int(self.config['zoom'][0]+self.config['zoom'][2])
+                    ])
+                else:
+                    self.frame_buffer.put(frame)
                 self.current_frame += 1
 
             self.stopped = True
