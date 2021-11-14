@@ -28,6 +28,7 @@ class SceneDetector:
         self.start_frame_number = start_frame_number
         self.current_frame_number = start_frame_number
         self.scenes = [start_frame_number]
+        self.stop_next_frame = False
 
 
     def update(self, frame_img: np.ndarray) -> None:
@@ -52,8 +53,9 @@ class SceneDetector:
             self.ignore_counter -= 1
             return False
 
-        if len(list(filter(lambda x: (x - frame_number) <= 0 and (x - frame_number) > -1*self.frame_skip_faktor, self.scenes))) > 0:
+        if self.stop_next_frame or len(list(filter(lambda x: (x - frame_number) <= 0 and (x - frame_number) > -1*self.frame_skip_faktor, self.scenes))) > 0:
             self.logger.info("Detect scene change")
+            self.stop_next_frame = False
             self.ignore_counter = self.min_scene_len
             return True
 
@@ -129,18 +131,19 @@ class SceneContentDetector(SceneDetector):
         super().__init__(frame_skip_faktor, fps, start_frame_number)
         self.logger.info("Use Content Detector")
         self.threshold = threshold
-        self.last_hsv = cv2.split(cv2.cvtColor(start_frame_img, cv2.COLOR_BGR2HSV))
+        self.last_hsv = [x for x in cv2.split(cv2.cvtColor(start_frame_img, cv2.COLOR_BGR2HSV))]
 
 
-    def calculate_frame_score(self, curr_hsv: np.ndarray) -> float:
+    def calculate_frame_score(self, curr_hsv_in: tuple) -> float:
         """ Calculate the frame score
 
         Args:
-            curr_hsv (np.ndarray): HSV frame data
+            curr_hsv_in (np.ndarray): HSV frame data
 
         Returns:
             float: frame score
         """
+        curr_hsv = [x for x in curr_hsv_in]
         delta_hsv = [0, 0, 0]
         for i in range(3):
             num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
@@ -164,6 +167,7 @@ class SceneContentDetector(SceneDetector):
         if frame_score >= self.threshold:
             if self.current_frame_number - self.scenes[-1] > self.min_scene_len:
                 self.logger.warning("Found scene change at frame %d", self.current_frame_number)
+                self.stop_next_frame = True
                 self.scenes.append(self.current_frame_number)
 
 
@@ -220,6 +224,7 @@ class SceneThresholdDetector(SceneDetector):
         elif self.last_fade['type'] == 'out' and frame_avg >= self.threshold:
             if (self.current_frame_number - self.scenes[-1]) >= self.min_scene_len:
                 self.logger.warning("Found scene change at frame %d", self.current_frame_number)
+                self.stop_next_frame = True
                 self.scenes.append(self.current_frame_number)
             self.last_fade['type'] = 'in'
             self.last_fade['frame'] = self.current_frame_number
