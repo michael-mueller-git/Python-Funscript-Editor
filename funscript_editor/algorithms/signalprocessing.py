@@ -142,8 +142,8 @@ def get_edge_points(score: list, changepoints: dict, threshold: float = 150.0) -
     """ Get Edge Points by calculate the distance to each point in the score.
 
     Note:
-        We map the time axis for between each predicted changepoint to 0 - 100 to
-        get usable distances.
+        We map the time axis between each predicted changepoint to min_pos - max_pos in
+        this section to get usable distances.
 
     Args:
         score (list): the predicted score
@@ -154,21 +154,27 @@ def get_edge_points(score: list, changepoints: dict, threshold: float = 150.0) -
         list: list with index of the edge points (additional change points)
     """
     edge_points = []
+    overall_max_distance = 0
     cp = changepoints['min']+changepoints['max']
     cp.sort()
     if len(cp) < 2: return []
     for i in range(len(cp)-1):
-        start = np.array([0.0, score[cp[i]]])
-        end = np.array([100.0, score[cp[i]]])
-        distances = [ norm(np.cross(end-start, start-np.array([100.0 * (j - cp[i]) / (cp[i+1] - cp[i]), score[j]])))/norm(end-start) \
+        min_pos = min([score[cp[i]], score[cp[i+1]]])
+        max_pos = max([score[cp[i]], score[cp[i+1]]])
+        start = np.array([min_pos, score[cp[i]]])
+        end = np.array([max_pos, score[cp[i]]])
+        scale = lambda x: ((max_pos - min_pos) * (x - cp[i]) / float(cp[i+1] - cp[i]) + float(min_pos))
+        distances = [ norm(np.cross(end-start, start-np.array([scale(j), score[j]])))/norm(end-start) \
                 for j in range(cp[i], cp[i+1]) ]
         max_distance = max(distances)
+        if overall_max_distance < max_distance:
+            overall_max_distance = max_distance
         if max_distance > threshold:
             print("Add Edge point for distance", max_distance)
             edge_points.append(cp[i] + distances.index(max_distance))
 
+    print("Max distance was", overall_max_distance)
     return edge_points
-
 
 
 def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_max :int = 0) -> dict:
