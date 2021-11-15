@@ -8,7 +8,7 @@ If you use an older version (`v0.0.x`), i recommend to first delete the `funscri
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
 2. Install OFS
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
-3. Start OFS at least one and close it again.
+3. Start OFS at least once and close it again.
    <br> ![Start OFS](./images/ofs_installation_04.jpg)
 4. Download the MTFG OFS Extension Installer from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
    <br> ![Download MTFG Extension](./images/ofs_extension_01.jpg)
