@@ -4,6 +4,7 @@ import numpy as np
 import logging
 import platform
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
+from numpy.linalg import norm
 
 def scale_signal(signal :list, lower: float = 0, upper: float = 99) -> list:
     """ Scale an signal (list of float or int) between given lower and upper value
@@ -135,6 +136,39 @@ def get_changepoints(score: list, fps: int, alpha: float) -> list:
     #    changepoints.append((tmp_max_idx))
 
     return changepoints
+
+
+def get_edge_points(score: list, changepoints: dict, threshold: float = 150.0) -> list:
+    """ Get Edge Points by calculate the distance to each point in the score.
+
+    Note:
+        We map the time axis for between each predicted changepoint to 0 - 100 to
+        get usable distances.
+
+    Args:
+        score (list): the predicted score
+        changepoints (dict): current min and max changepoints
+        threshold (float): threshold value to predict additional edge point
+
+    Returns:
+        list: list with index of the edge points (additional change points)
+    """
+    edge_points = []
+    cp = changepoints['min']+changepoints['max']
+    cp.sort()
+    if len(cp) < 2: return []
+    for i in range(len(cp)-1):
+        start = np.array([0.0, score[cp[i]]])
+        end = np.array([100.0, score[cp[i]]])
+        distances = [ norm(np.cross(end-start, start-np.array([100.0 * (j - cp[i]) / (cp[i+1] - cp[i]), score[j]])))/norm(end-start) \
+                for j in range(cp[i], cp[i+1]) ]
+        max_distance = max(distances)
+        if max_distance > threshold:
+            print("Add Edge point for distance", max_distance)
+            edge_points.append(cp[i] + distances.index(max_distance))
+
+    return edge_points
+
 
 
 def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_max :int = 0) -> dict:
