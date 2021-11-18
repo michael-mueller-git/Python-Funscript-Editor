@@ -1,8 +1,11 @@
 """ Settings Dialog for the Funscript Generator """
+import json
+import os
 
 import funscript_editor.ui.settings_view as settings_view
 
 from funscript_editor.utils.config import PROJECTION
+from funscript_editor.definitions import CONFIG_DIR
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -22,16 +25,73 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.setupUi(self.form)
         self.form.setWindowTitle("Settings")
         self.settings = settings
+        self.settings_file = os.path.join(CONFIG_DIR, "dialog_settings.json")
         self.__setup_ui_bindings()
         self.__setup_combo_boxes()
+        self.__setup_dialog_elements()
+        self.__load_settings()
+
 
     #: apply settings event
     applySettings = QtCore.pyqtSignal()
 
 
+    def __setup_dialog_elements(self):
+        self.dialog_elements = {
+                'videoType': {
+                    'instance': self.ui.videoTypeComboBox,
+                    'type': 'combobox'
+                },
+                'trackingMetric': {
+                    'instance': self.ui.trackingMetricComboBox,
+                    'type': 'combobox'
+                },
+                'trackingMethod': {
+                    'instance': self.ui.trackingMethodComboBox,
+                    'type': 'combobox'
+                },
+                'numberOfTracker': {
+                    'instance': self.ui.numberOfTrackerComboBox,
+                    'type': 'combobox'
+                }
+            }
+
+
     def show(self):
         """ Show settings dialog """
         self.form.show()
+
+
+    def __load_settings(self):
+        if not os.path.exists(self.settings_file):
+            return
+
+        with open(self.settings_file, "r") as f:
+            settings = json.load(f)
+            for key in self.dialog_elements.keys():
+                if key not in settings.keys():
+                    continue
+
+                if self.dialog_elements[key]['type'] == 'combobox':
+                    index = self.dialog_elements[key]['instance'].findText(str(settings[key]), QtCore.Qt.MatchFixedString)
+                    if index >= 0:
+                        self.dialog_elements[key]['instance'].setCurrentIndex(index)
+                    else:
+                        print("ERROR: Setting not found", str(settings[key]))
+                else:
+                    raise NotImplementedError(self.dialog_elements[key]['type'] + "type is not implemented")
+
+
+    def __save_settings(self):
+        settings = {}
+        for key in self.dialog_elements.keys():
+            if self.dialog_elements[key]['type'] == 'combobox':
+                settings[key] = self.dialog_elements[key]['instance'].currentText()
+            else:
+                raise NotImplementedError(self.dialog_elements[key]['type'] + "type is not implemented")
+
+        with open(self.settings_file, "w") as f:
+            json.dump(settings, f)
 
 
     def __setup_ui_bindings(self):
@@ -73,6 +133,7 @@ class SettingsDialog(QtWidgets.QDialog):
 
 
     def __apply(self):
+        self.__save_settings()
         self.form.hide()
         self.applySettings.emit()
 
