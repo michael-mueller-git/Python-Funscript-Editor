@@ -1,6 +1,7 @@
 import sys
 import logging
 import os
+import time
 import platform
 import cv2
 
@@ -108,6 +109,10 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
             self.__logger.info("Save result to %s", self.output_file)
             if not success: self.__show_message(msg, error=True)
+            if platform.system() == 'Windows':
+                time.sleep(0.5)
+                os.system("taskkill /f /im funscript-editor.exe")
+
             # os._exit(os.EX_OK)
             sys.exit()
 
