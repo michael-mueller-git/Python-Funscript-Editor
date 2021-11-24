@@ -27,7 +27,7 @@ min_frames: 90
 changepoint_detection_threshold: 1.2
 
 # threshold value in milliseconds to merge additional change points
-additional_changepoints_merge_threshold_in_ms: 100
+additional_changepoints_merge_threshold_in_ms: 110
 
 # reaction time of the user to stop the tracking when scene changed or tracking box shifts
 user_reaction_time_in_milliseconds: 1000
