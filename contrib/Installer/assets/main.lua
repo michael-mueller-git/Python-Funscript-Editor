@@ -77,6 +77,9 @@ function import_funscript_generator_result()
 
     -- save changes
     ofs.Commit(script)
+
+    -- delete temporary file
+    os.remove(tmpFile)
 end
 
 
@@ -118,7 +121,7 @@ function gui()
 
     ofs.SameLine()
     if not processHandleMTFG then
-        
+
         if ofs.Button("Start MTFG") then
             start_funscript_generator()
         end
@@ -140,5 +143,5 @@ function gui()
           end
     end
 
-    
+
 end
