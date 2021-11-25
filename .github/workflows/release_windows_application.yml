@@ -62,11 +62,3 @@ jobs:
           asset_name: funscript-editor_${{ steps.get_version.outputs.version }}.zip
           tag: ${{ github.ref }}
           overwrite: true
-      - name: Upload OFS Integration Asset
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./contrib/OpenFunscripter/funscript_generator_windows.lua
-          asset_name: funscript_generator_windows.lua
-          tag: ${{ github.ref }}
-          overwrite: true
