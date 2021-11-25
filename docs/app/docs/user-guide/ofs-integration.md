@@ -24,7 +24,7 @@ If you use an older version (`v0.0.x`), i recommend to first delete the `funscri
 <br>
 <br>
 
-NOTE: I have removed Installation Option 2 du to problems with data transfer to OFS. You should switch to Install Option 1!
+NOTE: I have removed Installation Option 2 due to problems with data transfer to OFS. You should switch to Install Option 1!
 
 <br>
 <br>
