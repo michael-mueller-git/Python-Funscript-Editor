@@ -82,7 +82,7 @@ class Funscript:
         """
         del_list = []
         for i in range(len(self.data['actions'])):
-            if abs(self.data['actions'][i]['at'] - timestamp ) <= 4:
+            if abs(self.data['actions'][i]['at'] - timestamp ) <= 2 * (1000.0 / self.data['fps']):
                 del_list.append(i)
 
         del_list.sort(reverse=True)
