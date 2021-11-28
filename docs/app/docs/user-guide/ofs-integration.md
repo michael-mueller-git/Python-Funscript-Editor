@@ -55,27 +55,3 @@ If less than 90 frames have been processed, a message box should pop up with the
 ### Tracking stops very often
 
 The selection of the tracking feature is tricky and requires some practice and experience. For a good tracking result, unique features in the video should be selected near the desired tacking position.
-
-## Troubleshot for old installation method
-
-If you have problems with the OFS integration setup first test if the app work in standalone mode by starting the `funscript-editor.exe`. This allows the source of the error to be narrowed down more quickly!
-
-If the standalone application works, look for your problem in the issues listed below. If the standalone application not work or your issue was not solved by a point listed below, open an issue with a detailed problem description and the full terminal window output if available.
-
-### Noting happens when i press the Shortcut for the Funscript Generator
-
-In most cases, the variable `Settings.FunscriptGenerator` in the `funscript_generator.lua` script was not set correctly.
-
-**Important:** You have to use use `/` or `\\` for the `\` symbols in your path!
-
-### When press shortcut the message "C:\\Users\\...” is not recognized as an internal or external command, operable program or batch file appears in the terminal output.
-
-The path you have set in `Settings.FunscriptGenerator` does not exist. You have an typo in the path or forget an parent directory. Double check the complete path string!
-
-### After setting the min and max value after tracking no points are inserted in OFS
-
-If the points are missing in OFS then most likely the variable `Settings.TmpFile` in the `funscript_generator.lua` script is set incorrectly or the generator crashes. A crash could happen if your PC does not have enough memory. The amount of memory required depends heavily on the video resolution!
-
-### The standalone application `funscript-editor.exe` show only a black console window
-
-On slow hardware the application requires several seconds to load. Therefore wait at least 60 seconds when the black console window opens!
