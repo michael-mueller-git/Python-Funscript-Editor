@@ -1,5 +1,6 @@
 """ Signal Processing Algorithms """
 
+import bisect
 import numpy as np
 import logging
 import platform
@@ -108,7 +109,7 @@ def second_derivative(x: list, w: int = 1) -> list:
     return moving_average(np.diff(moving_average(np.diff(x, 1).tolist(), w), 1).tolist(), w)
 
 
-def get_changepoints(score: list, fps: int, alpha: float) -> list:
+def get_high_second_derivative_points(score: list, fps: int, alpha: float) -> list:
     """ Get change points by comparing second derivative with the rolling standard deviation
 
     Args:
@@ -138,7 +139,7 @@ def get_changepoints(score: list, fps: int, alpha: float) -> list:
     return changepoints
 
 
-def get_edge_points(score: list, changepoints: dict, threshold: float = 150.0) -> list:
+def get_edge_points(score: list, changepoints: dict, threshold: float = 25.0) -> list:
     """ Get Edge Points by calculate the distance to each point in the score.
 
     Note:
@@ -162,7 +163,7 @@ def get_edge_points(score: list, changepoints: dict, threshold: float = 150.0) -
         min_pos = min([score[cp[i]], score[cp[i+1]]])
         max_pos = max([score[cp[i]], score[cp[i+1]]])
         start = np.array([min_pos, score[cp[i]]])
-        end = np.array([max_pos, score[cp[i]]])
+        end = np.array([max_pos, score[cp[i+1]]])
         scale = lambda x: ((max_pos - min_pos) * (x - cp[i]) / float(cp[i+1] - cp[i]) + float(min_pos))
         distances = [ norm(np.cross(end-start, start-np.array([scale(j), score[j]])))/norm(end-start) \
                 for j in range(cp[i], cp[i+1]) ]
@@ -170,11 +171,46 @@ def get_edge_points(score: list, changepoints: dict, threshold: float = 150.0) -
         if overall_max_distance < max_distance:
             overall_max_distance = max_distance
         if max_distance > threshold:
-            print("Add Edge point for distance", max_distance)
             edge_points.append(cp[i] + distances.index(max_distance))
 
-    print("Max distance was", overall_max_distance)
+    if platform.system() != 'Windows':
+        # TODO logging here on windows cause open background process
+        logger = logging.getLogger("edge_points")
+        logger.info("Max distance was {}".format(overall_max_distance))
+
     return edge_points
+
+
+def find_nearest(array, value, side):
+    """ Find nearest value in SORTED array
+
+    Args:
+        array (list): sorted list with values
+        value (float): search value
+        side (str): 'left' or 'right'
+
+    Returns:
+        value: nearest value in array
+    """
+    if side.lower() == 'left':
+        pos = 0
+        for i in range(len(array)):
+            if value <= array[i]:
+                break
+            pos = i
+
+        return array[pos]
+
+    elif side.lower() == 'right':
+        pos = 0
+        for i in reversed(range(len(array))):
+            if value >= array[i]:
+                break
+            pos = i
+
+        return array[pos]
+    else:
+        raise NotImplementedError("find_nearest is not implemented for side={}".format(side))
 
 
 def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_max :int = 0) -> dict:
@@ -234,12 +270,16 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
         changepoints['max'][k] = new_pos
 
 
-    if SETTINGS['additional_changepoints']:
+    if SETTINGS['additional_changepoints_at_high_second_derivative']:
         if platform.system() != 'Windows':
             # TODO logging here on windows cause open background process
-            logger.info("Add additional change points")
+            logger.info("Add additional change points by high second derivative")
         merge_threshold = max(1, round(fps * float(HYPERPARAMETER['additional_changepoints_merge_threshold_in_ms']) / 1000.0))
-        additional_changepoints = get_changepoints(score, fps, float(HYPERPARAMETER['changepoint_detection_threshold']))
+        additional_changepoints = get_high_second_derivative_points(score, fps, float(HYPERPARAMETER['changepoint_detection_threshold']))
+        current_cp = changepoints['min']+changepoints['max']
+        current_cp.sort()
+        current_min_cp = min(score)
+        current_max_cp = max(score)
         for cp_idx in additional_changepoints:
             if len(list(filter(lambda x: abs(cp_idx - x) <= merge_threshold, changepoints['min']))) > 0:
                 continue
@@ -247,6 +287,34 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
             if len(list(filter(lambda x: abs(cp_idx - x) <= merge_threshold, changepoints['max']))) > 0:
                 continue
 
+            p1 = find_nearest(current_cp, cp_idx, 'left')
+            p2 = find_nearest(current_cp, cp_idx, 'right')
+
+            start = np.array([current_min_cp, score[p1]])
+            end = np.array([current_max_cp, score[p2]])
+            scale = lambda x: ((current_max_cp - current_min_cp) * (x - p1) / float(p2 - p1) + float(current_min_cp))
+            distance = norm(np.cross(end-start, start-np.array([scale(cp_idx), score[cp_idx]])))/norm(end-start)
+
+            # TODO add this as HYPERPARAMETER
+            if distance < 10.0:
+                # changes not relevant
+                continue
+
+            if score[cp_idx] < avg[cp_idx]:
+                changepoints['min'].append(cp_idx)
+            else:
+                changepoints['max'].append(cp_idx)
+
+            bisect.insort(current_cp, cp_idx)
+
+
+    if SETTINGS['additional_changepoints_at_high_distance']:
+        if platform.system() != 'Windows':
+            # TODO logging here on windows cause open background process
+            logger.info("Add additional change points by distance")
+        # TODO threshold as HYPERPARAMETER
+        additional_changepoints = get_edge_points(score, changepoints, threshold = 20.0)
+        for cp_idx in additional_changepoints:
             if score[cp_idx] < avg[cp_idx]:
                 changepoints['min'].append(cp_idx)
             else:

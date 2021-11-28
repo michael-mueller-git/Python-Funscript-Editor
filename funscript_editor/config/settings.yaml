@@ -34,7 +34,10 @@ scene_detector: 'CSV'
 raw_output: False
 
 # Insert change points at high second derivative
-additional_changepoints: True
+additional_changepoints_at_high_second_derivative: True
+
+# Insert change points at for high distances between lineare interpolated change points
+additional_changepoints_at_high_distance: True
 
 # Force dark ui theme
 dark_theme: False
