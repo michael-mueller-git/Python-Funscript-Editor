@@ -235,6 +235,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         if self.funscript is None: return
         self.funscript.invert_actions()
         self.funscript_visualizer.update()
+        self.funscript = None
 
     def __video_player_on_key_press(self, key):
         if key == 'ctrl+g': self.__generateFunscript.emit()
