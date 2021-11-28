@@ -203,6 +203,11 @@ class VideoPlayer(QtCore.QThread):
             if self.key_callback is not None:
                 self.key_callback('ctrl+c')
 
+        @self.player.on_key_press('ctrl+q')
+        def __ctrl_q_binding():
+            if self.key_callback is not None:
+                self.key_callback('ctrl+q')
+
         @self.player.on_key_press('w')
         def __w_binding():
             self.move_stroke_indicator_relative(0,-1)
@@ -229,6 +234,20 @@ class VideoPlayer(QtCore.QThread):
 
     def __log_handler(self,a,b,c):
         pass
+
+
+    def close(self) -> None:
+        """ Close current video """
+        self.player.playlist_clear()
+        self.player.pause = True
+        self.fps = 30
+        self.duration = 0
+        self.length = 0
+        self.video_file = None
+        if self.video_file is not None:
+            self.video_file = None
+            self.__logger.info("close video")
+        self.player.stop()
 
 
     def toogle_stroke_indicator_inversion(self) -> None:

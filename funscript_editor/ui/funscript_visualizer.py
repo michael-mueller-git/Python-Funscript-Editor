@@ -60,6 +60,13 @@ class FunscriptVisualizer(QtCore.QThread):
         self.quit = True
 
 
+    def clear(self):
+        """ Clear current visualization """
+        self.funscript = None
+        self.__update_data()
+        self.preview_pane.canvas.draw()
+
+
     def set_select_point_callback(self, callback :Callable[[int], None]) -> None:
         """ Set the selcet point callback handler
 

@@ -129,6 +129,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         self.ui.menuFile.addAction('New (Ctrl+N)', self.__new_funscript)
         self.ui.menuFile.addAction('Save (Ctrl+S)', self.__save_funscript)
         self.ui.menuFile.addAction('Clear History (Ctrl+C)', self.__clear_funscript_history)
+        self.ui.menuFile.addAction('Close Video (Ctrl+Q)', self.__close_video)
 
         helpMenu = self.ui.menubar.addMenu("Help")
         # TODO we schold use an http server to show the documentation
@@ -176,6 +177,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         QtWidgets.QShortcut('CTRL+s', self).activated.connect(self.__save_funscript)
         QtWidgets.QShortcut('CTRL+Shift+Delete', self).activated.connect(self.__delete_folowing)
         QtWidgets.QShortcut('CTRL+n', self).activated.connect(self.__new_funscript)
+        QtWidgets.QShortcut('CTRL+q', self).activated.connect(self.__close_video)
 
     def __delete_folowing(self):
         reply = QtWidgets.QMessageBox.question(None, 'Delete Folowing Actions', 'Delete all folowing actions? ',
@@ -225,6 +227,9 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
                 max((0.0, self.video_player.get_current_timestamp_in_millis \
                 / float(1000) - UI_CONFIG['seek_prev_sec'])))
 
+    def __close_video(self):
+        self.video_player.close()
+        self.funscript_visualizer.clear()
 
     def __invert_actions(self):
         if self.funscript is None: return
@@ -254,6 +259,7 @@ class FunscriptEditorWindow(QtWidgets.QMainWindow):
         if key == 'ctrl+n': self.__new_funscript()
         if key == 'ctrl+o': self.__openVideo.emit()
         if key == 'ctrl+c': self.__clear_funscript_history()
+        if key == 'ctrl+q': self.__close_video()
 
     def __show_message(self, message):
         msg = QtWidgets.QMessageBox()
