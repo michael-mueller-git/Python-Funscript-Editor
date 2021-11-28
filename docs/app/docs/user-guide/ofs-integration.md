@@ -40,7 +40,7 @@ This section for technical interested people who want to understand the installa
 5. After the download complete we extract the latest release to the OFS Extension Directory (Installation of the latest release).
 6. Finally we download the [latest OFS Extension lua script](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/Installer/assets/main.lua) to the OFS Extension Directory.
 
-## Troubleshot for all Installation Options
+## Troubleshot
 
 ### When calling the generator, only a message box is displayed with the message: "Video file was not specified!"
 
