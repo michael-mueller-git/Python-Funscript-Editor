@@ -26,9 +26,6 @@ If you use an older version (`v0.0.x`), i recommend to first delete the `funscri
 
 **NOTE: I have removed Installation Option 2 due to problems with data transfer to OFS. You should switch to Install Option 1!**
 
-<br>
-<br>
-
 ### What does the installer do?
 
 This section for technical interested people who want to understand the installation process. The source code of the installer is in the [`contrib/Installer`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/Installer) directory of this repository. The installer perform the following Steps:
