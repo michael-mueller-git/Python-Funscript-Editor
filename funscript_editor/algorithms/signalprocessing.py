@@ -230,19 +230,20 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
         logger = logging.getLogger("changepoints")
 
     avg = moving_average(score, w=round(fps * HYPERPARAMETER['avg_sec_for_local_min_max_extraction']))
+    smothed_score = moving_average(score, w=3)
     changepoints = {'min': [], 'max': []}
     tmp_min_idx, tmp_max_idx = -1, -1
-    for pos in range(len(score)):
-        if score[pos] < avg[pos]:
+    for pos in range(len(smothed_score)):
+        if smothed_score[pos] < avg[pos]:
             if tmp_min_idx < 0: tmp_min_idx = pos
-            elif score[tmp_min_idx] >= score[pos]: tmp_min_idx = pos
+            elif smothed_score[tmp_min_idx] >= smothed_score[pos]: tmp_min_idx = pos
         elif tmp_min_idx >= 0:
             changepoints['min'].append(tmp_min_idx)
             tmp_min_idx = -1
 
-        if score[pos] > avg[pos]:
+        if smothed_score[pos] > avg[pos]:
             if tmp_max_idx < 0: tmp_max_idx = pos
-            elif score[tmp_max_idx] <= score[pos]: tmp_max_idx = pos
+            elif smothed_score[tmp_max_idx] <= smothed_score[pos]: tmp_max_idx = pos
         elif tmp_max_idx >= 0:
             changepoints['max'].append(tmp_max_idx)
             tmp_max_idx = -1
@@ -253,19 +254,19 @@ def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_m
     #if tmp_max_idx > 0:
     #    changepoints['max'].append((tmp_max_idx))
 
-    delta_max = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_max_delta_in_percent'])))
-    delta_min = (max(score) - min(score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_min_delta_in_percent'])))
+    delta_max = (max(smothed_score) - min(smothed_score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_max_delta_in_percent'])))
+    delta_min = (max(smothed_score) - min(smothed_score)) * 0.01 * min((10.0, float(HYPERPARAMETER['local_min_delta_in_percent'])))
 
     # shift points to the real change points
     for k, idx in enumerate(changepoints['min']):
         new_pos = idx
-        while new_pos+1 < len(score) and score[idx] + delta_min > score[new_pos+1]:
+        while new_pos+1 < len(smothed_score) and smothed_score[idx] + delta_min > smothed_score[new_pos+1]:
             new_pos += 1
         changepoints['min'][k] = new_pos
 
     for k, idx in enumerate(changepoints['max']):
         new_pos = idx
-        while new_pos+1 < len(score) and score[idx] - delta_max < score[new_pos+1]:
+        while new_pos+1 < len(smothed_score) and smothed_score[idx] - delta_max < smothed_score[new_pos+1]:
             new_pos += 1
         changepoints['max'][k] = new_pos
 
