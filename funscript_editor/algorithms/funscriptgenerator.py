@@ -1135,7 +1135,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         if metric not in self.score.keys():
             self.logger.error("key %s not in score metrics dict", metric)
             return dict()
-        return sp.get_local_max_and_min_idx(self.score[metric], round(self.video_info.fps))
+        return sp.get_local_max_and_min_idx2(self.score[metric], round(self.video_info.fps))
 
 
     def is_vr_video(self):

@@ -6,6 +6,7 @@ import logging
 import platform
 from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
 from numpy.linalg import norm
+from scipy.interpolate import interp1d
 
 def scale_signal(signal :list, lower: float = 0, upper: float = 99) -> list:
     """ Scale an signal (list of float or int) between given lower and upper value
@@ -211,6 +212,46 @@ def find_nearest(array, value, side):
         return array[pos]
     else:
         raise NotImplementedError("find_nearest is not implemented for side={}".format(side))
+
+
+def get_local_max_and_min_idx2(score :list, fps: int, shift_min :int = 0, shift_max :int = 0) -> dict:
+    """ Test Code """
+    filter_len = 3
+    if len(score) < filter_len:
+        return {'min': [], 'max': []}
+
+    filtered_indexe = [i for i in range(len(score)-filter_len) \
+            if all(score[i+j] > score[i+j+1] for j in range(filter_len)) \
+            or all(score[i+j] < score[i+j+1] for j in range(filter_len))
+    ]
+
+    if 0 not in filtered_indexe:
+        bisect.insort(filtered_indexe, 0)
+
+    if len(score)-1 not in filtered_indexe:
+        bisect.insort(filtered_indexe, len(score)-1)
+
+    fx = interp1d(filtered_indexe, [score[i] for i in filtered_indexe], kind = 'linear')
+    filtered_signal = [fx(i) for i in range(len(score))]
+
+    changepoints_canditates = []
+    direction = [-1 if filtered_signal[i] > filtered_signal[i+1] else 1 for i in range(len(filtered_signal)-1)]
+    current_direction = direction[0]
+    for i in range(1, len(direction)):
+        if direction[i] != current_direction:
+            changepoints_canditates.append(i)
+            current_direction = direction[i]
+
+    # Folowing code to match my current api, this has no effect to the result
+    changepoints = {'min': [], 'max': []}
+    avg = moving_average(score, w=round(fps * HYPERPARAMETER['avg_sec_for_local_min_max_extraction']))
+    for idx in changepoints_canditates:
+        if score[idx] > avg[idx]:
+            changepoints['max'].append(idx)
+        else:
+            changepoints['min'].append(idx)
+
+    return changepoints
 
 
 def get_local_max_and_min_idx(score :list, fps: int, shift_min :int = 0, shift_max :int = 0) -> dict:
