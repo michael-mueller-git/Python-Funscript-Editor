@@ -140,13 +140,17 @@ class StaticVideoTracker:
         tracking_init_phase_in_sec = HYPERPARAMETER['tracking_init_phase_in_sec']
         tracking_plausibility_factor_x = HYPERPARAMETER['tracking_plausibility_factor_x']
         tracking_plausibility_factor_y = HYPERPARAMETER['tracking_plausibility_factor_y']
+
         if self.tracking_counter <= round(self.fps * tracking_init_phase_in_sec):
             self.tracking_points.append([box[0] + box[2]/2, box[1] + box[3]/2])
+
             if self.tracking_counter == round(self.fps * tracking_init_phase_in_sec):
                 self.__logger.info("Determine Plausibility Threshold for Tracker")
                 self.cluster_center = np.mean(np.array(self.tracking_points), axis = 0)
+
                 distances_x = [abs(self.cluster_center[0] - point[0]) for point in self.tracking_points]
                 distances_y = [abs(self.cluster_center[1] - point[1]) for point in self.tracking_points]
+
                 self.plausibility_thresholds = [ \
                         max(distances_x) * tracking_plausibility_factor_x, \
                         max(distances_y) * tracking_plausibility_factor_y \
