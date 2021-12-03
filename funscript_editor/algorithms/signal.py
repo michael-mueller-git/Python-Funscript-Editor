@@ -1,4 +1,5 @@
 import bisect
+import copy
 import numpy as np
 import logging
 
@@ -6,13 +7,16 @@ from dataclasses import dataclass
 from numpy.linalg import norm
 
 @dataclass
-class SignalParameter:
+class signalParameter:
     avg_sec_for_local_min_max_extraction: float = 2.0
+    additional_changepoints_merge_time_threshold_in_ms: float = 110.0
+    additional_changepoints_merge_distance_threshold: float = 10.0
+
 
 class Signal:
 
     def __init__(self, fps):
-        self.params = SignalParameter()
+        self.params = signalParameter()
         self.fps = fps
         self.logger = logging.getLogger(__name__)
 
@@ -189,7 +193,7 @@ class Signal:
             return array[pos]
 
         elif side.lower() == 'right':
-            pos = 0
+            pos = len(array) - 1
             for i in reversed(range(len(array))):
                 if value >= array[i]:
                     break
@@ -200,17 +204,17 @@ class Signal:
             raise NotImplementedError("find_nearest is not implemented for side={}".format(side))
 
 
-    def get_high_second_derivative_points(self, score: list, alpha: float) -> list:
+    def get_high_second_derivative_points(self, signal: list, alpha: float) -> list:
         """ Get change points by comparing second derivative with the rolling standard deviation
 
         Args:
-            score (list): list with float or int signal values
+            signal (list): list with float or int signal values
             alpha (float): threshold value for standard deviation comparing
 
         Returns:
             list: idx list with changepoints
         """
-        dx2 = Signal.second_derivative(score)
+        dx2 = Signal.second_derivative(signal)
         dx2_abs = abs(np.array(dx2))
         std = Signal.moving_standard_deviation(dx2, round(self.fps * self.params.avg_sec_for_local_min_max_extraction))
         changepoints, tmp_max_idx = [], -1
@@ -225,35 +229,45 @@ class Signal:
         return changepoints
 
 
-    def get_edge_points(self, score: list, changepoints: list, threshold: float = 25.0) -> list:
-        """ Get Edge Points by calculate the distance to each point in the score.
+    def get_edge_points(self, signal: list, changepoints: list, threshold: float = 25.0) -> list:
+        """ Get Edge Points by calculate the distance to each point in the signal.
 
         Note:
             We map the time axis between each predicted changepoint to min_pos - max_pos in
             this section to get usable distances.
 
         Args:
-            score (list): the predicted score
+            signal (list): the predicted signal
             changepoints (list): current changepoints
             threshold (float): threshold value to predict additional edge point
 
         Returns:
             list: list with index of the edge points (additional change points)
         """
-        edge_points, overall_max_distance = [], 0
+        if len(changepoints) < 2:
+            return []
+
         changepoints.sort()
-        if len(changepoints) < 2: return []
-        for i in range(len(changepoints)-1):
-            min_pos = min([score[changepoints[i]], score[changepoints[i+1]]])
-            max_pos = max([score[changepoints[i]], score[changepoints[i+1]]])
-            start = np.array([min_pos, score[changepoints[i]]])
-            end = np.array([max_pos, score[changepoints[i+1]]])
+        edge_points, overall_max_distance = [], 0
+        for i in range(len(changepoints) - 1):
+            min_pos = min([signal[changepoints[i]], signal[changepoints[i+1]]])
+            max_pos = max([signal[changepoints[i]], signal[changepoints[i+1]]])
+
+            start = np.array([min_pos, signal[changepoints[i]]])
+            end = np.array([max_pos, signal[changepoints[i+1]]])
+
             scale = lambda x: ((max_pos - min_pos) * (x - changepoints[i]) / float(changepoints[i+1] - changepoints[i]) + float(min_pos))
-            distances = [ norm(np.cross(end-start, start-np.array([scale(j), score[j]])))/norm(end-start) \
-                    for j in range(changepoints[i], changepoints[i+1]) ]
+
+            distances = [ \
+                    norm( np.cross(end - start, start - np.array([scale(j), signal[j]])) ) / norm(end - start) \
+                    for j in range(changepoints[i], changepoints[i+1])
+                ]
+
             max_distance = max(distances)
+
             if overall_max_distance < max_distance:
                 overall_max_distance = max_distance
+
             if max_distance > threshold:
                 edge_points.append(changepoints[i] + distances.index(max_distance))
 
@@ -262,32 +276,33 @@ class Signal:
 
 
 
-    def get_local_max_and_min_idx(self, score :list) -> list:
+    def get_local_min_max_points(self, signal: list, filter_len: int = 3) -> list:
         """ Get the local max and min positions in given signal
 
         Args:
-            score (list): list with float signal
+            signal (list): list with float signal
+            filter_len (list): lenght of the moving average window to reduce false positive
 
         Returns:
             list:  with local max and min indexes
         """
-        avg = Signal.moving_average(score, w=round(self.fps * self.params.avg_sec_for_local_min_max_extraction))
-        smothed_score = Signal.moving_average(score, w=3)
+        avg = Signal.moving_average(signal, w=round(self.fps * self.params.avg_sec_for_local_min_max_extraction))
+        smothed_signal = Signal.moving_average(signal, w=filter_len)
         changepoints, tmp_min_idx, tmp_max_idx = [], -1, -1
-        for pos in range(len(smothed_score)):
-            if smothed_score[pos] < avg[pos]:
+        for pos in range(len(smothed_signal)):
+            if smothed_signal[pos] < avg[pos]:
                 if tmp_min_idx < 0:
                     tmp_min_idx = pos
-                elif smothed_score[tmp_min_idx] >= smothed_score[pos]:
+                elif smothed_signal[tmp_min_idx] >= smothed_signal[pos]:
                     tmp_min_idx = pos
             elif tmp_min_idx >= 0:
                 changepoints.append(tmp_min_idx)
                 tmp_min_idx = -1
 
-            if smothed_score[pos] > avg[pos]:
+            if smothed_signal[pos] > avg[pos]:
                 if tmp_max_idx < 0:
                     tmp_max_idx = pos
-                elif smothed_score[tmp_max_idx] <= smothed_score[pos]:
+                elif smothed_signal[tmp_max_idx] <= smothed_signal[pos]:
                     tmp_max_idx = pos
             elif tmp_max_idx >= 0:
                 changepoints.append(tmp_max_idx)
@@ -328,3 +343,90 @@ class Signal:
                 current_direction = direction
 
         return changepoints
+
+
+    def merge_points(self, signal: list, base_points: list, additional_points: list) -> list:
+        """ Merge additional points with base points with given criteria from config file
+
+        Args:
+            signal (list): the raw signal
+            base_points (list): list wit all base positions
+            additional_points (list): additional point candidates
+
+        Returns:
+            list: with merged points
+        """
+        merged_points = copy.deepcopy(base_points)
+        merged_points.sort()
+
+        merge_time_threshold = max([ 1, (round(self.fps * self.params.additional_changepoints_merge_time_threshold_in_ms) / 1000.0) ])
+
+        for idx in additional_points:
+            if len(list(filter(lambda x: abs(idx - x) <= merge_time_threshold, merged_points))) > 0:
+                continue
+
+            p1 = int(self.find_nearest(merged_points, idx, 'left'))
+            p2 = int(self.find_nearest(merged_points, idx, 'right'))
+
+            if p1 >= p2:
+                continue
+
+            min_pos = min([signal[p1], signal[p2]])
+            max_pos = max([signal[p1], signal[p2]])
+
+            start = np.array([min_pos, signal[p1]])
+            end = np.array([max_pos, signal[p2]])
+
+            scale = lambda x: ((max_pos - min_pos) * (x - p1) / float(p2 - p1) + float(min_pos))
+            distance = norm( np.cross(end - start, start - np.array([scale(idx), signal[idx]])) ) / norm(end - start)
+
+            if distance < self.params.additional_changepoints_merge_distance_threshold:
+                continue
+
+            bisect.insort(merged_points, idx)
+
+        return merged_points
+
+
+    def categorize_points(self, signal: list, points: list) -> dict:
+        """ Group a list of points in min and max points groups
+
+        Args:
+            signal (list): raw signal data
+            points (list): list with all point indexes
+
+        Returns:
+            dict: dictionary with grouped points { 'min': [], 'max': [] }
+        """
+        avg = Signal.moving_average(signal, w=round(self.fps * self.params.avg_sec_for_local_min_max_extraction))
+        smothed_signal = Signal.moving_average(signal, w=3)
+
+        grouped_points = {'min': [], 'max': []}
+        for idx in points:
+            if smothed_signal[idx] > avg[idx]:
+                grouped_points['max'].append(idx)
+            else:
+                grouped_points['min'].append(idx)
+
+        return grouped_points
+
+
+    @staticmethod
+    def apply_manual_shift(point_group: dict, max_idx: int, shift: dict = {'min': 0, 'max': 0}) -> dict:
+        """ Shift grouped points by given value
+
+        Args:
+            point_group (dict): grouped points to apply manual shift
+            max_idx (int): max index of the shiftted values (max available idx in the raw signal)
+            shift (dict): dictionary with values to shift of each group
+
+        Returns:
+            dict: shiftted point group
+        """
+        for key in shift.keys():
+            if key not in point_group:
+                continue
+
+            point_group[key] = [ max(( 0, min(( max_idx, point_group[key]+shift[key] )) )) ]
+
+        return point_group
