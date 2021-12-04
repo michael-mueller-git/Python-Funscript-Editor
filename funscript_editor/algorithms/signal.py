@@ -9,9 +9,9 @@ from dataclasses import dataclass
 from numpy.linalg import norm
 
 @dataclass
-class signalParameter:
+class SignalParameter:
     avg_sec_for_local_min_max_extraction: float = 2.0
-    additional_points_merge_time_threshold_in_ms: float = 110.0
+    additional_points_merge_time_threshold_in_ms: float = 100.0
     additional_points_merge_distance_threshold: float = 10.0
     distance_minimization_threshold: float = 20.0
     high_second_derivative_points_threshold: float = 1.2
@@ -21,7 +21,7 @@ class signalParameter:
 class Signal:
 
     def __init__(self, fps):
-        self.params = signalParameter()
+        self.params = SignalParameter()
         self.fps = fps
         self.logger = logging.getLogger(__name__)
 
