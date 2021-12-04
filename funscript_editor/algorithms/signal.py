@@ -243,6 +243,7 @@ class Signal:
                 changepoints.append(tmp_max_idx)
                 tmp_max_idx = -1
 
+        self.logger.info("Found %d high second derivative point candidates", len(changepoints))
         return changepoints
 
 
@@ -288,7 +289,7 @@ class Signal:
             if max_distance > threshold:
                 edge_points.append(base_points[i] + distances.index(max_distance))
 
-        self.logger.info("Max distance was {}".format(overall_max_distance))
+        self.logger.info("Found {} distance minimization point candidates with max distance of {}".format(len(edge_points), round(overall_max_distance)))
         return edge_points
 
 
@@ -325,11 +326,11 @@ class Signal:
                 points.append(tmp_max_idx)
                 tmp_max_idx = -1
 
+        self.logger.info("Found %d local min max points", len(points))
         return points
 
 
-    @staticmethod
-    def get_direction_changes(signal: list, filter_len: int = 3) -> list:
+    def get_direction_changes(self, signal: list, filter_len: int = 3) -> list:
         """ Get direction changes positions in given signal
 
         Args:
@@ -359,6 +360,7 @@ class Signal:
                 changepoints.append(idx + start_position)
                 current_direction = direction
 
+        self.logger.info("Found %d direction changes", len(changepoints))
         return changepoints
 
 
@@ -431,8 +433,7 @@ class Signal:
         return grouped_points
 
 
-    @staticmethod
-    def apply_manual_shift(point_group: dict, max_idx: int, shift: dict = {'min': 0, 'max': 0}) -> dict:
+    def apply_manual_shift(self, point_group: dict, max_idx: int, shift: dict = {'min': 0, 'max': 0}) -> dict:
         """ Shift grouped points by given value
 
         Args:
@@ -447,7 +448,9 @@ class Signal:
             if key not in point_group:
                 continue
 
-            point_group[key] = [ max(( 0, min(( max_idx, point_group[key]+shift[key] )) )) ]
+            if shift[key] != 0:
+                point_group[key] = [ max(( 0, min(( max_idx, point_group[key]+shift[key] )) )) ]
+                self.logger.info("Apply manual shift by %d for %s", shift[key], key)
 
         return point_group
 
@@ -476,10 +479,8 @@ class Signal:
         for algo in additional_points_algorithms:
             if algo == self.AdditionalPointAlgorithm.high_second_derivative:
                 additional_indexes = self.get_high_second_derivative_points(signal, alpha = self.params.high_second_derivative_points_threshold)
-                self.logger.info("Additional Points: high second derivative found %d new point candidates", len(additional_indexes))
             elif algo == self.AdditionalPointAlgorithm.distance_minimization:
                 additional_indexes = self.get_edge_points(signal, decimated_indexes, threshold = self.params.distance_minimization_threshold)
-                self.logger.info("Additional Points: distance minimization found %d new point candidates", len(additional_indexes))
             else:
                 raise NotImplementedError("Selected Additional Points Algorithm is not implemented")
 

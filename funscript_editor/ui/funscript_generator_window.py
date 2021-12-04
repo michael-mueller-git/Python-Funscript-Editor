@@ -131,6 +131,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                     start_frame = self.start_frame,
                     end_frame = self.end_frame,
                     number_of_trackers = int(self.settings['numberOfTrackers']),
+                    points = self.settings['points'].lower().replace(' ', '_'),
+                    additional_points= self.settings['additionalPoints'].lower().replace(' ', '_')
                 ),
                 self.funscript)
         self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)

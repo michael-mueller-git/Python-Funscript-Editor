@@ -49,6 +49,8 @@ class FunscriptGeneratorParameter:
     number_of_trackers: int = 1
 
     # Settings
+    points: str = "local_min_max"
+    additional_points: str = "none"
     raw_output: bool = SETTINGS["raw_output"]
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
     use_zoom: bool = SETTINGS['use_zoom']
@@ -1136,11 +1138,22 @@ class FunscriptGeneratorThread(QtCore.QThread):
             self.logger.error("key %s not in score metrics dict", metric)
             return dict()
 
+        base_point_algorithm = Signal.BasePointAlgorithm.local_min_max
+        if self.params.points == 'direction_changed':
+            base_point_algorithm = Signal.BasePointAlgorithm.direction_changes
+
+        additional_points_algorithms = []
+        if self.params.additional_points == 'high_second_derivative':
+            additional_points_algorithms.append(Signal.AdditionalPointAlgorithm.high_second_derivative)
+
+        if self.params.additional_points == 'distance_minimization':
+            additional_points_algorithms.append(Signal.AdditionalPointAlgorithm.distance_minimization)
+
         signal = Signal(self.video_info.fps)
         decimate_indexes = signal.decimate(
                 self.score[metric],
-                Signal.BasePointAlgorithm.direction_changes,
-                [Signal.AdditionalPointAlgorithm.high_second_derivative, Signal.AdditionalPointAlgorithm.distance_minimization]
+                base_point_algorithm,
+                additional_points_algorithms
         )
         return signal.categorize_points(self.score[metric], decimate_indexes)
 
