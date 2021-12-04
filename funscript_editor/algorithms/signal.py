@@ -2,7 +2,9 @@ import bisect
 import copy
 import numpy as np
 import logging
+import enum
 
+from typing import List
 from dataclasses import dataclass
 from numpy.linalg import norm
 
@@ -11,6 +13,9 @@ class signalParameter:
     avg_sec_for_local_min_max_extraction: float = 2.0
     additional_points_merge_time_threshold_in_ms: float = 110.0
     additional_points_merge_distance_threshold: float = 10.0
+    distance_minimization_threshold: float = 20.0
+    high_second_derivative_points_threshold: float = 1.2
+    direction_change_filter_len: int = 3
 
 
 class Signal:
@@ -19,6 +24,18 @@ class Signal:
         self.params = signalParameter()
         self.fps = fps
         self.logger = logging.getLogger(__name__)
+
+
+    class BasePointAlgorithm(enum.Enum):
+        """ Available base points algorithm for the decimate process """
+        direction_changes = 1
+        local_min_max = 2
+
+
+    class AdditionalPointAlgorithm(enum.Enum):
+        """ Available additional point algorithms for the decimate process """
+        high_second_derivative = 1
+        distance_minimization = 2
 
 
     @staticmethod
@@ -115,7 +132,7 @@ class Signal:
 
 
     @staticmethod
-    def scale_signal(signal: list, lower: float = 0, upper: float = 99) -> list:
+    def scale(signal: list, lower: float = 0, upper: float = 99) -> list:
         """ Scale an signal (list of float or int) between given lower and upper value
 
         Args:
@@ -138,7 +155,7 @@ class Signal:
 
 
     @staticmethod
-    def scale_signal_with_anomalies(
+    def scale_with_anomalies(
             signal :list,
             lower: float = 0,
             upper: float = 99,
@@ -361,6 +378,7 @@ class Signal:
 
         merge_time_threshold = max([ 1, (round(self.fps * self.params.additional_points_merge_time_threshold_in_ms) / 1000.0) ])
 
+        merge_counter = 0
         for idx in additional_points:
             if len(list(filter(lambda x: abs(idx - x) <= merge_time_threshold, merged_points))) > 0:
                 continue
@@ -384,7 +402,9 @@ class Signal:
                 continue
 
             bisect.insort(merged_points, idx)
+            merge_counter += 1
 
+        self.logger.info("Merge %d additional points", merge_counter)
         return merged_points
 
 
@@ -432,13 +452,38 @@ class Signal:
         return point_group
 
 
-    def decimate(self, signal: list) -> list:
-        """ Compute the decimated signal
+    def decimate(self,
+            signal: list,
+            base_point_algorithm: BasePointAlgorithm,
+            additional_points_algorithms: List[AdditionalPointAlgorithm]) -> list:
+        """ Compute the decimated signal with given algorithms
 
         Args:
             signal (list): raw signal
+            base_point_algorithm (BasePointAlgorithm): algorithm to determine the base points
+            additional_points_algorithms (List[AdditionalPointAlgorithm]): list with algorithms to determine additional points
 
         Returns:
             list: indexes for decimated signal
         """
-        return []
+        if base_point_algorithm == self.BasePointAlgorithm.direction_changes:
+            decimated_indexes = self.get_direction_changes(signal, filter_len = self.params.direction_change_filter_len)
+        elif base_point_algorithm == self.BasePointAlgorithm.local_min_max:
+            decimated_indexes = self.get_local_min_max_points(signal)
+        else:
+            raise NotImplementedError("Selected Base Point Algorithm is not implemented")
+
+        for algo in additional_points_algorithms:
+            if algo == self.AdditionalPointAlgorithm.high_second_derivative:
+                additional_indexes = self.get_high_second_derivative_points(signal, alpha = self.params.high_second_derivative_points_threshold)
+                self.logger.info("Additional Points: high second derivative found %d new point candidates", len(additional_indexes))
+            elif algo == self.AdditionalPointAlgorithm.distance_minimization:
+                additional_indexes = self.get_edge_points(signal, decimated_indexes, threshold = self.params.distance_minimization_threshold)
+                self.logger.info("Additional Points: distance minimization found %d new point candidates", len(additional_indexes))
+            else:
+                raise NotImplementedError("Selected Additional Points Algorithm is not implemented")
+
+            if len(additional_indexes) > 0:
+                decimated_indexes = self.merge_points(signal, decimated_indexes, additional_indexes)
+
+        return decimated_indexes

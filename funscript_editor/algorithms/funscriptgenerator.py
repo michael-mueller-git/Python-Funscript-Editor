@@ -30,8 +30,8 @@ from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION, 
 from funscript_editor.utils.logging import get_logfiles_paths
 from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CONFIG_FILE
 from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneContentDetector, SceneThresholdDetector
+from funscript_editor.algorithms.signal import Signal
 
-import funscript_editor.algorithms.signalprocessing as sp
 import multiprocessing as mp
 import numpy as np
 
@@ -441,7 +441,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         self.logger.info("Scale Score to 0 - 100")
         for metric in score.keys():
-            self.score[metric] = sp.scale_signal(score[metric], 0, 100)
+            self.score[metric] = Signal.scale(score[metric], 0, 100)
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:
@@ -501,7 +501,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             desired_max = 99
 
         self.logger.info("Scale score %s to user input", metric)
-        self.score[metric] = sp.scale_signal(self.score[metric], desired_min, desired_max)
+        self.score[metric] = Signal.scale(self.score[metric], desired_min, desired_max)
 
 
     def plot_y_score(self, name: str, idx_list: list, dpi : int = 300) -> None:
@@ -1135,7 +1135,14 @@ class FunscriptGeneratorThread(QtCore.QThread):
         if metric not in self.score.keys():
             self.logger.error("key %s not in score metrics dict", metric)
             return dict()
-        return sp.get_local_max_and_min_idx2(self.score[metric], round(self.video_info.fps))
+
+        signal = Signal(self.video_info.fps)
+        decimate_indexes = signal.decimate(
+                self.score[metric],
+                Signal.BasePointAlgorithm.direction_changes,
+                [Signal.AdditionalPointAlgorithm.high_second_derivative, Signal.AdditionalPointAlgorithm.distance_minimization]
+        )
+        return signal.categorize_points(self.score[metric], decimate_indexes)
 
 
     def is_vr_video(self):
