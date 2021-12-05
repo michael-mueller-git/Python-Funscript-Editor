@@ -343,11 +343,12 @@ class Funscript:
         return self
 
 
-    def save(self, filename: str):
+    def save(self, filename: str, create_backup: bool = True):
         """ Save funscript to file
 
         Args:
             filename (path): path where to save the funscript
+            create_backup (bool): create an additional backup file
 
         Returns:
             Funscript: current funscript instance
@@ -357,11 +358,13 @@ class Funscript:
 
         with open(filename, 'w') as json_file: json.dump(self.data, json_file, indent=4)
 
-        num=0
-        while os.path.exists(filename + str(num)): num += 1
-        filename += str(num)
+        if create_backup:
+            num=0
+            while os.path.exists(filename + str(num)): num += 1
+            filename += str(num)
 
-        with open(filename, 'w') as json_file: json.dump(self.data, json_file, indent=4) # save history
+            with open(filename, 'w') as json_file: json.dump(self.data, json_file, indent=4) # save history
+
         self.changed = False
         return self
 
