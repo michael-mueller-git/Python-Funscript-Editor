@@ -17,14 +17,14 @@ preview_scaling: 0.6
 # Specify the tracker algorithm. Available options are 'MIL', 'KCF', 'CSRT'.
 tracker: 'CSRT'
 
-# Specify the wav file to play when tracking finished (write 'off' to disable the sound notification)
+# Specify the wav file in the config directory to play when tracking finished (write 'off' to disable the sound notification)
 notification_sound: 'off'
 
 # Time in milliseconds at which the tracking is stopped if the selected feature is not found
-# THIS feature is not available since v0.1.2
+# THIS feature has no effekt since v0.1.2!
 tracking_lost_time: 0
 
-# Specify the scene detector algorithm. Available options:
+# Specify the scene detector algorithm. Tracking pause at detected scene changes. Available options:
 # - 'CSV': load scene csv file from [PySceneDetect](https://github.com/Breakthrough/PySceneDetect) if available
 # - 'CONTENT': Detects cuts using changes in colour and intensity between frames.
 # - 'THRESHOLD': Detects fades in video.
@@ -32,12 +32,6 @@ scene_detector: 'CSV'
 
 # Output an position for each frame. This option disable post processing!
 raw_output: False
-
-# Insert change points at high second derivative
-additional_changepoints_at_high_second_derivative: True
-
-# Insert change points at for high distances between lineare interpolated change points
-additional_changepoints_at_high_distance: True
 
 # Force dark ui theme
 dark_theme: False

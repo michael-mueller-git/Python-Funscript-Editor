@@ -5,7 +5,15 @@ import cv2
 
 import numpy as np
 
+from dataclasses import dataclass
 from funscript_editor.utils.config import HYPERPARAMETER
+
+
+@dataclass
+class SceneDetectorParameter:
+    min_scene_len_in_seconds: int = int(HYPERPARAMETER['scene_detector']['min_scene_len_in_seconds'])
+    scene_content_detector_threshold: float = float(HYPERPARAMETER['scene_detector']['scene_content_detector_threshold'])
+    scene_threshold_detector_threshold: int = int(HYPERPARAMETER['scene_detector']['scene_threshold_detector_threshold'])
 
 
 class SceneDetector:
@@ -19,11 +27,12 @@ class SceneDetector:
 
     def __init__(self,
             frame_skip_faktor: int,
-            fps: int,
+            fps: float,
             start_frame_number: int):
+        self.params = SceneDetectorParameter()
         self.logger = logging.getLogger(__name__)
         self.frame_skip_faktor = frame_skip_faktor
-        self.min_scene_len = round(fps * HYPERPARAMETER['min_scene_len'])
+        self.min_scene_len = round(fps * self.params.min_scene_len_in_seconds)
         self.ignore_counter = self.min_scene_len
         self.start_frame_number = start_frame_number
         self.current_frame_number = start_frame_number
@@ -119,18 +128,16 @@ class SceneContentDetector(SceneDetector):
         start_frame_img (np.ndarray): start frame opencv image
         frame_skip_faktor (int): the frame skip faktor of the tracking algorithms
         fps (float): frames per second
-        threshold (float): thresold value to detect an scene change
     """
 
     def __init__(self,
             start_frame_number: int,
             start_frame_img: np.ndarray,
             frame_skip_faktor: int,
-            fps: float,
-            threshold: float = HYPERPARAMETER['scene_content_detector_threshold']):
+            fps: float):
         super().__init__(frame_skip_faktor, fps, start_frame_number)
         self.logger.info("Use Content Detector")
-        self.threshold = threshold
+        self.threshold = self.params.scene_content_detector_threshold
         self.last_hsv = [x for x in cv2.split(cv2.cvtColor(start_frame_img, cv2.COLOR_BGR2HSV))]
 
 
@@ -180,17 +187,15 @@ class SceneThresholdDetector(SceneDetector):
         start_frame_number (int): start frame number
         frame_skip_faktor (int): the frame skip faktor of the tracking algorithms
         fps (float): frames per second
-        threshold (int):  8-bit intensity threshold value in order to trigger a fade in/out.
     """
 
     def __init__(self,
             start_frame_number: int,
             frame_skip_faktor: int,
-            fps: float,
-            threshold: int = HYPERPARAMETER['scene_threshold_detector_threshold']):
+            fps: float):
         super().__init__(frame_skip_faktor, fps, start_frame_number)
         self.logger.info("Use Threshold Detector")
-        self.threshold = int(threshold)
+        self.threshold = self.params.scene_threshold_detector_threshold
         self.last_fade = {
             'frame': self.current_frame_number,
             'type': 'in'

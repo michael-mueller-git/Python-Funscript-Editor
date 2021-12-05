@@ -9,9 +9,20 @@ import platform
 from dataclasses import dataclass
 from threading import Thread
 from queue import Queue
+from dataclasses import dataclass
 from funscript_editor.utils.config import SETTINGS, HYPERPARAMETER
 
 import numpy as np
+
+
+@dataclass
+class StaticVideoTrackerParameter:
+    tracking_init_phase_in_sec: int = int(HYPERPARAMETER['tracker']['tracking_init_phase_in_sec'])
+    tracking_plausibility_factor_x: float = float(HYPERPARAMETER['tracker']['tracking_plausibility_factor_x'])
+    tracking_plausibility_factor_y: float = float(HYPERPARAMETER['tracker']['tracking_plausibility_factor_y'])
+    tracking_plausibility_check: bool = bool(SETTINGS['tracking_plausibility_check'])
+    tracking_algorithm: str = str(SETTINGS['tracker'])
+
 
 class StaticVideoTracker:
     """
@@ -35,6 +46,7 @@ class StaticVideoTracker:
             limit_searchspace : dict = {'h': 0.45, 'w':0.4},
             supervised_tracking_area: tuple = None,
             queue_size : int = 2):
+        self.params = StaticVideoTrackerParameter()
         self.first_frame = first_frame
         self.limit_searchspace = limit_searchspace
         self.first_tracking_bbox = tracking_bbox
@@ -124,10 +136,10 @@ class StaticVideoTracker:
 
     def __setup_tracker(self) -> None:
         """ Setup the tracker specified in the config """
-        if SETTINGS['tracker'].upper() == 'MIL':
+        if self.params.tracking_algorithm.upper() == 'MIL':
             self.__logger.info("Start MIL Tracker")
             self.tracker = cv2.TrackerMIL_create()
-        elif SETTINGS['tracker'].upper() == 'KCF':
+        elif self.params.tracking_algorithm.upper() == 'KCF':
             self.__logger.info("Start KCF Tracker")
             self.tracker = cv2.TrackerKCF_create()
         else:
@@ -137,14 +149,11 @@ class StaticVideoTracker:
 
 
     def __is_plausible(self, box) -> bool:
-        tracking_init_phase_in_sec = HYPERPARAMETER['tracking_init_phase_in_sec']
-        tracking_plausibility_factor_x = HYPERPARAMETER['tracking_plausibility_factor_x']
-        tracking_plausibility_factor_y = HYPERPARAMETER['tracking_plausibility_factor_y']
 
-        if self.tracking_counter <= round(self.fps * tracking_init_phase_in_sec):
+        if self.tracking_counter <= round(self.fps * self.params.tracking_init_phase_in_sec):
             self.tracking_points.append([box[0] + box[2]/2, box[1] + box[3]/2])
 
-            if self.tracking_counter == round(self.fps * tracking_init_phase_in_sec):
+            if self.tracking_counter == round(self.fps * self.params.tracking_init_phase_in_sec):
                 self.__logger.info("Determine Plausibility Threshold for Tracker")
                 self.cluster_center = np.mean(np.array(self.tracking_points), axis = 0)
 
@@ -152,8 +161,8 @@ class StaticVideoTracker:
                 distances_y = [abs(self.cluster_center[1] - point[1]) for point in self.tracking_points]
 
                 self.plausibility_thresholds = [ \
-                        max(distances_x) * tracking_plausibility_factor_x, \
-                        max(distances_y) * tracking_plausibility_factor_y \
+                        max(distances_x) * self.params.tracking_plausibility_factor_x, \
+                        max(distances_y) * self.params.tracking_plausibility_factor_y \
                 ]
         else:
             point = [box[0] + box[2]/2, box[1] + box[3]/2]
@@ -226,7 +235,7 @@ class StaticVideoTracker:
                     bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]))
                     if not StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
                         status = StaticVideoTracker.Status.FEATURE_OUTSIDE
-                    elif SETTINGS['tracking_plausibility_check']:
+                    elif self.params.tracking_plausibility_check:
                         if not self.__is_plausible(bbox):
                             status = StaticVideoTracker.Status.IMPLAUSIBLE
 

@@ -9,56 +9,57 @@
 # values result in poorer predictions!
 skip_frames: 1
 
-# Specify the window size for the calculation of the reference value for the local min
-# and max search.
-avg_sec_for_local_min_max_extraction: 2.0
-
-# Specify the maximum deviation for a max point in percent
-local_max_delta_in_percent: 0.01
-
-# Specify the maximum deviation for a min point in percent
-local_min_delta_in_percent: 0.01
-
 # Specify the minimum required frames for the tracking. Wee need this parameter to
 # ensure there is at leas two strokes in the tracking result.
 min_frames: 90
-
-# threshold value tor get additional change points by comparing second derivative with the rolling standard deviation and given threshold
-changepoint_detection_threshold: 1.2
-
-# threshold value in milliseconds to merge additional change points
-additional_changepoints_merge_threshold_in_ms: 110
 
 # reaction time of the user to stop the tracking when scene changed or tracking box shifts
 user_reaction_time_in_milliseconds: 1000
 
 
-##################
-# Scene Detector #
-##################
+# Signal Processing Hyperparameter
+signal:
+  # Specify the window size for the calculation of the reference value for the local min and max search.
+  avg_sec_for_local_min_max_extraction: 2.0
 
-# Specify the minimum scene length in seconds
-min_scene_len: 3
+  # threshold value to predict an distance minimization point candidate
+  distance_minimization_threshold: 20.0
 
-# Threshold value for the content detector to detect an scene change
-scene_content_detector_threshold: 30.0
+  # threshold value tor get additional points by comparing second derivative with the rolling standard deviation and given threshold
+  high_second_derivative_points_threshold: 1.2
 
-# Threshold value for the threshold detector to detect an scene change
-scene_threshold_detector_threshold: 12
+  # filter length to detect a direction change
+  direction_change_filter_len: 3
+
+  # threshold value in milliseconds to merge additional points
+  additional_points_merge_time_threshold_in_ms: 100
+
+  # threshold value to merge additional points
+  additional_points_merge_distance_threshold: 10.0
 
 
-###########
-# Tracker #
-###########
+# Scene Detector Hyperparameter
+scene_detector:
+  # Specify the minimum scene length in seconds
+  min_scene_len_in_seconds: 3
 
-# Specify the init phase for the tracker (currently only used for the plausible check)
-tracking_init_phase_in_sec: 6
+  # Threshold value for the content detector to detect an scene change
+  scene_content_detector_threshold: 30.0
 
-# plausiblity factor to veriify a correct tracking position
-tracking_plausibility_factor_x: 4.0
+  # Threshold value for the threshold detector to detect an scene change
+  scene_threshold_detector_threshold: 12
 
-# plausiblity factor to veriify a correct tracking position
-tracking_plausibility_factor_y: 2.5
+
+# Tracker Hyperparameter
+tracker:
+  # Specify the init phase for the tracker (currently only used for the plausible check)
+  tracking_init_phase_in_sec: 6
+
+  # plausiblity factor to veriify a correct tracking position
+  tracking_plausibility_factor_x: 4.0
+
+  # plausiblity factor to veriify a correct tracking position
+  tracking_plausibility_factor_y: 2.5
 
 
 ##############################

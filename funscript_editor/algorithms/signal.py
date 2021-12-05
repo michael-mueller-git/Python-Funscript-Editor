@@ -7,15 +7,17 @@ import enum
 from typing import List
 from dataclasses import dataclass
 from numpy.linalg import norm
+from funscript_editor.utils.config import HYPERPARAMETER
+
 
 @dataclass
 class SignalParameter:
-    avg_sec_for_local_min_max_extraction: float = 2.0
-    additional_points_merge_time_threshold_in_ms: float = 100.0
-    additional_points_merge_distance_threshold: float = 10.0
-    distance_minimization_threshold: float = 20.0
-    high_second_derivative_points_threshold: float = 1.2
-    direction_change_filter_len: int = 3
+    avg_sec_for_local_min_max_extraction: float = float(HYPERPARAMETER['signal']['avg_sec_for_local_min_max_extraction'])
+    additional_points_merge_time_threshold_in_ms: float = float(HYPERPARAMETER['signal']['additional_points_merge_time_threshold_in_ms'])
+    additional_points_merge_distance_threshold: float = float(HYPERPARAMETER['signal']['additional_points_merge_distance_threshold'])
+    distance_minimization_threshold: float = float(HYPERPARAMETER['signal']['distance_minimization_threshold'])
+    high_second_derivative_points_threshold: float = float(HYPERPARAMETER['signal']['high_second_derivative_points_threshold'])
+    direction_change_filter_len: int = int(HYPERPARAMETER['signal']['direction_change_filter_len'])
 
 
 class Signal:
