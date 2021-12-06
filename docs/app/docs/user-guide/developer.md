@@ -1,5 +1,15 @@
 # Notes for Developer
 
+## Prerelease Version of MTFG
+
+Sometimes it is useful to test new functions and verify the correctness of changed code. Therefore we use [Prereleases with Giithub Actions](https://github.com/michael-mueller-git/Python-Funscript-Editor/actions/workflows/prerelease_windows_application.yml) to create a Executable without releasing the Application to the public. **This release type can only be downloaded when you login to an GitHub Account!** Each prereleases are only available vor limited time to download. Currently i have set the retention time to 7 days.
+<br> ![Download Prerelease 01](./images/download_prerelease_01.jpg)
+<br> ![Download Prerelease 02](./images/download_prerelease_02.jpg)
+
+### Installation
+
+There is no automated way to install the prereleases since they are indented for developer and technical experienced test users. To install the prerealese you have to extract the downloaded Prerelease to `%APPDATA%\OFS\OFS_data\extensions\Funscript Generator Windows\funscript-editor`. Therefore first delete the `funscript-editor` folder in `%APPDATA%\OFS\OFS_data\extensions\Funscript Generator Windows`. And create a new one with the content of the Prerelease. The preerelease now can be used as OFS extension. Note: For preereleases the version may be displayed incorrectly because there is no official release tag. To sitch back to the lastes official release delete the `funscript-editor` folder in `%APPDATA%\OFS\OFS_data\extensions\Funscript Generator Windows` and run the `mtfg-ofs-extension-installer.exe` from [latest github release](https://github.com/michael-mueller-git/Python-Funscript-Editor/releases/tag/latest).
+
 ## Development on Windows
 
 I have only a Winows KVM with gpu passthrough for testing, therefore i do not know very much about the development of python applications on Windows. For testing i use the `build_and_deploy.bat` script from the repository root directory.
