@@ -15,7 +15,7 @@ from packaging import version
 from bs4 import BeautifulSoup # beautifulsoup4
 from tqdm import tqdm
 
-VERSION = "v0.0.3"
+VERSION = "v0.0.4"
 LUA_EXTENSION_URL = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/main.lua"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
@@ -103,6 +103,24 @@ def process_exists(process_name):
         return False
 
 
+def install_main_lua(extension_dir, dest_dir):
+    if os.path.exists(os.path.join(dest_dir, "main.lua")):
+        shutil.copy2(os.path.join(dest_dir,"main.lua"), os.path.join(extension_dir, "main.lua"))
+    else:
+        print("Download main.lua from GitHub...")
+        # sometimes requests failed to fetch the url so we try up to 3 times
+        for i in range(3):
+            try:
+                with open(os.path.join(extension_dir, "main.lua"), "wb") as f:
+                    f.write(requests.get(LUA_EXTENSION_URL).content)
+                break
+            except:
+                if os.path.exists(dest_dir):
+                    try: shutil.rmtree(dest_dir)
+                    except: pass
+                error('main.lua insallation failed')
+
+
 def is_latest_version_installed(version_file, version):
     if os.path.exists(version_file):
         with open(version_file, 'r') as f:
@@ -157,18 +175,8 @@ def update(download_urls, latest, release_notes):
         except: error('Error while deleting old Version (Is OFS currenty running?)')
 
     shutil.move(dest_dir + "_update", dest_dir)
+    install_main_lua(extension_dir, dest_dir)
 
-    # sometimes requests failed to fetch the url so we try up to 3 times
-    for i in range(3):
-        try:
-            with open(os.path.join(extension_dir, "main.lua"), "wb") as f:
-                f.write(requests.get(LUA_EXTENSION_URL).content)
-            break
-        except:
-            if os.path.exists(dest_dir):
-                try: shutil.rmtree(dest_dir)
-                except: pass
-            error('main.lua insallation failed')
 
 
 if __name__ == "__main__":
