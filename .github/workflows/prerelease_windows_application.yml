@@ -39,6 +39,10 @@ jobs:
         shell: bash -l {0}
         run: |
           mv "docs/app/site" "dist/funscript-editor/funscript_editor/docs"
+      - name: Add MTFG OFS Extension
+        shell: bash -l {0}
+        run: |
+          cp "contrib/Installer/assets/main.lua" "dist/funscript-editor/main.lua"
       - name: Create Asset Archive
         uses: papeloto/action-zip@v1
         with:
