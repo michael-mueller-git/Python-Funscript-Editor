@@ -782,6 +782,38 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return config
 
 
+    def get_target_name(self, person=0) -> str:
+        """ Get target name for tracking boxes
+
+        Args:
+            person (int): corresponding persion id
+
+        Returns:
+            str: name
+        """
+        mapping = {
+            'y': {
+                0: 'top person',
+                1: 'bottom person'
+                },
+            'x': {
+                0: 'left person',
+                1: 'right person'
+            },
+            'distance': {
+                0: 'top/left person',
+                1: 'bottom/right person'
+            },
+            'roll': {
+                0: 'top/left person',
+                1: 'bottom/right person'
+            }
+        }
+
+        return mapping[self.params.metric][person]
+
+
+
     def init_trackers(self, ffmpeg_stream: FFmpegStream) -> tuple:
         """ Initialize the trackers
 
@@ -804,11 +836,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
         first_frame = ffmpeg_stream.read()
         preview_frame = first_frame
         for tracker_number in range(self.params.number_of_trackers):
-            bbox_woman = self.get_bbox(preview_frame, "Select Woman Feature #" + str(tracker_number+1))
+            bbox_woman = self.get_bbox(preview_frame, "Select {} Feature #{}".format(self.get_target_name(0), tracker_number+1))
             preview_frame = self.draw_box(preview_frame, bbox_woman, color=(255,0,255))
             if self.params.supervised_tracking:
                 while True:
-                    tracking_areas_woman[tracker_number] = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Woman Feature #" + str(tracker_number+1))
+                    tracking_areas_woman[tracker_number] = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(0), tracker_number+1))
                     if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_areas_woman[tracker_number]): break
                     self.logger.error("Invalid supervised tracking area selected")
                 preview_frame = self.draw_box(preview_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
@@ -822,11 +854,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 bboxes['Woman'][1][tracker_number] = bbox_woman
 
             if self.params.track_men:
-                bbox_men = self.get_bbox(preview_frame, "Select Men Feature #" + str(tracker_number+1))
+                bbox_men = self.get_bbox(preview_frame, "Select {} Feature #{}".format(self.get_target_name(1), tracker_number+1))
                 preview_frame = self.draw_box(preview_frame, bbox_men, color=(255,0,255))
                 if self.params.supervised_tracking:
                     while True:
-                        tracking_areas_men[tracker_number] = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the Men Feature #" + str(tracker_number+1))
+                        tracking_areas_men[tracker_number] = self.get_bbox(preview_frame, "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(1), tracker_number+1))
                         if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_areas_men[tracker_number]): break
                         self.logger.error("Invalid supervised tracking area selected")
                     preview_frame = self.draw_box(preview_frame, tracking_areas_men[tracker_number], color=(255,0,255))
@@ -1007,7 +1039,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 trackers_men[i].stop()
 
         self.__show_loading_screen(first_frame.shape)
-        self.logger.info("Raw tracking data: %d Tracking points for %d seconds of the video", len(bboxes["Woman"]), int(len(bboxes["Woman"])*(self.params.skip_frames + 1)/self.video_info.fps))
+        self.logger.info("Raw tracking data: %d Tracking points for %d seconds of the video", \
+                len(bboxes["Woman"]), int(len(bboxes["Woman"])*(self.params.skip_frames + 1)/self.video_info.fps))
         video.stop()
         bboxes = self.correct_bboxes(bboxes, delete_last_predictions)
         self.logger.info(status)
