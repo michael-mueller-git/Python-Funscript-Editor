@@ -5,7 +5,7 @@
 ###########
 
 # Specify the minimum required frames for the tracking. Wee need this parameter to
-# ensure there is at leas two strokes in the tracking result.
+# ensure there is at least two strokes in the tracking result.
 min_frames: 90
 
 # reaction time of the user to stop the tracking when scene changed or tracking box shifts
@@ -24,7 +24,7 @@ signal:
   high_second_derivative_points_threshold: 1.2
 
   # filter length to detect a direction change
-  direction_change_filter_len: 3
+  direction_change_filter_len: 4
 
   # threshold value in milliseconds to merge additional points
   additional_points_merge_time_threshold_in_ms: 100
