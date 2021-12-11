@@ -23,7 +23,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui = settings_view.Ui_Form()
         self.form = QtWidgets.QDialog()
         self.ui.setupUi(self.form)
-        self.form.setWindowTitle("Settings")
+        self.form.setWindowTitle("MTFG Settings")
         self.settings = settings
         self.settings_file = os.path.join(CONFIG_DIR, "dialog_settings.json")
         self.__setup_ui_bindings()
@@ -38,30 +38,15 @@ class SettingsDialog(QtWidgets.QDialog):
 
     def __setup_dialog_elements(self):
         self.dialog_elements = {
-                'videoType': {
-                    'instance': self.ui.videoTypeComboBox,
-                    'type': 'combobox'
-                },
-                'trackingMetric': {
-                    'instance': self.ui.trackingMetricComboBox,
-                    'type': 'combobox'
-                },
-                'trackingMethod': {
-                    'instance': self.ui.trackingMethodComboBox,
-                    'type': 'combobox'
-                },
-                'numberOfTracker': {
-                    'instance': self.ui.numberOfTrackerComboBox,
-                    'type': 'combobox'
-                },
-                'points': {
-                    'instance': self.ui.pointsComboBox,
-                    'type': 'combobox'
-                },
-                'additionalPoints': {
-                    'instance': self.ui.additionalPointsComboBox,
-                    'type': 'combobox'
-                }
+                'videoType': self.ui.videoTypeComboBox,
+                'trackingMetric': self.ui.trackingMetricComboBox,
+                'trackingMethod': self.ui.trackingMethodComboBox,
+                'numberOfTracker': self.ui.numberOfTrackerComboBox,
+                'points': self.ui.pointsComboBox,
+                'additionalPoints': self.ui.additionalPointsComboBox,
+                'processingSpeed': self.ui.processingSpeedComboBox,
+                'topPointOffset': self.ui.topPointOffsetSpinBox,
+                'bottomPointOffset': self.ui.bottomPointOffsetSpinBox,
             }
 
 
@@ -80,23 +65,28 @@ class SettingsDialog(QtWidgets.QDialog):
                 if key not in settings.keys():
                     continue
 
-                if self.dialog_elements[key]['type'] == 'combobox':
-                    index = self.dialog_elements[key]['instance'].findText(str(settings[key]), QtCore.Qt.MatchFixedString)
+                if isinstance(self.dialog_elements[key], QtWidgets.QComboBox):
+                    index = self.dialog_elements[key].findText(str(settings[key]), QtCore.Qt.MatchFixedString)
                     if index >= 0:
-                        self.dialog_elements[key]['instance'].setCurrentIndex(index)
+                        self.dialog_elements[key].setCurrentIndex(index)
                     else:
                         print("ERROR: Setting not found", str(settings[key]))
+                elif isinstance(self.dialog_elements[key], QtWidgets.QSpinBox):
+                    self.dialog_elements[key].setValue(0) # always trigger the change event
+                    self.dialog_elements[key].setValue(int(settings[key]))
                 else:
-                    raise NotImplementedError(self.dialog_elements[key]['type'] + "type is not implemented")
+                    raise NotImplementedError(str(type(self.dialog_elements[key])) + " type is not implemented")
 
 
     def __save_settings(self):
         settings = {}
         for key in self.dialog_elements.keys():
-            if self.dialog_elements[key]['type'] == 'combobox':
-                settings[key] = self.dialog_elements[key]['instance'].currentText()
+            if isinstance(self.dialog_elements[key], QtWidgets.QComboBox):
+                settings[key] = self.dialog_elements[key].currentText()
+            elif isinstance(self.dialog_elements[key], QtWidgets.QSpinBox):
+                settings[key] = self.dialog_elements[key].value()
             else:
-                raise NotImplementedError(self.dialog_elements[key]['type'] + "type is not implemented")
+                raise NotImplementedError(str(type(self.dialog_elements[key])) + " type is not implemented")
 
         with open(self.settings_file, "w") as f:
             json.dump(settings, f)
@@ -105,16 +95,19 @@ class SettingsDialog(QtWidgets.QDialog):
     def __setup_ui_bindings(self):
         self.ui.okButton.clicked.connect(self.__apply)
         self.ui.videoTypeComboBox.currentTextChanged.connect(
-                lambda value: self.__set_setting(
+                lambda value: self.__set_str_setting(
                     'videoType',
                     list(filter(lambda x: PROJECTION[x]['name'] == value, PROJECTION.keys()))[0]
                 )
             )
         self.ui.trackingMetricComboBox.currentTextChanged.connect(self.__set_tracking_metric)
-        self.ui.trackingMethodComboBox.currentTextChanged.connect(lambda value: self.__set_setting('trackingMethod', value))
-        self.ui.numberOfTrackerComboBox.currentTextChanged.connect(lambda value: self.__set_setting('numberOfTrackers', value))
-        self.ui.pointsComboBox.currentTextChanged.connect(lambda value: self.__set_setting('points', value))
-        self.ui.additionalPointsComboBox.currentTextChanged.connect(lambda value: self.__set_setting('additionalPoints', value))
+        self.ui.trackingMethodComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('trackingMethod', value))
+        self.ui.numberOfTrackerComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('numberOfTrackers', value))
+        self.ui.pointsComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('points', value))
+        self.ui.additionalPointsComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('additionalPoints', value))
+        self.ui.processingSpeedComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('skipFrames', value))
+        self.ui.topPointOffsetSpinBox.valueChanged.connect(lambda value: self.__set_number_setting("topPointOffset", value))
+        self.ui.bottomPointOffsetSpinBox.valueChanged.connect(lambda value: self.__set_number_setting("bottomPointOffset", value))
 
 
     def __setup_combo_boxes(self):
@@ -125,6 +118,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'y inverted (down-up)', 'x (left-right)', 'x inverted (right-left)', 'distance (p1-p2)', 'distance inverted (p2-p1)', 'roll (rotation)', 'roll inverted (rotation)'])
         self.ui.pointsComboBox.addItems(["Direction Changed", "Local Min Max"])
         self.ui.additionalPointsComboBox.addItems(["None", "High Second Derivative", "Distance Minimization"])
+        self.ui.processingSpeedComboBox.addItems(["0 (accurate)", "1 (normal)", "2 (fast)"])
 
         self.ui.numberOfTrackerComboBox.addItems([str(i) for i in range(1, 6)])
 
@@ -141,7 +135,7 @@ class SettingsDialog(QtWidgets.QDialog):
                 self.ui.trackingMethodComboBox.clear()
                 self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman + Men', 'Supervised Woman + Men'])
 
-        self.__set_setting('trackingMetric', value)
+        self.__set_str_setting('trackingMetric', value)
 
 
     def __apply(self):
@@ -150,5 +144,9 @@ class SettingsDialog(QtWidgets.QDialog):
         self.applySettings.emit()
 
 
-    def __set_setting(self, key, value):
+    def __set_str_setting(self, key, value):
+        value = value.split('(')[0].strip()
+        self.settings[key] = value
+
+    def __set_number_setting(self, key, value):
         self.settings[key] = value

@@ -60,23 +60,9 @@ class FunscriptGeneratorParameter:
     scene_detector: str = SETTINGS['scene_detector']
 
     # General Hyperparameter
-    skip_frames: int = max((0, int(HYPERPARAMETER['skip_frames'])))
-
-    # VR Movement in y Direction
-    shift_bottom_points: int = int(HYPERPARAMETER['shift_bottom_points'])
-    shift_top_points: int = int(HYPERPARAMETER['shift_top_points'])
-    bottom_points_offset: float = float(HYPERPARAMETER['bottom_points_offset'])
-    top_points_offset: float = float(HYPERPARAMETER['top_points_offset'])
-    bottom_threshold: float = float(HYPERPARAMETER['bottom_threshold'])
-    top_threshold: float = float(HYPERPARAMETER['top_threshold'])
-
-    # All other predicted Movements
-    shift_min_points: int = int(HYPERPARAMETER['shift_min_points'])
-    shift_max_points: int = int(HYPERPARAMETER['shift_max_points'])
-    min_points_offset: float = float(HYPERPARAMETER['min_points_offset'])
-    max_points_offset: float = float(HYPERPARAMETER['max_points_offset'])
-    min_threshold: float = float(HYPERPARAMETER['min_threshold'])
-    max_threshold: float = float(HYPERPARAMETER['max_threshold'])
+    skip_frames: int = 1
+    top_points_offset: float = 10.0
+    bottom_points_offset: float = -10.0
 
 
 def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue = None) -> list:
@@ -1115,8 +1101,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             int: real frame position
         """
-        shift_max = self.params.shift_top_points if metric == 'y' and self.is_vr_video() else self.params.shift_max_points
-        shift_min = self.params.shift_bottom_points if metric == 'y' and self.is_vr_video() else self.params.shift_min_points
+        """
+        shift_max = self.params.shift_max_points
+        shift_min = self.params.shift_min_points
 
         if position in ['max'] :
             if frame_number >= -1*shift_max \
@@ -1127,12 +1114,12 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if frame_number >= -1*shift_min \
                     and frame_number + shift_min < len(self.score[metric]): \
                     return self.params.start_frame + frame_number + shift_min
-
+        """
         return self.params.start_frame + frame_number
 
 
     def get_score_with_offset(self, idx_dict: dict, metric: str) -> list:
-        """ Apply the offsets form config file
+        """ Apply the offsets form settings dialog
 
         Args:
             idx_dict (dict): the idx dictionary with {'min':[], 'max':[]} idx lists
@@ -1141,8 +1128,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             list: score with offset
         """
-        offset_max = self.params.top_points_offset if metric == 'y' and self.is_vr_video() else self.params.max_points_offset
-        offset_min = self.params.bottom_points_offset if metric == 'y' and self.is_vr_video() else self.params.min_points_offset
+        offset_max = self.params.top_points_offset
+        offset_min = self.params.bottom_points_offset
 
         score = copy.deepcopy(self.score[metric])
         score_min, score_max = min(score), max(score)
@@ -1218,22 +1205,15 @@ class FunscriptGeneratorThread(QtCore.QThread):
         else:
             output_score = self.get_score_with_offset(idx_dict, self.params.metric)
 
-            threshold_min = self.params.bottom_threshold if self.params.metric == 'y' and self.is_vr_video() else self.params.min_threshold
-            threshold_max = self.params.top_threshold if self.params.metric == 'y' and self.is_vr_video() else self.params.max_threshold
-
             for idx in idx_dict['min']:
                 self.funscript.add_action(
-                        min(output_score) \
-                                if output_score[idx] < min(output_score) + threshold_min \
-                                else round(output_score[idx]),
+                        round(output_score[idx]),
                         FFmpegStream.frame_to_millisec(self.apply_shift(idx, self.params.metric, 'min'), self.video_info.fps)
                     )
 
             for idx in idx_dict['max']:
                 self.funscript.add_action(
-                        max(output_score) \
-                                if output_score[idx] > max(output_score) - threshold_max \
-                                else round(output_score[idx]),
+                        round(output_score[idx]),
                         FFmpegStream.frame_to_millisec(self.apply_shift(idx, self.params.metric, 'max'), self.video_info.fps)
                     )
 

@@ -132,7 +132,10 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                     end_frame = self.end_frame,
                     number_of_trackers = int(self.settings['numberOfTrackers']),
                     points = self.settings['points'].lower().replace(' ', '_'),
-                    additional_points= self.settings['additionalPoints'].lower().replace(' ', '_')
+                    additional_points = self.settings['additionalPoints'].lower().replace(' ', '_'),
+                    skip_frames = int(self.settings['skipFrames']),
+                    top_points_offset = self.settings['topPointOffset'],
+                    bottom_points_offset = self.settings['bottomPointOffset']
                 ),
                 self.funscript)
         self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)

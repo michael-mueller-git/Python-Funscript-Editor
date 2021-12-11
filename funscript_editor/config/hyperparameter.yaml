@@ -4,11 +4,6 @@
 # General #
 ###########
 
-# This parameter specifies how many frames are skipped and interpolated during tracking.
-# Increase this parameter to improve the processing speed on slow hardware. But higher
-# values result in poorer predictions!
-skip_frames: 1
-
 # Specify the minimum required frames for the tracking. Wee need this parameter to
 # ensure there is at leas two strokes in the tracking result.
 min_frames: 90
@@ -61,60 +56,3 @@ tracker:
   # plausiblity factor to veriify a correct tracking position
   tracking_plausibility_factor_y: 2.5
 
-
-##############################
-# VR Movement in y Direction #
-##############################
-
-# Shift predicted top points by given frame number. Positive values delay the position
-# and negative values result in an earlier position.
-shift_top_points: 0
-
-# Shift predicted bottom points by given frame number. Positive values delay the position
-# and negative values result in an earlier position.
-shift_bottom_points: 0
-
-# An fix offset to the top points (positive values move the point up and negative values
-# move the point down). The offset respect the user defined upper and lower limit.
-top_points_offset: 5.0
-
-# An fix offset to the bottom points (positive values move the point up and negative values
-# move the point down). The offset respect the user defined upper and lower limit.
-bottom_points_offset: -16.0
-
-# Define the top threshold. All top points greater than (max - threshold) will be set to
-# the specified max value. Set 0.0 to disable this function.
-top_threshold: 2.5
-
-# Define the bottom threshold. All bottom points lower than (min + threshold) will be set to
-# the specified min value. Set 0.0 to disable this function.
-bottom_threshold: 2.5
-
-
-#################################
-# All other predicted Movements #
-#################################
-
-# Shift predicted min points by given frame number. Positive values delay the position
-# and negative values result in an earlier position.
-shift_min_points: 0
-
-# Shift predicted max points by given frame number. Positive values delay the position
-# and negative values result in an earlier position.
-shift_max_points: 0
-
-# An fix offset to the min points (positive values increase position and negative values
-# lower the points). The offset respect the user defined upper and lower limit.
-min_points_offset: -7.5
-
-# An fix offset to the max points (positive values increase the position and negative values
-# lower the points). The offset respect the user defined upper and lower limit.
-max_points_offset: 7.5
-
-# Define the min threshold. All min points lower than (min + threshold) will be set to
-# the specified min value. Set 0.0 to disable this function.
-min_threshold: 2.5
-
-# Define the max threshold. All right points greater than (max - threshold) will be set to
-# the specified max value. Set 0.0 to disable this function.
-max_threshold: 2.5
