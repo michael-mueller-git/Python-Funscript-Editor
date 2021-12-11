@@ -11,6 +11,7 @@ status = "MTFG not running"
 function start_funscript_generator()
     if processHandleMTFG then
         print('MTFG already running')
+        return
     end
 
     scriptIdx = ofs.ActiveIdx()
@@ -83,6 +84,105 @@ function import_funscript_generator_result()
 end
 
 
+function invert_selected()
+    local script = ofs.Script(ofs.ActiveIdx())
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            action.pos = clamp(100 - action.pos, 0, 100)
+        end
+    end
+    ofs.Commit(script)
+end
+
+
+function align_bottom_points(align_value)
+    local script = ofs.Script(ofs.ActiveIdx())
+
+    -- get min value in selection if no align_value was given
+    if align_value < 0 then
+        align_value = 99
+        for idx, action in ipairs(script.actions) do
+            if action.selected then
+                if action.pos < align_value then
+                    align_value = action.pos
+                end
+            end
+        end
+    end
+
+    -- align bottom points
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            local bottom_point = true
+
+            local next_action = ofs.ClosestActionAfter(script, action.at / 1000)
+            if next_action then
+                if script.actions[next_action].pos <= action.pos then
+                    bottom_point = false
+                end
+            end
+
+            local prev_action = ofs.ClosestActionBefore(script, action.at / 1000)
+            if prev_action then
+                if script.actions[prev_action].pos <= action.pos then
+                    bottom_point = false
+                end
+            end
+
+            if bottom_point then
+                action.pos = align_value
+            end
+        end
+    end
+
+    ofs.Commit(script)
+end
+
+
+function align_top_points(align_value)
+    local script = ofs.Script(ofs.ActiveIdx())
+
+    -- get max value in selection if no align_value was given
+    if align_value < 0 then
+        align_value = 1
+        for idx, action in ipairs(script.actions) do
+            if action.selected then
+                if action.pos > align_value then
+                    align_value = action.pos
+                end
+            end
+        end
+    end
+
+    -- align top points
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            local top_point = true
+
+            local next_action = ofs.ClosestActionAfter(script, action.at / 1000)
+            if next_action then
+                if script.actions[next_action].pos >= action.pos then
+                    top_point = false
+                end
+            end
+
+            local prev_action = ofs.ClosestActionBefore(script, action.at / 1000)
+            if prev_action then
+                if script.actions[prev_action].pos >= action.pos then
+                    top_point = false
+                end
+            end
+
+            if top_point then
+                action.pos = align_value
+            end
+        end
+    end
+
+    ofs.Commit(script)
+end
+
+
 function init()
     ofs.Bind("start_funscript_generator", "execute the funcript generator")
     local f = io.open(ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\VERSION.txt")
@@ -143,5 +243,21 @@ function gui()
           end
     end
 
+    ofs.Separator()
+    ofs.Text("Post-Processing:")
+    ofs.SameLine()
+    if ofs.Button("Invert") then
+        invert_selected()
+    end
+
+    ofs.SameLine()
+    if ofs.Button("Align Bottom Points") then
+        align_bottom_points(-1)
+    end
+
+    ofs.SameLine()
+    if ofs.Button("Align Top Points") then
+        align_top_points(-1)
+    end
 
 end
