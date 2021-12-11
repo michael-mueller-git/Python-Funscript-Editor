@@ -373,7 +373,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 'x':[np.array([]) for _ in range(self.params.number_of_trackers)],
                 'y':[np.array([]) for _ in range(self.params.number_of_trackers)],
                 'distance': [np.array([]) for _ in range(self.params.number_of_trackers)],
-                'roll': [np.array([]) for _ in range(self.params.number_of_trackers)]
+                'roll': [[] for _ in range(self.params.number_of_trackers)]
         }
         self.logger.info("Calculate score for %d Tracker(s)", self.params.number_of_trackers)
         for tracker_number in range(self.params.number_of_trackers):
@@ -392,19 +392,20 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     x = bboxes['Woman'][tracker_number][i][0] - bboxes['Men'][tracker_number][i][0]
                     y = bboxes['Men'][tracker_number][i][1] - bboxes['Woman'][tracker_number][i][1]
                     if x >= 0 and y >= 0:
-                        score['roll'][tracker_number] = np.append(score['roll'][tracker_number], np.arctan(np.array(y / max((10e-3, x)))))
+                        score['roll'][tracker_number].append(np.arctan(np.array(y / max((10e-3, x)))))
                     elif x >= 0 and y < 0:
-                        score['roll'][tracker_number] = np.append(score['roll'][tracker_number], -1.0*np.arctan(np.array(y / max((10e-3, x)))))
+                        score['roll'][tracker_number].append(-1.0*np.arctan(np.array(y / max((10e-3, x)))))
                     elif x < 0 and y < 0:
-                        score['roll'][tracker_number] = np.append(score['roll'][tracker_number], math.pi + -1.0*np.arctan(np.array(y / x)))
+                        score['roll'][tracker_number].append(math.pi + -1.0*np.arctan(np.array(y / x)))
                     elif x < 0 and y >= 0:
-                        score['roll'][tracker_number] = np.append(score['roll'][tracker_number], math.pi + np.arctan(np.array(y / x)))
+                        score['roll'][tracker_number].append(math.pi + np.arctan(np.array(y / x)))
                     else:
                         # this should never happen
                         self.logger.error('Calculate score not implement for x=%d, y=%d', x, y)
 
                 # invert because math angle is ccw
-                score['roll'][tracker_number] = np.array([-1.0*item for item in self.score['roll']])
+                inverted_roll = copy.deepcopy(score['roll'][tracker_number])
+                score['roll'][tracker_number] = -1*np.array(inverted_roll)
 
 
             else:
