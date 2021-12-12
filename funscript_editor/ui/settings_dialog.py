@@ -114,9 +114,9 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.videoTypeComboBox.addItems([PROJECTION[key]['name'] \
                 for key in PROJECTION.keys() \
                 if 'vr' not in key.lower() or self.include_vr])
-        self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman', 'Unsupervised Woman + Men', 'Supervised Woman', 'Supervised Woman + Men']) # set before tracking metric
+        self.ui.trackingMethodComboBox.addItems(['Unsupervised one moving person', 'Unsupervised two moving persons', 'Supervised one moving person', 'Supervised two moving persons']) # set before tracking metric
         self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'y inverted (down-up)', 'x (left-right)', 'x inverted (right-left)', 'distance (p1-p2)', 'distance inverted (p2-p1)', 'roll (rotation)', 'roll inverted (rotation)'])
-        self.ui.pointsComboBox.addItems(["Direction Changed", "Local Min Max"])
+        self.ui.pointsComboBox.addItems(["Local Min Max", "Direction Changed"])
         self.ui.additionalPointsComboBox.addItems(["None", "High Second Derivative", "Distance Minimization"])
         self.ui.processingSpeedComboBox.addItems(["0 (accurate)", "1 (normal)", "2 (fast)"])
 
@@ -128,12 +128,12 @@ class SettingsDialog(QtWidgets.QDialog):
         current_tracking_method_items = [self.ui.trackingMethodComboBox.itemText(i) for i in range(self.ui.trackingMethodComboBox.count())]
 
         if value in ['x', 'y', 'x inverted', 'y inverted']:
-            if 'Unsupervised Woman' not in current_tracking_method_items:
-                self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman', 'Supervised Woman'])
+            if 'Unsupervised one moving person' not in current_tracking_method_items:
+                self.ui.trackingMethodComboBox.addItems(['Unsupervised one moving person', 'Supervised one moving person'])
         else:
-            if 'Unsupervised Woman' in current_tracking_method_items:
+            if 'Unsupervised one moving person' in current_tracking_method_items:
                 self.ui.trackingMethodComboBox.clear()
-                self.ui.trackingMethodComboBox.addItems(['Unsupervised Woman + Men', 'Supervised Woman + Men'])
+                self.ui.trackingMethodComboBox.addItems(['Unsupervised two moving persons', 'Supervised two moving persons'])
 
         self.__set_str_setting('trackingMetric', value)
 

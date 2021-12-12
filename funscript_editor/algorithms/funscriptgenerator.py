@@ -638,9 +638,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 parameter_changed = False
                 preview = FFmpegStream.get_projection(image, config)
 
-                preview = self.draw_text(preview, "Press 'space' to use current selected region of interest)",
+                preview = self.draw_text(preview, "Press 'space' to use current selected region of interest",
                         y = 50, color = (255, 0, 0))
-                preview = self.draw_text(preview, "Press '0' (NULL) to reset view)",
+                preview = self.draw_text(preview, "Press '0' (NULL) to reset view",
                         y = 75, color = (255, 0, 0))
                 for line, txt in enumerate(ui_texte):
                     preview = self.draw_text(preview, txt, y = 100 + (line * 25), color = (0, 255, 0))
@@ -778,6 +778,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             str: name
         """
+        if not self.params.track_men:
+            return "moving person"
+
         mapping = {
             'y': {
                 0: 'top person',

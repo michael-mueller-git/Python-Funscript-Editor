@@ -49,7 +49,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         if video_file is None or video_file == "":
             self.__show_message("Video file was not specified! " \
-                    + "(Make sure there are no special symbols like squared brackets in the video file path -> Rename your video file and store them in a path without special characters)",
+                    + "(Make sure there are no special symbols like squared brackets in the video file path " \
+                    + "-> Rename your video file and store them in a path without special characters)",
                     error=True)
             sys.exit()
 
@@ -123,7 +124,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.funscript_generator = FunscriptGeneratorThread(
                 FunscriptGeneratorParameter(
                     video_path = self.video_file,
-                    track_men = 'Men' in self.settings['trackingMethod'],
+                    track_men = 'two' in self.settings['trackingMethod'],
                     supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
                     metric = self.settings['trackingMetric'].replace('inverted', '').strip(),
                     projection = self.settings['videoType'],
