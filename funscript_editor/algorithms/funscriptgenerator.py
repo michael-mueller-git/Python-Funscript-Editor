@@ -428,9 +428,14 @@ class FunscriptGeneratorThread(QtCore.QThread):
             for metric in score.keys():
                 score[metric] = merge_score(score[metric], self.params.number_of_trackers)
 
-        self.logger.info("Scale Score to 0 - 100")
-        for metric in score.keys():
-            self.score[metric] = Signal.scale(score[metric], 0, 100)
+        if self.params.invert:
+            self.logger.info("Scale Inverted Score to 0 - 100")
+            for metric in score.keys():
+                self.score[metric] = Signal.scale(-1.0*np.array(score[metric]), 0, 100)
+        else:
+            self.logger.info("Scale Score to 0 - 100")
+            for metric in score.keys():
+                self.score[metric] = Signal.scale(score[metric], 0, 100)
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:
@@ -1263,8 +1268,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 self.plot_y_score('debug.png', idx_list)
 
             self.create_funscript(idx_dict)
-            if self.params.invert:
-                self.funscript.invert_actions()
             self.finished(status, True)
         except Exception as ex:
             self.logger.critical("The program crashed due to a fatal error", exc_info=ex)
