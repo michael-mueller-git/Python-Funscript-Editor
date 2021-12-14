@@ -1,6 +1,6 @@
 import csv
 import os
-import logging
+import funscript_editor.utils.logging as logging
 import cv2
 
 import numpy as np

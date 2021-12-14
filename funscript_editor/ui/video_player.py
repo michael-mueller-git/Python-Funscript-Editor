@@ -4,7 +4,7 @@ import locale
 import cv2
 import time
 import os
-import logging
+import funscript_editor.utils.logging as logging
 import typing
 
 from typing import Callable

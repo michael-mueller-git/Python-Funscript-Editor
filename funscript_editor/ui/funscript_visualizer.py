@@ -2,7 +2,7 @@
 
 import time
 import cv2
-import logging
+import funscript_editor.utils.logging as logging
 
 import numpy as np
 import matplotlib.pyplot as plt

@@ -6,7 +6,7 @@ import copy
 import time
 import math
 import json
-import logging
+import funscript_editor.utils.logging as logging
 import platform
 import threading
 from numpy.core.fromnumeric import take

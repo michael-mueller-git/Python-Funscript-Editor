@@ -6,7 +6,7 @@ import os
 import copy
 import locale
 import threading
-import logging
+import funscript_editor.utils.logging as logging
 import shutil
 import webbrowser
 import platform

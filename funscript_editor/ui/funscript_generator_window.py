@@ -1,5 +1,5 @@
 import sys
-import logging
+import funscript_editor.utils.logging as logging
 import os
 import time
 import platform

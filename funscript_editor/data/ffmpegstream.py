@@ -2,7 +2,7 @@
 
 import cv2
 import os
-import logging
+import funscript_editor.utils.logging as logging
 import time
 import platform
 

@@ -3,7 +3,7 @@
 import os
 import cv2
 import time
-import logging
+import funscript_editor.utils.logging as logging
 import platform
 
 from dataclasses import dataclass

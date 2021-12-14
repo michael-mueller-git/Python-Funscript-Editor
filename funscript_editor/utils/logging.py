@@ -31,6 +31,41 @@ def get_log_config_path() -> str:
     return WINDOWS_LOG_CONFIG_FILE if platform.system() == 'Windows' else LINUX_LOG_CONFIG_FILE
 
 
+class DevZeroLogger:
+    """ Logger replacement to suppresses all log messages
+
+    Args:
+        name (str): name of the logger instance
+    """
+
+    def __init__(self, name):
+        self.name = name
+
+    def debug(self, *args):
+        pass
+
+    def info(self, *args):
+        pass
+
+    def warning(self, *args):
+        pass
+
+    def error(self, *args):
+        pass
+
+    def critical(self, *args):
+        pass
+
+
+def getLogger(name) -> DevZeroLogger:
+    """ Get logger wrapper for python logging.getLogger
+
+    Args:
+        name (str): name of the logger instance
+    """
+    return DevZeroLogger(name)
+
+
 def get_logfiles_paths() -> list:
     """ Get the logfiles paths from log config
 

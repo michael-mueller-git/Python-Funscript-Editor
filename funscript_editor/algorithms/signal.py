@@ -1,7 +1,7 @@
 import bisect
 import copy
 import numpy as np
-import logging
+import funscript_editor.utils.logging as logging
 import enum
 
 from typing import List
