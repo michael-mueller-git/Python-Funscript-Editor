@@ -21,6 +21,14 @@ FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
 
+USE_HTTP_ONLY=False
+if os.path.exists("HTTP_ONLY.txt"):
+    print("Use HTTP only mode")
+    USE_HTTP_ONLY=True
+    LUA_EXTENSION_URL = LUA_EXTENSION_URL.replace("https:", "http:")
+    FUNSCRIPT_GENERATOR_RELEASE_URL = FUNSCRIPT_GENERATOR_RELEASE_URL.replace("https:", "http:")
+    LATEST_RELEASE_API_URL = LATEST_RELEASE_API_URL.replace("https:", "http:")
+
 
 def Mbox(title, text, style):
     """
@@ -43,6 +51,8 @@ class DownloadProgressBar(tqdm):
 
 
 def download_url(url, output_path):
+    if USE_HTTP_ONLY:
+        url = url.replace("https:", "http")
     print("Download latest release of Python-Funscript-Editor")
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
         urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
