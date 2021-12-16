@@ -52,7 +52,7 @@ class DownloadProgressBar(tqdm):
 
 def download_url(url, output_path):
     if USE_HTTP_ONLY:
-        url = url.replace("https:", "http")
+        url = url.replace("https:", "http:")
     print("Download latest release of Python-Funscript-Editor")
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
         urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
