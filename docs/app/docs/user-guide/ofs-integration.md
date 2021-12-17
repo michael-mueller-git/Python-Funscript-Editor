@@ -24,7 +24,34 @@ If you use an older version (`v0.0.x`), i recommend to first delete the `funscri
 <br>
 <br>
 
-**NOTE: I have removed Installation Option 2 due to problems with data transfer to OFS. You should switch to Install Option 1!**
+## Installation Windows Option 1 (Manual)
+
+If the installer not work for you, you can try to install the MTFG manually.
+
+Disadvantages with manual installation:
+
+- No update function available, you have to update the Program according this manual install instruction.
+
+Manual Installation:
+
+1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.2!!!)**
+   <br> ![OFS Download](./images/ofs_installation_01.jpg)
+2. Install OFS
+   <br> ![Install OFS](./images/ofs_installation_03.jpg)
+3. Start OFS at least once and close it again.
+   <br> ![Start OFS](./images/ofs_installation_04.jpg)
+4. Download the application `funscript-editor_vx.x.x.zip` from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
+5. Open your File Explorer and navigate to `%APPDATA%\OFS\OFS_data\extensions`.
+6. Create an directory for the Extension with the name `Funscript Generator Windows`.
+7. Create an other directory inside the `Funscript Generator Windows` directory with the Name `funscript-editor`.
+8. Extract the Downloaded `funscript-editor_vx.x.x.zip` into `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows\funscript-editor`.
+9. Now check that the file `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows\funscript-editor\funscript-editor.exe` exists.
+10. Download the [lua wrapper script](https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/main.lua). Open the URL in your Browser and press `CTRL+S`. Then save the file as `main.lua` to the Directory `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows`.
+11. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!. Before you press the _Start MTFG_ Button you have to open a video in OFS else you get only the Message Box "Video file was not specified!".
+    <br> ![Activate MTFG Extension](./images/ofs_extension_03.jpg)
+
+<br>
+<br>
 
 ### What does the installer do?
 
