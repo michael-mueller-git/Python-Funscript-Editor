@@ -20,7 +20,6 @@ If you use an older version (`v0.0.x`), i recommend to first delete the `funscri
    <br> ![Assign an Shortcut](./images/ofs_extension_04.jpg)
 
 <br>
-<br>
 
 ### What does the installer do?
 
@@ -59,7 +58,6 @@ Manual Installation:
 11. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!. Before you press the _Start MTFG_ Button you have to open a video in OFS else you get only the Message Box "Video file was not specified!".
     <br> ![Activate MTFG Extension](./images/ofs_extension_03.jpg)
 
-<br>
 <br>
 
 ## Installation Linux
