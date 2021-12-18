@@ -22,7 +22,7 @@ If you use an older version (`v0.0.x`), i recommend to first delete the `funscri
 <br>
 <br>
 
-## Installation Manually
+## Installation Windows (Manually)
 
 If the installer not work for you, you can try to install the MTFG manually.
 
