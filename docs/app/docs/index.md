@@ -1,6 +1,6 @@
 # Python Funscript Editor
 
-A Python program that use Computer Vision to predict the funscript actions for static video scenes. Most of you are probably interested in the [Open Funscripter (OFS)](https://github.com/OpenFunscripter/OFS) integration of this tool. I create a lua script to integrate the prediction of this tool in OFS. More information in [OFS Integration](user-guide/ofs-integration/index.html). For the configuration see [this](user-guide/config/index.html) Documentation page.
+Simple Funscript Editor written in Python with an motion tracking add-on to partially automate the generation of funscripts for static video scenes like vr videos. Python Funscript Editor has an simple UI to perform basic operations to generate a funscript. Due to the limitations it is not intended for productive use. Therefore i create a lua script to integrate the motion tracking funscript generator (MTFG) in [Open Funscripter (OFS)](https://github.com/OpenFunscripter/OFS). For the Installation see my detailed step by step [OFS Integration instruction](user-guide/ofs-integration.md).
 
 ## User-Guide
 
