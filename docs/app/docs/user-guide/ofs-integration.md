@@ -32,6 +32,8 @@ This section for technical interested people who want to understand the installa
 5. After the download complete we extract the latest release to the OFS Extension Directory (Installation of the latest release).
 6. Finally we download the [latest OFS Extension lua script](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/Installer/assets/main.lua) to the OFS Extension Directory.
 
+<br>
+
 ## Installation Windows (Manually)
 
 If the installer not work for you, you can try to install the MTFG manually.
@@ -63,6 +65,8 @@ Manual Installation:
 ## Installation Linux
 
 Currently i don't have automated the setup on a Linux host system. Please take a look at the [application build instruction](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/build.md) where the basic setup is explained. If you have any problems or need further help with the setup, please open a issue on GitHub.
+
+<br>
 
 ## Troubleshot
 
