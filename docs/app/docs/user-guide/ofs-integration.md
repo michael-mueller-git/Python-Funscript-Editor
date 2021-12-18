@@ -22,6 +22,17 @@ If you use an older version (`v0.0.x`), i recommend to first delete the `funscri
 <br>
 <br>
 
+### What does the installer do?
+
+This section for technical interested people who want to understand the installation process. The source code of the installer is in the [`contrib/Installer`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/Installer) directory of this repository. The installer perform the following Steps:
+
+1. Check if the OFS Extension Directory `%APPDATA%\OFS\OFS_data\extensions` exists.
+2. Fetch the latest release Version from github rest api.
+3. Check if an (older) MTFG Version is already installed in the OFS Extension Directory: If we have already the latest version installed, we are done here
+4. The installer download the latest release version from github.
+5. After the download complete we extract the latest release to the OFS Extension Directory (Installation of the latest release).
+6. Finally we download the [latest OFS Extension lua script](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/Installer/assets/main.lua) to the OFS Extension Directory.
+
 ## Installation Windows (Manually)
 
 If the installer not work for you, you can try to install the MTFG manually.
@@ -51,16 +62,9 @@ Manual Installation:
 <br>
 <br>
 
-### What does the installer do?
+## Installation Linux
 
-This section for technical interested people who want to understand the installation process. The source code of the installer is in the [`contrib/Installer`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/Installer) directory of this repository. The installer perform the following Steps:
-
-1. Check if the OFS Extension Directory `%APPDATA%\OFS\OFS_data\extensions` exists.
-2. Fetch the latest release Version from github rest api.
-3. Check if an (older) MTFG Version is already installed in the OFS Extension Directory: If we have already the latest version installed, we are done here
-4. The installer download the latest release version from github.
-5. After the download complete we extract the latest release to the OFS Extension Directory (Installation of the latest release).
-6. Finally we download the [latest OFS Extension lua script](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/Installer/assets/main.lua) to the OFS Extension Directory.
+Currently i don't have automated the setup on a Linux host system. Please take a look at the [application build instruction](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/build.md) where the basic setup is explained. If you have any problems or need further help with the setup, please open a issue on GitHub.
 
 ## Troubleshot
 
