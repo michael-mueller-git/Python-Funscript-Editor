@@ -489,6 +489,7 @@ class OpenCV_GUI(KeypressHandler):
             image = cv2.resize(image, None, fx=self.params.zoom_factor, fy=self.params.zoom_factor)
 
         self.set_background_image(image, copy_image=True)
+        self.print_text("Select area with Mouse and Press 'space' or 'enter' to continue")
         self.print_text(txt)
 
         while True:
