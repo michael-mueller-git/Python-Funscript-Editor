@@ -525,7 +525,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                                 beep = True
                             )
                         while True:
-                            if self.opemcvui.was_space_pressed() or key == ord(' '):
+                            if self.ui.was_space_pressed() or key == ord(' '):
                                 break
 
                             if self.ui.was_key_pressed('q') or key == ord('q'):
