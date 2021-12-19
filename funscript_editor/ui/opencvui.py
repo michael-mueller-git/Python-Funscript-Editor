@@ -22,14 +22,15 @@ class OpenCV_GUI_Parameters:
     skip_frames: int
     end_frame_number: int
     preview_scaling: float = float(SETTINGS['preview_scaling'])
-    text_start_x: int = 40
-    text_start_y: int = 40
-    text_line_height: int = 28
+    text_start_x: int = 30
+    text_start_y: int = 30
+    text_line_height: int = 30
     font_size: float = 0.75
     fps_smoothing_factor: int = 100
     window_name_prefix: str = "MTFG"
     notification_sound_file = NOTIFICATION_SOUND_FILE
     zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))
+    text_border_width: int = 6
 
 
 class KeypressHandler:
@@ -285,7 +286,7 @@ class OpenCV_GUI(KeypressHandler):
         self.print_text(txt, text_position_x = 'right')
 
 
-    def print_text(self, txt, color: tuple = (0,0,255), text_position_x: str = 'left') -> None:
+    def print_text(self, txt, color: tuple = (243,153,29), text_position_x: str = 'left') -> None:
         """ Draw text to an image/frame
 
         Args:
@@ -296,23 +297,32 @@ class OpenCV_GUI(KeypressHandler):
         assert self.preview_image is not None
         assert text_position_x in self.text_y_pos.keys()
 
-        if text_position_x.lower() == 'left':
-            x = self.params.text_start_x
-        elif text_position_x.lower() == 'right':
-            x = max([0, int(self.preview_image.shape[1] - self.params.text_start_x - round(len(txt)*17*self.params.font_size)) ])
-        elif text_position_x.lower() == 'center':
-            x = round(self.preview_image_origin_width / 2 + self.params.text_start_x)
-        else:
-            raise NotImplementedError("Print Text at position %s is not implemented", text_position_x)
-
         if not isinstance(txt, list):
             txt = [txt]
 
         for line in txt:
+            if text_position_x.lower() == 'left':
+                x = self.params.text_start_x
+            elif text_position_x.lower() == 'right':
+                (text_w, _), _ = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, self.params.font_size, 2)
+                x = max([0, int(self.preview_image.shape[1] - self.params.text_start_x - text_w) ])
+            elif text_position_x.lower() == 'center':
+                x = round(self.preview_image_origin_width / 2 + self.params.text_start_x)
+            else:
+                raise NotImplementedError("Print Text at position %s is not implemented", text_position_x)
+
+            (text_w, text_h), _ = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, self.params.font_size, 2)
+            cv2.rectangle(
+                    self.preview_image,
+                    (x - self.params.text_border_width, self.text_y_pos[text_position_x] - self.params.text_border_width),
+                    (x + text_w + self.params.text_border_width, self.text_y_pos[text_position_x] + text_h + self.params.text_border_width),
+                    (0, 0, 0),
+                    -1
+                )
             cv2.putText(
                     self.preview_image,
                     str(line),
-                    (x, self.text_y_pos[text_position_x]),
+                    (x, round(self.text_y_pos[text_position_x] + text_h + self.params.font_size - 1)),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     self.params.font_size,
                     color,
