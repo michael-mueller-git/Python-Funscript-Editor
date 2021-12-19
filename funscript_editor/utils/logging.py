@@ -52,7 +52,7 @@ class LoggerInterface:
     def error(self, *args):
         pass
 
-    def critical(self, *args):
+    def critical(self, *args, exc_info=None):
         pass
 
 
@@ -78,7 +78,7 @@ class DevZeroLogger(LoggerInterface):
     def error(self, *args):
         pass
 
-    def critical(self, *args):
+    def critical(self, *args, exc_info=None):
         pass
 
 
@@ -104,8 +104,8 @@ class PythonLogger(LoggerInterface):
     def error(self, *args):
         self.logger.error(*args)
 
-    def critical(self, *args):
-        self.logger.critical(*args)
+    def critical(self, *args, exc_info=None):
+        self.logger.critical(*args, exc_info=exc_info)
 
 
 def getLogger(name) -> LoggerInterface:
