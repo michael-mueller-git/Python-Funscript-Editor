@@ -28,7 +28,7 @@ tracking_lost_time: 0
 # - 'CSV': load scene csv file from [PySceneDetect](https://github.com/Breakthrough/PySceneDetect) if available
 # - 'CONTENT': Detects cuts using changes in colour and intensity between frames.
 # - 'THRESHOLD': Detects fades in video.
-scene_detector: 'CONTENT'
+scene_detector: 'CSV'
 
 # Output an position for each frame. This option disable post processing!
 raw_output: False

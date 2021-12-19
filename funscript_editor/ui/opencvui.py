@@ -29,6 +29,7 @@ class OpenCV_GUI_Parameters:
     fps_smoothing_factor: int = 100
     window_name_prefix: str = "MTFG"
     notification_sound_file = NOTIFICATION_SOUND_FILE
+    use_zoom: bool = SETTINGS["use_zoom"]
     zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))
     text_border_width: int = 6
 
@@ -469,18 +470,17 @@ class OpenCV_GUI(KeypressHandler):
 
 
 
-    def bbox_selector(self, image: np.ndarray, txt: str, use_zoom = False) -> tuple:
+    def bbox_selector(self, image: np.ndarray, txt: str) -> tuple:
         """ Window to get an bounding box from user input
 
         Args:
             image (np.ndarray): opencv image e.g. the first frame to determine the bounding box
             txt (str): additional text to display on the selection window
-            use_zoom (bool): use zoom window
 
         Returns:
             tuple: user input bounding box tuple (x,y,w,h)
         """
-        if use_zoom:
+        if self.params.use_zoom:
             self.set_background_image(image, copy_image=True)
             self.print_text("Select area with Mouse and Press 'space' or 'enter' to continue")
             self.print_text("Zoom selected area")
@@ -495,6 +495,13 @@ class OpenCV_GUI(KeypressHandler):
                     continue
 
                 break
+
+            zoom_bbox = (
+                    round(zoom_bbox[0]/self.monitor_preview_scaling),
+                    round(zoom_bbox[1]/self.monitor_preview_scaling),
+                    round(zoom_bbox[2]/self.monitor_preview_scaling),
+                    round(zoom_bbox[3]/self.monitor_preview_scaling)
+                )
 
             image = image[zoom_bbox[1]:zoom_bbox[1]+zoom_bbox[3], zoom_bbox[0]:zoom_bbox[0]+zoom_bbox[2]]
             image = cv2.resize(image, None, fx=self.params.zoom_factor, fy=self.params.zoom_factor)
@@ -523,7 +530,7 @@ class OpenCV_GUI(KeypressHandler):
             )
 
         # revert the zoom
-        if use_zoom:
+        if self.params.use_zoom:
             bbox = (
                     round(bbox[0]/self.params.zoom_factor + zoom_bbox[0]),
                     round(bbox[1]/self.params.zoom_factor + zoom_bbox[1]),
