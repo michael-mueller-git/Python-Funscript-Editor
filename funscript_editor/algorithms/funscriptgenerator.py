@@ -1,34 +1,20 @@
 """ Top level process to generate the funscript actions by tracking selected features in the video """
 
 import cv2
-import os
 import copy
 import time
 import math
-import json
 import funscript_editor.utils.logging as logging
-import platform
 import threading
-from numpy.core.fromnumeric import take
-from numpy.lib.function_base import append
-from numpy.ma.core import array
 
-from playsound import playsound
-from screeninfo import get_monitors
-from queue import Queue
-from pynput.keyboard import Key, Listener
 from dataclasses import dataclass
 from PyQt5 import QtCore
-from matplotlib.figure import Figure
-from datetime import datetime
 from scipy.interpolate import interp1d
 
 from funscript_editor.algorithms.videotracker import StaticVideoTracker
 from funscript_editor.data.ffmpegstream import FFmpegStream
 from funscript_editor.data.funscript import Funscript
-from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION, NOTIFICATION_SOUND_FILE
-from funscript_editor.utils.logging import get_logfiles_paths
-from funscript_editor.definitions import SETTINGS_CONFIG_FILE, HYPERPARAMETER_CONFIG_FILE
+from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
 from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneContentDetector, SceneThresholdDetector
 from funscript_editor.algorithms.signal import Signal
 from funscript_editor.ui.opencvui import OpenCV_GUI, OpenCV_GUI_Parameters
@@ -54,10 +40,6 @@ class FunscriptGeneratorParameter:
     additional_points: str = "none"
     raw_output: bool = SETTINGS["raw_output"]
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
-    use_zoom: bool = SETTINGS['use_zoom']
-    zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))
-    preview_scaling: float = float(SETTINGS['preview_scaling'])
-    tracking_lost_time: int = max((0, SETTINGS['tracking_lost_time']))
     scene_detector: str = SETTINGS['scene_detector']
 
     # General Hyperparameter
@@ -91,6 +73,7 @@ def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue = No
         max_frame_number = max([len(item[i]) for i in range(number_of_trackers)])
         arr = np.ma.empty((max_frame_number,number_of_trackers))
         arr.mask = True
+        item = np.array(item)
         for tracker_number in range(number_of_trackers):
             arr[:item[tracker_number].shape[0],tracker_number] = item[tracker_number]
         if return_queue is not None:
@@ -123,9 +106,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 'roll': []
             }
 
-        self.opencvui = OpenCV_GUI(OpenCV_GUI_Parameters(
-            video_info=self.video_info,
-            skip_frames=self.params.skip_frames,
+        self.ui = OpenCV_GUI(OpenCV_GUI_Parameters(
+            video_info = self.video_info,
+            skip_frames = self.params.skip_frames,
             end_frame_number = self.params.end_frame
             ))
 
@@ -289,7 +272,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
             imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
 
-            (desired_min, desired_max) = self.opencvui.min_max_selector(
+            (desired_min, desired_max) = self.ui.min_max_selector(
                     image_min = imgMin,
                     image_max = imgMax,
                     info = status,
@@ -409,14 +392,14 @@ class FunscriptGeneratorThread(QtCore.QThread):
         first_frame = ffmpeg_stream.read()
         preview_frame = first_frame
         for tracker_number in range(self.params.number_of_trackers):
-            bbox_woman = self.opencvui.bbox_selector(preview_frame, "Select {} Feature #{}".format(self.get_target_name(0), tracker_number+1))
-            preview_frame = self.opencvui.draw_box_to_image(preview_frame, bbox_woman, color=(255,0,255))
+            bbox_woman = self.ui.bbox_selector(preview_frame, "Select {} Feature #{}".format(self.get_target_name(0), tracker_number+1))
+            preview_frame = self.ui.draw_box_to_image(preview_frame, bbox_woman, color=(255,0,255))
             if self.params.supervised_tracking:
                 while True:
-                    tracking_areas_woman[tracker_number] = self.opencvui.bbox_selector(preview_frame, "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(0), tracker_number+1))
+                    tracking_areas_woman[tracker_number] = self.ui.bbox_selector(preview_frame, "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(0), tracker_number+1))
                     if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_areas_woman[tracker_number]): break
                     self.logger.error("Invalid supervised tracking area selected")
-                preview_frame = self.opencvui.draw_box_to_image(preview_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
+                preview_frame = self.ui.draw_box_to_image(preview_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
                 trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, self.video_info.fps, supervised_tracking_area = tracking_areas_woman[tracker_number])
             else:
                 trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, self.video_info.fps)
@@ -427,14 +410,14 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 bboxes['Woman'][1][tracker_number] = bbox_woman
 
             if self.params.track_men:
-                bbox_men = self.opencvui.bbox_selector(preview_frame, "Select {} Feature #{}".format(self.get_target_name(1), tracker_number+1))
-                preview_frame = self.opencvui.draw_box_to_image(preview_frame, bbox_men, color=(255,0,255))
+                bbox_men = self.ui.bbox_selector(preview_frame, "Select {} Feature #{}".format(self.get_target_name(1), tracker_number+1))
+                preview_frame = self.ui.draw_box_to_image(preview_frame, bbox_men, color=(255,0,255))
                 if self.params.supervised_tracking:
                     while True:
-                        tracking_areas_men[tracker_number] = self.opencvui.bbox_selector(preview_frame, "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(1), tracker_number+1))
+                        tracking_areas_men[tracker_number] = self.ui.bbox_selector(preview_frame, "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(1), tracker_number+1))
                         if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_areas_men[tracker_number]): break
                         self.logger.error("Invalid supervised tracking area selected")
-                    preview_frame = self.opencvui.draw_box_to_image(preview_frame, tracking_areas_men[tracker_number], color=(255,0,255))
+                    preview_frame = self.ui.draw_box_to_image(preview_frame, tracking_areas_men[tracker_number], color=(255,0,255))
                     trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, self.video_info.fps, supervised_tracking_area = tracking_areas_men[tracker_number])
                 else:
                     trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, self.video_info.fps)
@@ -458,7 +441,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """
         first_frame = FFmpegStream.get_frame(self.params.video_path, self.params.start_frame)
 
-        projection_config = self.opencvui.get_video_projection_config(first_frame, self.params.projection)
+        projection_config = self.ui.get_video_projection_config(first_frame, self.params.projection)
 
         video = FFmpegStream(
                 video_path = self.params.video_path,
@@ -473,11 +456,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
             cycle_time_in_ms = (float(1000) / float(self.params.max_playback_fps)) * (self.params.skip_frames+1)
         else:
             cycle_time_in_ms = 0
-
-        tracking_lost_frames = round(self.video_info.fps * self.params.tracking_lost_time / 1000.0)
-        if tracking_lost_frames > 0 and self.params.number_of_trackers > 1:
-            self.logger.warning("Delayed Tracking Lost is currently not implemented for multiple trackers (The feature will be disabled)")
-            tracking_lost_frames = 0
 
         if self.params.scene_detector.upper() == "CONTENT":
             scene_detector = SceneContentDetector(self.params.start_frame, first_frame, self.params.skip_frames, self.video_info.fps)
@@ -539,7 +517,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     scene_change_quit_flag = False
                     if scene_detector.is_scene_change(frame_num-1 + self.params.start_frame):
                         self.logger.info("Scene change detected, Pause tracking")
-                        key = self.opencvui.preview(
+                        key = self.ui.preview(
                                 last_frame,
                                 frame_num + self.params.start_frame,
                                 texte = ["Scene change detected, Press 'space' to continue tracking or press 'q' to finalize tracking"],
@@ -550,7 +528,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                             if self.opemcvui.was_space_pressed() or key == ord(' '):
                                 break
 
-                            if self.opencvui.was_key_pressed('q') or key == ord('q'):
+                            if self.ui.was_key_pressed('q') or key == ord('q'):
                                 scene_change_quit_flag = True
                                 break
 
@@ -565,16 +543,16 @@ class FunscriptGeneratorThread(QtCore.QThread):
                             delete_last_predictions = (self.params.skip_frames+1)*2
                         break
 
-                    key = self.opencvui.preview(
+                    key = self.ui.preview(
                             last_frame,
                             frame_num + self.params.start_frame,
                             texte = ["Press 'q' if the tracking point shifts or a video cut occured"],
                             boxes = boxes_to_draw,
                         )
 
-                    if self.opencvui.was_key_pressed('q') or key == ord('q'):
+                    if self.ui.was_key_pressed('q') or key == ord('q'):
                         status = 'Tracking stopped by user'
-                        delete_last_predictions = max((1, int((self.opencvui.get_preview_fps()+1)*0.5*HYPERPARAMETER['user_reaction_time_in_milliseconds']/1000.0)))
+                        delete_last_predictions = max((1, int((self.ui.get_preview_fps()+1)*0.5*HYPERPARAMETER['user_reaction_time_in_milliseconds']/1000.0)))
                         break
 
                 stop_tracking = False
@@ -614,7 +592,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if self.params.track_men:
                 trackers_men[i].stop()
 
-        self.opencvui.show_loading_screen()
+        self.ui.show_loading_screen()
         self.logger.info("Raw tracking data: %d Tracking points for %d seconds of the video", \
                 len(bboxes["Woman"]), int(len(bboxes["Woman"])*(self.params.skip_frames + 1)/self.video_info.fps))
         video.stop()
@@ -633,7 +611,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             status (str): a process status/error message
             success (bool): True if funscript was generated else False
         """
-        self.opencvui.close()
+        self.ui.close()
         self.funscriptCompleted.emit(self.funscript, status, success)
 
 
@@ -674,7 +652,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
             score[idx] = max(( score_min, min((score_max, score[idx] + offset_min)) ))
 
         return score
-
 
 
     def determine_change_points(self, metric: str) -> dict:

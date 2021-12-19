@@ -8,7 +8,7 @@ from playsound import playsound
 from queue import Queue
 from datetime import datetime
 from funscript_editor.data.ffmpegstream import FFmpegStream, VideoInfo
-from funscript_editor.utils.config import PROJECTION
+from funscript_editor.utils.config import PROJECTION, SETTINGS, NOTIFICATION_SOUND_FILE
 from screeninfo import get_monitors
 from dataclasses import dataclass
 
@@ -19,17 +19,17 @@ import numpy as np
 @dataclass
 class OpenCV_GUI_Parameters:
     video_info: VideoInfo
-    preview_scaling: float = 0.6
-    skip_frames: int = 0
+    skip_frames: int
+    end_frame_number: int
+    preview_scaling: float = float(SETTINGS['preview_scaling'])
     text_start_x: int = 50
     text_start_y: int = 50
     text_line_height: int = 25
     font_size: float = 0.6
     fps_smoothing_factor: int = 100
     window_name_prefix: str = "MTFG"
-    notification_sound_file = None
-    zoom_factor: float = 4.0
-    end_frame_number: int = -1
+    notification_sound_file = NOTIFICATION_SOUND_FILE
+    zoom_factor: float = max((1.0, float(SETTINGS['zoom_factor'])))
 
 
 class KeypressHandler:
@@ -115,6 +115,7 @@ class OpenCV_GUI(KeypressHandler):
         self.window_name = "{} - {}".format(self.params.window_name_prefix, datetime.now().strftime("%H:%M:%S"))
         self.__reset_print_positions()
         self.preview_scaling_applied = False
+        self.preview_image = None
 
 
     def __del__(self):
@@ -371,10 +372,10 @@ class OpenCV_GUI(KeypressHandler):
             shape (tuple): image shape of loading screen
             txt (str): text to display
         """
-        assert self.preview_image is not None
-        self.set_background_image(np.full(self.preview_image.shape, 0, dtype=np.uint8))
-        self.print_text(txt)
-        self.show()
+        if self.preview_image is not None:
+            self.set_background_image(np.full(self.preview_image.shape, 0, dtype=np.uint8))
+            self.print_text(txt)
+            self.show()
 
 
     def play_notification_sound(self) -> None:
