@@ -138,6 +138,7 @@ class OpenCV_GUI(KeypressHandler):
         self.text_y_pos = {
                 'left': self.params.text_start_y,
                 'center': self.params.text_start_y,
+                'column2': self.params.text_start_y,
                 'right': self.params.text_start_y
             }
 
@@ -293,7 +294,7 @@ class OpenCV_GUI(KeypressHandler):
         Args:
             txt (str, list): the text to plot on the image
             colot (tuple): BGR Color tuple
-            text_position_x (str): text position ['left',  'right', 'center']
+            text_position_x (str): text position ['left',  'right', 'center', 'column2']
         """
         assert self.preview_image is not None
         assert text_position_x in self.text_y_pos.keys()
@@ -308,6 +309,9 @@ class OpenCV_GUI(KeypressHandler):
                 (text_w, _), _ = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, self.params.font_size, 2)
                 x = max([0, int(self.preview_image.shape[1] - self.params.text_start_x - text_w) ])
             elif text_position_x.lower() == 'center':
+                (text_w, _), _ = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, self.params.font_size, 2)
+                x = max([0, round((self.preview_image_origin_width / 2) - (text_w / 2))])
+            elif text_position_x.lower() == 'column2':
                 x = round(self.preview_image_origin_width / 2 + self.params.text_start_x)
             else:
                 raise NotImplementedError("Print Text at position %s is not implemented", text_position_x)
@@ -447,10 +451,10 @@ class OpenCV_GUI(KeypressHandler):
             try:
                 self.set_background_image(image, copy_image=True)
                 self.print_text(title_min if title_min != "" else "Min")
-                self.print_text(title_max if title_max != "" else "Max", text_position_x='center')
+                self.print_text(title_max if title_max != "" else "Max", text_position_x='column2')
                 self.print_text(info)
                 self.print_text("Set {} to {}".format('Min', trackbarValueMin))
-                self.print_text("Set {} to {}".format('Max', trackbarValueMax), text_position_x='center')
+                self.print_text("Set {} to {}".format('Max', trackbarValueMax), text_position_x='column2')
                 ret = self.show(25)
 
                 if self.was_space_pressed() or ret == ord(' '):
