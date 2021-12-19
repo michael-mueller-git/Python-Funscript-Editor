@@ -22,10 +22,10 @@ class OpenCV_GUI_Parameters:
     skip_frames: int
     end_frame_number: int
     preview_scaling: float = float(SETTINGS['preview_scaling'])
-    text_start_x: int = 50
-    text_start_y: int = 50
-    text_line_height: int = 25
-    font_size: float = 0.6
+    text_start_x: int = 40
+    text_start_y: int = 40
+    text_line_height: int = 28
+    font_size: float = 0.75
     fps_smoothing_factor: int = 100
     window_name_prefix: str = "MTFG"
     notification_sound_file = NOTIFICATION_SOUND_FILE

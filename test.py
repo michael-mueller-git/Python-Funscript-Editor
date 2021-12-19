@@ -4,7 +4,9 @@ from funscript_editor.data.ffmpegstream import FFmpegStream
 test_video = './tests/data/example1.mkv'
 
 params = OpenCV_GUI_Parameters(
-        video_info=FFmpegStream.get_video_info(test_video)
+        video_info=FFmpegStream.get_video_info(test_video),
+        end_frame_number=-1,
+        skip_frames=1
     )
 
 ui = OpenCV_GUI(params)
