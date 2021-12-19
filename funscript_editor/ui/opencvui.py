@@ -286,7 +286,7 @@ class OpenCV_GUI(KeypressHandler):
         self.print_text(txt, text_position_x = 'right')
 
 
-    def print_text(self, txt, color: tuple = (243,153,29), text_position_x: str = 'left') -> None:
+    def print_text(self, txt, color: tuple = (0,0,255), text_position_x: str = 'left') -> None:
         """ Draw text to an image/frame
 
         Args:
@@ -384,7 +384,7 @@ class OpenCV_GUI(KeypressHandler):
         """
         if self.preview_image is not None:
             self.set_background_image(np.full(self.preview_image.shape, 0, dtype=np.uint8))
-            self.print_text(txt)
+            self.print_text(txt, color=(0,0,255))
             self.show()
 
 
