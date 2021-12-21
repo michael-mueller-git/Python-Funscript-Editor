@@ -34,6 +34,7 @@ class FunscriptGeneratorParameter:
     start_frame: int
     end_frame: int = -1 # default is video end (-1)
     number_of_trackers: int = 1
+    supervised_tracking_is_exit_condition: bool = True
 
     # Settings
     points: str = "local_min_max"
@@ -392,17 +393,48 @@ class FunscriptGeneratorThread(QtCore.QThread):
         first_frame = ffmpeg_stream.read()
         preview_frame = first_frame
         for tracker_number in range(self.params.number_of_trackers):
-            bbox_woman = self.ui.bbox_selector(preview_frame, "Select {} Feature #{}".format(self.get_target_name(0), tracker_number+1))
-            preview_frame = self.ui.draw_box_to_image(preview_frame, bbox_woman, color=(255,0,255))
+            bbox_woman = self.ui.bbox_selector(
+                    preview_frame,
+                    "Select {} Feature #{}".format(self.get_target_name(0), tracker_number+1)
+                )
+
+            preview_frame = self.ui.draw_box_to_image(
+                    preview_frame, 
+                    bbox_woman, 
+                    color=(255,0,255)
+                )
+
             if self.params.supervised_tracking:
                 while True:
-                    tracking_areas_woman[tracker_number] = self.ui.bbox_selector(preview_frame, "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(0), tracker_number+1))
-                    if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_areas_woman[tracker_number]): break
+                    tracking_areas_woman[tracker_number] = self.ui.bbox_selector(
+                            preview_frame,
+                            "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(0), tracker_number+1)
+                        )
+
+                    if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_areas_woman[tracker_number]):
+                        break
+
                     self.logger.error("Invalid supervised tracking area selected")
-                preview_frame = self.ui.draw_box_to_image(preview_frame, tracking_areas_woman[tracker_number], color=(0,255,0))
-                trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, self.video_info.fps, supervised_tracking_area = tracking_areas_woman[tracker_number])
+
+                preview_frame = self.ui.draw_box_to_image(
+                        preview_frame,
+                        tracking_areas_woman[tracker_number],
+                        color=(0,255,0)
+                    )
+
+                trackers_woman[tracker_number] = StaticVideoTracker(
+                        first_frame,
+                        bbox_woman,
+                        self.video_info.fps,
+                        supervised_tracking_area = tracking_areas_woman[tracker_number],
+                        supervised_tracking_is_exit_condition=self.params.supervised_tracking_is_exit_condition
+                    )
             else:
-                trackers_woman[tracker_number] = StaticVideoTracker(first_frame, bbox_woman, self.video_info.fps)
+                trackers_woman[tracker_number] = StaticVideoTracker(
+                        first_frame,
+                        bbox_woman,
+                        self.video_info.fps
+                    )
 
             if tracker_number == 0:
                 bboxes['Woman'][1] = { tracker_number: bbox_woman }
@@ -410,17 +442,42 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 bboxes['Woman'][1][tracker_number] = bbox_woman
 
             if self.params.track_men:
-                bbox_men = self.ui.bbox_selector(preview_frame, "Select {} Feature #{}".format(self.get_target_name(1), tracker_number+1))
+                bbox_men = self.ui.bbox_selector(
+                        preview_frame,
+                        "Select {} Feature #{}".format(self.get_target_name(1), tracker_number+1)
+                    )
                 preview_frame = self.ui.draw_box_to_image(preview_frame, bbox_men, color=(255,0,255))
                 if self.params.supervised_tracking:
                     while True:
-                        tracking_areas_men[tracker_number] = self.ui.bbox_selector(preview_frame, "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(1), tracker_number+1))
-                        if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_areas_men[tracker_number]): break
+                        tracking_areas_men[tracker_number] = self.ui.bbox_selector(
+                                preview_frame,
+                                "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(1), tracker_number+1)
+                            )
+
+                        if StaticVideoTracker.is_bbox_in_tracking_area(bbox_men, tracking_areas_men[tracker_number]):
+                            break
+
                         self.logger.error("Invalid supervised tracking area selected")
-                    preview_frame = self.ui.draw_box_to_image(preview_frame, tracking_areas_men[tracker_number], color=(255,0,255))
-                    trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, self.video_info.fps, supervised_tracking_area = tracking_areas_men[tracker_number])
+
+                    preview_frame = self.ui.draw_box_to_image(
+                            preview_frame,
+                            tracking_areas_men[tracker_number],
+                            color=(255,0,255)
+                        )
+
+                    trackers_men[tracker_number] = StaticVideoTracker(
+                            first_frame,
+                            bbox_men,
+                            self.video_info.fps,
+                            supervised_tracking_area = tracking_areas_men[tracker_number],
+                            supervised_tracking_is_exit_condition = self.params.supervised_tracking_is_exit_condition
+                        )
                 else:
-                    trackers_men[tracker_number] = StaticVideoTracker(first_frame, bbox_men, self.video_info.fps)
+                    trackers_men[tracker_number] = StaticVideoTracker(
+                            first_frame,
+                            bbox_men,
+                            self.video_info.fps
+                        )
 
                 if tracker_number == 0:
                     bboxes['Men'][1] = { tracker_number: bbox_men }
@@ -434,7 +491,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """ Tracking function to track the features in the video
 
         TODO:
-            Tracking lost for multiple tracker
+            bring back Tracking lost function
 
         Returns:
             str: a process status message e.g. 'end of video reached'
@@ -511,7 +568,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                             boxes_to_draw.append(bboxes['Men'][frame_num-1][tracker_number])
                             if self.params.supervised_tracking:
                                 boxes_to_draw.append(tracking_areas_men[tracker_number])
-
 
 
                     scene_change_quit_flag = False
@@ -615,16 +671,14 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.funscriptCompleted.emit(self.funscript, status, success)
 
 
-    def apply_shift(self, frame_number: int, metric: str, position: str) -> int:
-        """ Apply shift to predicted frame positions
+    def get_absolute_framenumber(self, frame_number: int) -> int:
+        """ Get the absoulte frame number
 
         Args:
             frame_number (int): relative frame number
-            metric (str): metric to apply the shift
-            position (str): keyword ['max', 'min', 'None']
 
         Returns:
-            int: real frame position
+            int: absolute frame position
         """
         return self.params.start_frame + frame_number
 
@@ -709,7 +763,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             for idx in range(len(output_score)):
                 self.funscript.add_action(
                         output_score[idx],
-                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, self.params.metric, 'None'), self.video_info.fps)
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
                     )
 
         else:
@@ -718,13 +772,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
             for idx in idx_dict['min']:
                 self.funscript.add_action(
                         round(output_score[idx]),
-                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, self.params.metric, 'min'), self.video_info.fps)
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
                     )
 
             for idx in idx_dict['max']:
                 self.funscript.add_action(
                         round(output_score[idx]),
-                        FFmpegStream.frame_to_millisec(self.apply_shift(idx, self.params.metric, 'max'), self.video_info.fps)
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
                     )
 
 

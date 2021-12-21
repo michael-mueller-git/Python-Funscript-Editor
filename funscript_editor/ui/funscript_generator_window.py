@@ -126,6 +126,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                     video_path = self.video_file,
                     track_men = 'two' in self.settings['trackingMethod'],
                     supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
+                    supervised_tracking_is_exit_condition = "stopping" in self.settings['trackingMethod'],
                     metric = self.settings['trackingMetric'].replace('inverted', '').strip(),
                     projection = self.settings['videoType'],
                     invert = "inverted" in self.settings['trackingMetric'],

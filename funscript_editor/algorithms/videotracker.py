@@ -45,7 +45,9 @@ class StaticVideoTracker:
             fps: float,
             limit_searchspace : dict = {'h': 0.45, 'w':0.4},
             supervised_tracking_area: tuple = None,
+            supervised_tracking_is_exit_condition: bool = True,
             queue_size : int = 2):
+        self.logger = logging.getLogger(__name__)
         self.params = StaticVideoTrackerParameter()
         self.first_frame = first_frame
         self.limit_searchspace = limit_searchspace
@@ -63,10 +65,8 @@ class StaticVideoTracker:
         self.tracking_counter = 0
         self.cluster_center = [0, 0]
         self.plausibility_thresholds = [0, 0]
-
-
-
-    __logger = logging.getLogger(__name__)
+        self.last_valid_tracking_box = tracking_bbox
+        self.supervised_tracking_is_exit_condition = supervised_tracking_is_exit_condition
 
 
     @dataclass
@@ -137,14 +137,14 @@ class StaticVideoTracker:
     def __setup_tracker(self) -> None:
         """ Setup the tracker specified in the config """
         if self.params.tracking_algorithm.upper() == 'MIL':
-            self.__logger.info("Start MIL Tracker")
+            self.logger.info("Start MIL Tracker")
             self.tracker = cv2.TrackerMIL_create()
         elif self.params.tracking_algorithm.upper() == 'KCF':
-            self.__logger.info("Start KCF Tracker")
+            self.logger.info("Start KCF Tracker")
             self.tracker = cv2.TrackerKCF_create()
         else:
             # falback is CSRT tracker
-            self.__logger.info("Start CSRT Tracker")
+            self.logger.info("Start CSRT Tracker")
             self.tracker = cv2.TrackerCSRT_create()
 
 
@@ -154,7 +154,7 @@ class StaticVideoTracker:
             self.tracking_points.append([box[0] + box[2]/2, box[1] + box[3]/2])
 
             if self.tracking_counter == round(self.fps * self.params.tracking_init_phase_in_sec):
-                self.__logger.info("Determine Plausibility Threshold for Tracker")
+                self.logger.info("Determine Plausibility Threshold for Tracker")
                 self.cluster_center = np.mean(np.array(self.tracking_points), axis = 0)
 
                 distances_x = [abs(self.cluster_center[0] - point[0]) for point in self.tracking_points]
@@ -167,7 +167,7 @@ class StaticVideoTracker:
         else:
             point = [box[0] + box[2]/2, box[1] + box[3]/2]
             if abs(point[0] - self.cluster_center[0]) > self.plausibility_thresholds[0]:
-                self.__logger.warning(
+                self.logger.warning(
                         "Tracking point x is not plausible (%d > %d +- %d)",
                         round(point[0]),
                         round(self.cluster_center[0]),
@@ -176,7 +176,7 @@ class StaticVideoTracker:
                 return False
 
             if abs(point[1] - self.cluster_center[1]) > self.plausibility_thresholds[1]:
-                self.__logger.warning(
+                self.logger.warning(
                         "Tracking point y is not plausible (%d > %d +- %d)",
                         round(point[1]),
                         round(self.cluster_center[1]),
@@ -219,9 +219,9 @@ class StaticVideoTracker:
                 wait_counter += 1
                 if wait_counter == 2000:
                     if self.queue_in.qsize() == 0:
-                        self.__logger.error("Video Tracker still waiting for Input")
+                        self.logger.error("Video Tracker still waiting for Input")
                     else:
-                        self.__logger.error("Video Tracker output queue overrun!!!")
+                        self.logger.error("Video Tracker output queue overrun!!!")
             else:
                 frame = self.queue_in.get()
                 frame_roi = frame[y0:y1, x0:x1]
@@ -233,15 +233,22 @@ class StaticVideoTracker:
                 else:
                     status = StaticVideoTracker.Status.OK
                     bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]))
-                    if not StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
-                        status = StaticVideoTracker.Status.FEATURE_OUTSIDE
-                    elif self.params.tracking_plausibility_check:
+                    if self.params.tracking_plausibility_check:
                         if not self.__is_plausible(bbox):
                             status = StaticVideoTracker.Status.IMPLAUSIBLE
+                    elif not StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
+                        if self.supervised_tracking_is_exit_condition:
+                            status = StaticVideoTracker.Status.FEATURE_OUTSIDE
+                        else:
+                            bbox = self.last_valid_tracking_box
+
 
                 self.queue_out.put((status, bbox))
 
+                if status == StaticVideoTracker.Status.OK:
+                    self.last_valid_tracking_box = bbox
+
         if platform.system() != 'Windows':
             # TODO logging here on windows cause open background process
-            self.__logger.info("Video Tracker Stoped")
+            self.logger.info("Video Tracker Stoped")
 

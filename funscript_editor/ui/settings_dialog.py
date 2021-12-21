@@ -114,11 +114,43 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.videoTypeComboBox.addItems([PROJECTION[key]['name'] \
                 for key in PROJECTION.keys() \
                 if 'vr' not in key.lower() or self.include_vr])
-        self.ui.trackingMethodComboBox.addItems(['Unsupervised one moving person', 'Unsupervised two moving persons', 'Supervised one moving person', 'Supervised two moving persons']) # set before tracking metric
-        self.ui.trackingMetricComboBox.addItems(['y (up-down)', 'y inverted (down-up)', 'x (left-right)', 'x inverted (right-left)', 'distance (p1-p2)', 'distance inverted (p2-p1)', 'roll (rotation)', 'roll inverted (rotation)'])
-        self.ui.pointsComboBox.addItems(["Local Min Max", "Direction Changed"])
-        self.ui.additionalPointsComboBox.addItems(["None", "High Second Derivative", "Distance Minimization"])
-        self.ui.processingSpeedComboBox.addItems(["0 (accurate)", "1 (normal)", "2 (fast)"])
+
+        self.ui.trackingMethodComboBox.addItems([
+            'Unsupervised one moving person',
+            'Unsupervised two moving persons',
+            'Supervised stopping one moving person',
+            'Supervised stopping two moving persons',
+            'Supervised ignoring one moving person',
+            'Supervised ignoring two moving persons'
+            ]) # set before tracking metric!
+
+        self.ui.trackingMetricComboBox.addItems([
+            'y (up-down)',
+            'y inverted (down-up)',
+            'x (left-right)',
+            'x inverted (right-left)',
+            'distance (p1-p2)',
+            'distance inverted (p2-p1)',
+            'roll (rotation)',
+            'roll inverted (rotation)'
+        ])
+
+        self.ui.pointsComboBox.addItems([
+            "Local Min Max",
+            "Direction Changed"
+        ])
+
+        self.ui.additionalPointsComboBox.addItems([
+            "None",
+            "High Second Derivative",
+            "Distance Minimization"
+        ])
+
+        self.ui.processingSpeedComboBox.addItems([
+            "0 (accurate)",
+            "1 (normal)",
+            "2 (fast)"
+        ])
 
         self.ui.numberOfTrackerComboBox.addItems([str(i) for i in range(1, 6)])
 
@@ -129,11 +161,11 @@ class SettingsDialog(QtWidgets.QDialog):
 
         if value in ['x', 'y', 'x inverted', 'y inverted']:
             if 'Unsupervised one moving person' not in current_tracking_method_items:
-                self.ui.trackingMethodComboBox.addItems(['Unsupervised one moving person', 'Supervised one moving person'])
+                self.ui.trackingMethodComboBox.addItems(['Unsupervised one moving person', 'Supervised stopping one moving person'])
         else:
             if 'Unsupervised one moving person' in current_tracking_method_items:
                 self.ui.trackingMethodComboBox.clear()
-                self.ui.trackingMethodComboBox.addItems(['Unsupervised two moving persons', 'Supervised two moving persons'])
+                self.ui.trackingMethodComboBox.addItems(['Unsupervised two moving persons', 'Supervised stopping two moving persons'])
 
         self.__set_str_setting('trackingMetric', value)
 
