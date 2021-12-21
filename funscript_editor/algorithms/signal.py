@@ -308,25 +308,47 @@ class Signal:
         """
         avg = Signal.moving_average(signal, w=round(self.fps * self.params.avg_sec_for_local_min_max_extraction))
         smothed_signal = Signal.moving_average(signal, w=filter_len)
-        points, tmp_min_idx, tmp_max_idx = [], -1, -1
+        points, tmp_min_start_idx, tmp_min_end_idx, tmp_max_start_idx, tmp_max_end_idx = [], -1, -1, -1, -1
         for pos in range(len(smothed_signal)):
             if smothed_signal[pos] < avg[pos]:
-                if tmp_min_idx < 0:
-                    tmp_min_idx = pos
-                elif smothed_signal[tmp_min_idx] >= smothed_signal[pos]:
-                    tmp_min_idx = pos
-            elif tmp_min_idx >= 0:
-                points.append(tmp_min_idx)
-                tmp_min_idx = -1
+                if tmp_min_start_idx < 0:
+                    tmp_min_start_idx = pos
+                    tmp_min_end_idx = pos
+                elif smothed_signal[tmp_min_start_idx] == smothed_signal[pos]:
+                    tmp_min_end_idx = pos
+                elif smothed_signal[tmp_min_start_idx] > smothed_signal[pos]:
+                    tmp_min_start_idx = pos
+                    tmp_min_end_idx = pos
+            elif tmp_min_start_idx >= 0:
+                if abs(smothed_signal[tmp_min_end_idx] - avg[tmp_min_end_idx]) > 2.0:
+                    # only add if ther is movement in the data
+                    if tmp_min_end_idx - tmp_min_start_idx > 3:
+                        points.append(tmp_min_start_idx)
+
+                    points.append(tmp_min_end_idx)
+
+                tmp_min_start_idx = -1
+                tmp_min_end_idx = -1
 
             if smothed_signal[pos] > avg[pos]:
-                if tmp_max_idx < 0:
-                    tmp_max_idx = pos
-                elif smothed_signal[tmp_max_idx] <= smothed_signal[pos]:
-                    tmp_max_idx = pos
-            elif tmp_max_idx >= 0:
-                points.append(tmp_max_idx)
-                tmp_max_idx = -1
+                if tmp_max_start_idx < 0:
+                    tmp_max_start_idx = pos
+                    tmp_max_end_idx = pos
+                elif smothed_signal[tmp_max_start_idx] == smothed_signal[pos]:
+                    tmp_max_end_idx = pos
+                elif smothed_signal[tmp_max_start_idx] < smothed_signal[pos]:
+                    tmp_max_start_idx = pos
+                    tmp_max_end_idx = pos
+            elif tmp_max_start_idx >= 0:
+                if abs(smothed_signal[tmp_max_end_idx] - avg[tmp_max_end_idx]) > 2.0:
+                    # only add if ther is movement in the data
+                    if tmp_max_end_idx - tmp_max_start_idx > 3:
+                        points.append(tmp_max_start_idx)
+
+                    points.append(tmp_max_end_idx)
+
+                tmp_max_start_idx = -1
+                tmp_max_end_idx = -1
 
         self.logger.info("Found %d local min max points", len(points))
         return points
