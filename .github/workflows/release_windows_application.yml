@@ -53,7 +53,7 @@ jobs:
         run: |
           echo "${{ steps.get_version.outputs.version }}" > dist/funscript-editor/funscript_editor/VERSION.txt
       - name: Create Asset Archive
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: dist/funscript-editor
           recursive: true
