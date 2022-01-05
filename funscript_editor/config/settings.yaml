@@ -38,3 +38,6 @@ dark_theme: False
 
 # enable the tracking plausiblity check
 tracking_plausibility_check: False
+
+# enable logging on windows. logging cause some problems on windows only enable for debugging.
+logging: False

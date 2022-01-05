@@ -8,6 +8,8 @@ import coloredlogs
 import logging.config
 
 from funscript_editor.definitions import WINDOWS_LOG_CONFIG_FILE, LINUX_LOG_CONFIG_FILE
+from funscript_editor.utils.config import SETTINGS
+
 
 def create_log_directories(config: dict) -> None:
     """ create all log directories for a log configuration
@@ -115,7 +117,10 @@ def getLogger(name) -> LoggerInterface:
         name (str): name of the logger instance
     """
     if platform.system() == 'Windows':
-        return DevZeroLogger(name)
+        if SETTINGS['logging']:
+            return PythonLogger(name)
+        else:
+            return DevZeroLogger(name)
     else:
         return PythonLogger(name)
 
