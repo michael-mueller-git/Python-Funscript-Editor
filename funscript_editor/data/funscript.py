@@ -216,7 +216,6 @@ class Funscript:
         Returns:
             Funscript: current funscript instance
         """
-        print('raw is', insert_raw)
         self.changed = True
         if not insert_raw:
             self.delete_action(time)

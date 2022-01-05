@@ -484,10 +484,11 @@ class Signal:
 
         grouped_points = {'min': [], 'max': []}
         for idx in points:
-            if smothed_signal[idx] > avg[idx]:
-                grouped_points['max'].append(idx)
-            else:
-                grouped_points['min'].append(idx)
+            if -1 < idx < min((len(smothed_signal), len(avg))):
+                if smothed_signal[idx] > avg[idx]:
+                    grouped_points['max'].append(idx)
+                else:
+                    grouped_points['min'].append(idx)
 
         return grouped_points
 

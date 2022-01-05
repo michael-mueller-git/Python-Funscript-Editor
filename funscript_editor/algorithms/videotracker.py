@@ -241,6 +241,9 @@ class StaticVideoTracker:
                             status = StaticVideoTracker.Status.FEATURE_OUTSIDE
                         else:
                             bbox = self.last_valid_tracking_box
+                    elif self.supervised_tracking_area is not None and not self.supervised_tracking_is_exit_condition:
+                        # TODO: When we insert the tracking area again make sure the point is below/above the last valid box
+                        pass
 
 
                 self.queue_out.put((status, bbox))

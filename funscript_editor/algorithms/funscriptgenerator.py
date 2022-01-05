@@ -128,6 +128,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
         Returns:
             dict: interpolated bboxes {'Men': {tracker_number: [(box_frame1),(box_frame2),....], ...} 'Woman': {tracker_number: [(box_frame1),(box_frame2),....], ...}}
         """
+        interpolation = 'quadratic'
+        if self.params.supervised_tracking and not self.params.supervised_tracking_is_exit_condition:
+            # NOTE: wh have to use linea interpolation to get flat lines at when the feature leave the tracking area
+            interpolation = 'linear'
+
+        self.logger.info("Use %s interpolation", interpolation)
+
         interpolated_bboxes = {}
         for tracker_type in bboxes:
             interpolated_bboxes[tracker_type] = {}
@@ -144,10 +151,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 x_head = [x[0]-1]+x+[x[-1]+1]
                 boxes = [boxes[0]]+boxes+[boxes[-1]]
 
-                fx0 = interp1d(x_head, [item[0] for item in boxes], kind = 'quadratic')
-                fy0 = interp1d(x_head, [item[1] for item in boxes], kind = 'quadratic')
-                fw  = interp1d(x_head, [item[2] for item in boxes], kind = 'quadratic')
-                fh  = interp1d(x_head, [item[3] for item in boxes], kind = 'quadratic')
+                fx0 = interp1d(x_head, [item[0] for item in boxes], kind = interpolation)
+                fy0 = interp1d(x_head, [item[1] for item in boxes], kind = interpolation)
+                fw  = interp1d(x_head, [item[2] for item in boxes], kind = interpolation)
+                fh  = interp1d(x_head, [item[3] for item in boxes], kind = interpolation)
 
                 for i in range(min(x), max(x)+1):
                     interpolated_bboxes[tracker_type][tracker_number].append((float(fx0(i)), float(fy0(i)), float(fw(i)), float(fh(i))))
