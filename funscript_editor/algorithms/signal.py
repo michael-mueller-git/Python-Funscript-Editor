@@ -354,6 +354,37 @@ class Signal:
         return points
 
 
+    def get_flat_start_points(self, signal: list, filter_len: int = 4, delta: float = 0.005) -> list:
+        """ Get flat starting points in given signal
+
+        Args:
+            signal (list): list with float signal
+            filter_len (int): length of the filter to detect flat signal positions
+            delta (float): delta to detect an flat position in the signal
+
+        Returns:
+            list: indexes of flat starting points
+        """
+        if filter_len < 2:
+            filter_len = 2
+
+        if len(signal) < filter_len:
+            return []
+
+        threshold = (max(signal) - min(signal)) * delta
+
+        filtered_indexe = [i for i in range(len(signal)-filter_len) \
+                if all(abs(signal[i+j] - signal[i+j+1]) <= threshold for j in range(filter_len))
+        ]
+
+        flat_start_points = [item for item in filtered_indexe \
+                if all((item - j) not in filtered_indexe for j in range(1, 2*filter_len))
+        ]
+
+        self.logger.info("Found %d flat start points", len(flat_start_points))
+        return flat_start_points
+
+
     def get_direction_changes(self, signal: list, filter_len: int = 3) -> list:
         """ Get direction changes positions in given signal
 
@@ -362,7 +393,7 @@ class Signal:
             filter_len (int): length of the filter to detect an direction change
 
         Returns:
-            list:  indexes of direction changes
+            list: indexes of direction changes
         """
         if len(signal) < filter_len:
             return []
@@ -385,6 +416,10 @@ class Signal:
                 current_direction = direction
 
         self.logger.info("Found %d direction changes", len(changepoints))
+
+        for idx in self.get_flat_start_points(signal, filter_len + 1):
+            bisect.insort(changepoints, idx)
+
         return changepoints
 
 
