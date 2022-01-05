@@ -760,10 +760,12 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """
         if self.params.raw_output:
             output_score = copy.deepcopy(self.score[self.params.metric])
+            self.logger.warning("Insert %d raw points", len(output_score))
             for idx in range(len(output_score)):
                 self.funscript.add_action(
-                        output_score[idx],
-                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
+                        round(output_score[idx]),
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps),
+                        True
                     )
 
         else:

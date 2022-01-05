@@ -205,18 +205,21 @@ class Funscript:
         return int(round(abs(self.get_next_action(current_timestamp)['pos'] - self.get_prev_action(current_timestamp)['pos'])))
 
 
-    def add_action(self, position: int, time: int):
+    def add_action(self, position: int, time: int, insert_raw: bool = False):
         """ Add a new action to the Funscript
 
         Args:
             position (int): position in percent (0-100)
             time (int): time to be at position in milliseconds
+            insert_raw (bool): do not delete near points
 
         Returns:
             Funscript: current funscript instance
         """
+        print('raw is', insert_raw)
         self.changed = True
-        self.delete_action(time)
+        if not insert_raw:
+            self.delete_action(time)
         self.data['actions'].append({'pos': int(round(position)), 'at': time})
         self.data['actions'].sort(key = lambda x: x['at'])
         return self

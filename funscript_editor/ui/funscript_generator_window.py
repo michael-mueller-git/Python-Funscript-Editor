@@ -11,6 +11,7 @@ from funscript_editor.data.funscript import Funscript
 from funscript_editor.ui.settings_dialog import SettingsDialog
 import funscript_editor.definitions as definitions
 from funscript_editor.ui.theme import setup_theme
+from funscript_editor.utils.config import SETTINGS
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -99,7 +100,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     def __funscript_generated(self, funscript, msg, success) -> None:
         if isinstance(self.output_file, Funscript):
             for item in funscript.get_actions():
-                self.output_file.add_action(item['pos'], item['at'])
+                self.output_file.add_action(item['pos'], item['at'], SETTINGS['raw_output'])
             self.funscriptCompleted.emit(self.output_file, msg, success)
         else:
             os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
