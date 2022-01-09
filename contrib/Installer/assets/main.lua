@@ -236,12 +236,12 @@ function gui()
         processHandleConfigDir = ofs.CreateProcess("explorer.exe", ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\config")
     end
 
-    if logfileExist then
-          ofs.SameLine()
-          if ofs.Button("Open Log") then
-             processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
-          end
-    end
+    -- if logfileExist then
+    --       ofs.SameLine()
+    --       if ofs.Button("Open Log") then
+    --          processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
+    --       end
+    -- end
 
     ofs.Separator()
     ofs.Text("Post-Processing:")
