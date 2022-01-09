@@ -2,7 +2,7 @@
 
 ## Installation Windows (Easy)
 
-This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the Motion Tracking Funscript Generator (MTFG) OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFS_data\extensions`.
+This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the MTFG OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFS_data\extensions` before running the installer.
 
 **Installation:**
 
