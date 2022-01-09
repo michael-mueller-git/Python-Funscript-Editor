@@ -32,7 +32,6 @@ This section for technical interested people who want to understand the installa
 3. Check if an (older) MTFG Version is already installed in the OFS Extension Directory: If we have already the latest version installed, we are done here
 4. The installer download the latest release version from github.
 5. After the download complete we extract the latest release to the OFS Extension Directory (Installation of the latest release).
-6. Finally we download the [latest OFS Extension lua script](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/Installer/assets/main.lua) to the OFS Extension Directory.
 
 <br>
 
