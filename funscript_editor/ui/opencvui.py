@@ -452,9 +452,9 @@ class OpenCV_GUI(KeypressHandler):
                 self.set_background_image(image, copy_image=True)
                 self.print_text(title_min if title_min != "" else "Min")
                 self.print_text(title_max if title_max != "" else "Max", text_position_x='column2')
-                self.print_text(info)
                 self.print_text("Set {} to {}".format('Min', trackbarValueMin))
                 self.print_text("Set {} to {}".format('Max', trackbarValueMax), text_position_x='column2')
+                self.print_text("Info: " + info)
                 ret = self.show(25)
 
                 if self.was_space_pressed() or ret == ord(' '):
