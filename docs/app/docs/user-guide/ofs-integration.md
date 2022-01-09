@@ -2,7 +2,9 @@
 
 ## Installation Windows (Easy)
 
-If you use an older version (`v0.0.x`), i recommend to first delete the `funscript_generator_windows.lua` script in `C:\Program Files\OpenFunscripter\data\lua`.
+This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the Motion Tracking Funscript Generator (MTFG) OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFS_data\extensions`.
+
+**Installation:**
 
 1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.2!!!)**
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
