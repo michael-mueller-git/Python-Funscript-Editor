@@ -254,12 +254,17 @@ class FunscriptGeneratorThread(QtCore.QThread):
         min_frame = np.argmin(np.array(self.score[metric])) + self.params.start_frame
         max_frame = np.argmax(np.array(self.score[metric])) + self.params.start_frame
 
-        cap = cv2.VideoCapture(self.params.video_path)
-        cap.set(cv2.CAP_PROP_POS_FRAMES, min_frame)
-        success_min, imgMin = cap.read()
-        cap.set(cv2.CAP_PROP_POS_FRAMES, max_frame)
-        success_max, imgMax = cap.read()
-        cap.release()
+        if False:
+            cap = cv2.VideoCapture(self.params.video_path)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, min_frame)
+            success_min, imgMin = cap.read()
+            cap.set(cv2.CAP_PROP_POS_FRAMES, max_frame)
+            success_max, imgMax = cap.read()
+            cap.release()
+        else:
+            success_min, success_max = True, True
+            imgMin = FFmpegStream.get_frame(self.params.video_path, min_frame)
+            imgMax = FFmpegStream.get_frame(self.params.video_path, max_frame)
 
         if success_min and success_max:
             if self.is_vr_video():
@@ -534,6 +539,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         delete_last_predictions = 0
         bbox_woman = [None for _ in range(self.params.number_of_trackers)]
         bbox_men = [None for _ in range(self.params.number_of_trackers)]
+        self.ui.clear_keypress_queue()
         try:
             while video.isOpen():
                 cycle_start = time.time()

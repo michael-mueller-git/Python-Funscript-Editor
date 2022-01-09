@@ -1,8 +1,8 @@
 """ Video Tracker """
 
-import os
 import cv2
 import time
+import copy
 import funscript_editor.utils.logging as logging
 import platform
 
@@ -65,6 +65,8 @@ class StaticVideoTracker:
         self.tracking_counter = 0
         self.cluster_center = [0, 0]
         self.plausibility_thresholds = [0, 0]
+        self.current_detected_tracking_box = tracking_bbox
+        self.lats_detected_tracking_box = tracking_bbox
         self.last_valid_tracking_box = tracking_bbox
         self.supervised_tracking_is_exit_condition = supervised_tracking_is_exit_condition
 
@@ -190,6 +192,19 @@ class StaticVideoTracker:
         return True
 
 
+    @staticmethod
+    def get_center(box: tuple) -> tuple:
+        """ Get the cencter point of an box
+
+        Args:
+            box (tuple): the predicted bounding box
+
+        Returns:
+            tuple (x,y) of the current point
+        """
+        return ( round(box[0] + box[2]/2), round(box[1] + box[3]/2) )
+
+
     def run(self) -> None:
         """ The Video Tracker Thread Function """
         self.__setup_tracker()
@@ -226,6 +241,8 @@ class StaticVideoTracker:
                 frame = self.queue_in.get()
                 frame_roi = frame[y0:y1, x0:x1]
                 success, bbox = self.tracker.update(frame_roi)
+                self.last_detected_tracking_box = self.current_detected_tracking_box
+                self.current_detected_tracking_box = copy.deepcopy(bbox)
                 self.tracking_counter += 1
                 status = StaticVideoTracker.Status.TRACKING_LOST
                 if not success or bbox is None:
