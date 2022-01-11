@@ -306,50 +306,42 @@ class FFmpegStream:
         Returns:
             np.ndarray: opencv image
         """
-        if False:
-            cap = cv2.VideoCapture(video_path)
-            if frame_number > 0:
-                cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
-            _, frame = cap.read()
-            cap.release()
-            return frame
-        else:
-            video_info = FFmpegStream.get_video_info(video_path)
-            seek = FFmpegStream.frame_to_timestamp(frame_number, video_info.fps)
+        video_info = FFmpegStream.get_video_info(video_path)
+        seek = FFmpegStream.frame_to_timestamp(frame_number, video_info.fps)
 
-            command = [
-                    FFmpegStream.get_ffmpeg_command(),
-                    '-hide_banner',
-                    '-loglevel', 'warning',
-                    '-ss', str(seek),
-                    '-hwaccel', 'auto',
-                    '-i', video_path,
-                    '-f', 'image2pipe',
-                    '-pix_fmt', 'bgr24',
-                    '-vsync', '0',
-                    '-vcodec', 'rawvideo',
-                    '-an',
-                    '-sn',
-                    '-'
-                ]
+        command = [
+                FFmpegStream.get_ffmpeg_command(),
+                '-hide_banner',
+                '-loglevel', 'warning',
+                '-ss', str(seek),
+                '-hwaccel', 'auto',
+                '-i', video_path,
+                '-f', 'image2pipe',
+                '-pix_fmt', 'bgr24',
+                '-vsync', '0',
+                '-vcodec', 'rawvideo',
+                '-an',
+                '-sn',
+                '-'
+            ]
 
-            pipe = sp.Popen(
-                    command,
-                    stdout = sp.PIPE,
-                    stderr = sp.PIPE,
-                    bufsize= 3 * video_info.height * video_info.width
-                )
+        pipe = sp.Popen(
+                command,
+                stdout = sp.PIPE,
+                stderr = sp.PIPE,
+                bufsize= 3 * video_info.height * video_info.width
+            )
 
-            data = pipe.stdout.read(video_info.width * video_info.height * 3)
-            pipe.terminate()
-            try: pipe.stdout.close()
-            except: pass
-            try: pipe.stderr.close()
-            except: pass
+        data = pipe.stdout.read(video_info.width * video_info.height * 3)
+        pipe.terminate()
+        try: pipe.stdout.close()
+        except: pass
+        try: pipe.stderr.close()
+        except: pass
 
-            return np.frombuffer(data, dtype='uint8').reshape(
-                    (video_info.height, video_info.width, 3)
-                )
+        return np.frombuffer(data, dtype='uint8').reshape(
+                (video_info.height, video_info.width, 3)
+            )
 
 
     def run(self) -> None:
