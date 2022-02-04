@@ -407,12 +407,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
         for tracker_number in range(self.params.number_of_trackers):
             bbox_woman = self.ui.bbox_selector(
                     preview_frame,
-                    "Select {} Feature #{}".format(self.get_target_name(0), tracker_number+1)
+                    "Select {} Feature #{}".format(self.get_target_name(0), tracker_number+1),
+                    add_center = True
                 )
 
             preview_frame = self.ui.draw_box_to_image(
-                    preview_frame, 
-                    bbox_woman, 
+                    preview_frame,
+                    bbox_woman,
                     color=(255,0,255)
                 )
 
@@ -420,7 +421,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 while True:
                     tracking_areas_woman[tracker_number] = self.ui.bbox_selector(
                             preview_frame,
-                            "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(0), tracker_number+1)
+                            "Select the Supervised Tracking Area for the {} Feature #{}".format(self.get_target_name(0), tracker_number+1),
                         )
 
                     if StaticVideoTracker.is_bbox_in_tracking_area(bbox_woman, tracking_areas_woman[tracker_number]):
@@ -456,7 +457,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if self.params.track_men:
                 bbox_men = self.ui.bbox_selector(
                         preview_frame,
-                        "Select {} Feature #{}".format(self.get_target_name(1), tracker_number+1)
+                        "Select {} Feature #{}".format(self.get_target_name(1), tracker_number+1),
+                        add_center = True
                     )
                 preview_frame = self.ui.draw_box_to_image(preview_frame, bbox_men, color=(255,0,255))
                 if self.params.supervised_tracking:

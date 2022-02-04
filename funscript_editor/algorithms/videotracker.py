@@ -205,6 +205,26 @@ class StaticVideoTracker:
         return ( round(box[0] + box[2]/2), round(box[1] + box[3]/2) )
 
 
+    @staticmethod
+    def create_tracking_box(box: tuple):
+        """ Create an tracking box (x, y, h, w, x_center, y_center)
+
+        Args:
+            box (tuple): the predicted bounding box
+
+        Returns:
+            tuble: tracking box
+        """
+        if box is None:
+            return None
+
+        if len(box) < 4:
+            return None
+
+        center = StaticVideoTracker.get_center(box)
+        return (box[0], box[1], box[2], box[3], center[0], center[1])
+
+
     def run(self) -> None:
         """ The Video Tracker Thread Function """
         self.__setup_tracker()
@@ -241,6 +261,7 @@ class StaticVideoTracker:
                 frame = self.queue_in.get()
                 frame_roi = frame[y0:y1, x0:x1]
                 success, bbox = self.tracker.update(frame_roi)
+                bbox = self.create_tracking_box(bbox)
                 self.last_detected_tracking_box = self.current_detected_tracking_box
                 self.current_detected_tracking_box = copy.deepcopy(bbox)
                 self.tracking_counter += 1
@@ -249,7 +270,7 @@ class StaticVideoTracker:
                     bbox = None
                 else:
                     status = StaticVideoTracker.Status.OK
-                    bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]))
+                    bbox = (int(bbox[0] + x0), int(bbox[1] + y0), int(bbox[2]), int(bbox[3]), int(bbox[4] + x0), int(bbox[5] + y0))
                     if self.params.tracking_plausibility_check:
                         if not self.__is_plausible(bbox):
                             status = StaticVideoTracker.Status.IMPLAUSIBLE

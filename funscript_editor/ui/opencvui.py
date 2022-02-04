@@ -200,7 +200,7 @@ class OpenCV_GUI(KeypressHandler):
             bbox = [bbox]
 
         for box in bbox:
-            if box and len(box) == 4:
+            if box and len(box) >= 4:
                 cv2.rectangle(
                         self.preview_image,
                         (box[0], box[1]),
@@ -209,6 +209,15 @@ class OpenCV_GUI(KeypressHandler):
                         3,
                         1
                     )
+                if len(box) >= 6:
+                    cv2.circle(
+                            self.preview_image,
+                            (box[4], box[5]),
+                            5,
+                            color,
+                            2
+                        )
+
 
     @staticmethod
     def draw_box_to_image(image: np.ndarray, bbox, color: tuple = (255, 0, 255)) -> np.ndarray:
@@ -226,7 +235,7 @@ class OpenCV_GUI(KeypressHandler):
             bbox = [bbox]
 
         for box in bbox:
-            if box and len(box) == 4:
+            if box and len(box) >= 4:
                 cv2.rectangle(
                         image,
                         (box[0], box[1]),
@@ -235,6 +244,14 @@ class OpenCV_GUI(KeypressHandler):
                         3,
                         1
                     )
+                if len(box) >= 6:
+                    cv2.circle(
+                            image,
+                            (box[4], box[5]),
+                            5,
+                            color,
+                            2
+                        )
 
         return image
 
@@ -473,13 +490,26 @@ class OpenCV_GUI(KeypressHandler):
                 else (trackbarValueMax, trackbarValueMin)
 
 
+    @staticmethod
+    def get_center(box: tuple) -> tuple:
+        """ Get the cencter point of an box
 
-    def bbox_selector(self, image: np.ndarray, txt: str) -> tuple:
+        Args:
+            box (tuple): the predicted bounding box
+
+        Returns:
+            tuple (x,y) of the current point
+        """
+        return ( round(box[0] + box[2]/2), round(box[1] + box[3]/2) )
+
+
+    def bbox_selector(self, image: np.ndarray, txt: str, add_center: bool = False) -> tuple:
         """ Window to get an bounding box from user input
 
         Args:
             image (np.ndarray): opencv image e.g. the first frame to determine the bounding box
             txt (str): additional text to display on the selection window
+            add_center (bool): add center cordinates to the box
 
         Returns:
             tuple: user input bounding box tuple (x,y,w,h)
@@ -541,6 +571,10 @@ class OpenCV_GUI(KeypressHandler):
                     round(bbox[2]/self.params.zoom_factor),
                     round(bbox[3]/self.params.zoom_factor)
                 )
+
+        if add_center:
+            center = self.get_center(bbox)
+            bbox = (bbox[0], bbox[1], bbox[2], bbox[3], center[0], center[1])
 
         self.logger.info("User Input: %s", str(bbox))
         return bbox
