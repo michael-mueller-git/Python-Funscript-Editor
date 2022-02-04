@@ -410,7 +410,6 @@ class StaticVideoTracker:
                             if self.last_box_was_in_tracking_area:
                                 self.last_box_was_in_tracking_area = False
                                 self.last_valid_tracking_box = self.get_border_box(self.last_valid_tracking_box, bbox)
-                                self.logger.info("Determine Border Intersection with box: %s", str(self.last_valid_tracking_box))
                                 bbox = self.last_valid_tracking_box
                             else:
                                 bbox = self.last_valid_tracking_box
