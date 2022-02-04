@@ -100,13 +100,15 @@ class StaticVideoTracker:
             return False
         if supervised_tracking_area[3] <= 1:
             return False
-        if bbox[0] < supervised_tracking_area[0]:
+
+        if bbox[4] < supervised_tracking_area[0]:
             return False
-        if bbox[1] < supervised_tracking_area[1]:
+        if bbox[5] < supervised_tracking_area[1]:
             return False
-        if bbox[0] + bbox[2] > supervised_tracking_area[0] + supervised_tracking_area[2]:
+
+        if bbox[4] > supervised_tracking_area[0] + supervised_tracking_area[2]:
             return False
-        if bbox[1] + bbox[3] > supervised_tracking_area[1] + supervised_tracking_area[3]:
+        if bbox[5] > supervised_tracking_area[1] + supervised_tracking_area[3]:
             return False
 
         return True

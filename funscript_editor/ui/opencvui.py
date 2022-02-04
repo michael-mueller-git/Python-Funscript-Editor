@@ -213,7 +213,7 @@ class OpenCV_GUI(KeypressHandler):
                     cv2.circle(
                             self.preview_image,
                             (box[4], box[5]),
-                            5,
+                            4,
                             color,
                             2
                         )
@@ -248,7 +248,7 @@ class OpenCV_GUI(KeypressHandler):
                     cv2.circle(
                             image,
                             (box[4], box[5]),
-                            5,
+                            4,
                             color,
                             2
                         )
