@@ -50,6 +50,7 @@ class StaticVideoTracker:
         self.logger = logging.getLogger(__name__)
         self.params = StaticVideoTrackerParameter()
         self.first_frame = first_frame
+        self.frame_heigt, self.frame_width = first_frame.shape[:2]
         self.limit_searchspace = limit_searchspace
         self.first_tracking_bbox = tracking_bbox
         self.supervised_tracking_area = supervised_tracking_area
@@ -69,6 +70,7 @@ class StaticVideoTracker:
         self.lats_detected_tracking_box = tracking_bbox
         self.last_valid_tracking_box = tracking_bbox
         self.supervised_tracking_is_exit_condition = supervised_tracking_is_exit_condition
+        self.last_box_was_in_tracking_area = True
 
 
     @dataclass
@@ -227,6 +229,129 @@ class StaticVideoTracker:
         return (box[0], box[1], box[2], box[3], center[0], center[1])
 
 
+    def move_box_by(self, box: tuple, x0: int, y0: int) -> tuple:
+        """ Move box by given (x, y)
+
+        Args:
+            box: the tracking box
+            x0: shift value in x direction
+            y0: shift value in y direction
+        """
+        return (
+                min(( self.frame_width, max((0, box[0] + x0)) )),
+                min(( self.frame_heigt, max((0, box[1] + y0)) )),
+                box[2],
+                box[3],
+                min(( self.frame_width, max((0, box[4] + x0)) )),
+                min(( self.frame_heigt, max((0, box[5] + y0)) ))
+            )
+
+
+    def move_box_to(self, box: tuple, cx: int, cy: int) -> tuple:
+        """ Move box to given (x, y) center coordinates
+
+        Args:
+            box: the tracking box
+            x0: shift value in x direction
+            y0: shift value in y direction
+        """
+        return self.move_box_by(box, cx - box[4], cy - box[5])
+
+
+    @staticmethod
+    def get_line_intersection(line1, line2):
+        """ Compute the intersection point of two lines
+
+        Args:
+            line1 (list): [[x1,y1], [x2,y2]]
+            line2 (list): [[x1,y1], [x2,y2]]
+
+        Returns:
+            tuple: (x, y)
+        """
+        xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+        ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
+
+        def det(a, b):
+            return a[0] * b[1] - a[1] * b[0]
+
+        div = det(xdiff, ydiff)
+        if div == 0:
+            return None
+
+        d = (det(*line1), det(*line2))
+        x = det(d, xdiff) / div
+        y = det(d, ydiff) / div
+        return (round(x), round(y))
+
+
+    def get_border_box(self, last_valid_box, invalid_box) -> tuple:
+        """ Calculate the intersection with the tracking area to predict a box exacly
+        at the border of the tracking area.
+
+        Args:
+            last_valid_box (tuple): last valid tracking box
+            invert_box (tuple): box that is outside the tracking area
+
+        Returns:
+            tuple: border box
+        """
+        if invalid_box is None:
+            return last_valid_box
+
+        if self.supervised_tracking_area is None:
+            return last_valid_box
+
+        x0 = self.supervised_tracking_area[0]
+        y0 = self.supervised_tracking_area[1]
+        x1 = self.supervised_tracking_area[0] + self.supervised_tracking_area[2]
+        y1 = self.supervised_tracking_area[1] + self.supervised_tracking_area[3]
+
+        # left top point
+        if invalid_box[4] < x0 and invalid_box[5] < y0:
+            return self.move_box_to(invalid_box, x0, y0)
+
+        # left bottom point
+        if invalid_box[4] < x0 and invalid_box[5] > y1:
+            return self.move_box_to(invalid_box, x0, y1)
+
+        # left bottom point
+        if invalid_box[4] > x1 and invalid_box[5] > y1:
+            return self.move_box_to(invalid_box, x1, y1)
+
+        # right top point
+        if invalid_box[4] > x1 and invalid_box[5] < y0:
+            return self.move_box_to(invalid_box, x1, y0)
+
+        line1 = [ [invalid_box[4], invalid_box[5]], [last_valid_box[4], last_valid_box[5]] ]
+
+        # left
+        if invalid_box[4] <= x0:
+            intersection = self.get_line_intersection(line1, [ [x0, y0], [x0, y1] ])
+            if intersection:
+                return self.move_box_to(invalid_box, intersection[0], intersection[1])
+
+        # bottom
+        if invalid_box[5] >= y1:
+            intersection = self.get_line_intersection(line1, [ [x0, y1], [x1, y1] ])
+            if intersection:
+                return self.move_box_to(invalid_box, intersection[0], intersection[1])
+
+        # right
+        if invalid_box[4] >= x1:
+            intersection = self.get_line_intersection(line1, [ [x1, y1], [x1, y0] ])
+            if intersection:
+                return self.move_box_to(invalid_box, intersection[0], intersection[1])
+
+        # top
+        if invalid_box[5] <= y0:
+            intersection = self.get_line_intersection(line1, [ [x1, y0], [x0, y0] ])
+            if intersection:
+                return self.move_box_to(invalid_box, intersection[0], intersection[1])
+
+        return last_valid_box
+
+
     def run(self) -> None:
         """ The Video Tracker Thread Function """
         self.__setup_tracker()
@@ -276,14 +401,19 @@ class StaticVideoTracker:
                     if self.params.tracking_plausibility_check:
                         if not self.__is_plausible(bbox):
                             status = StaticVideoTracker.Status.IMPLAUSIBLE
-                    elif not StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
+                    elif StaticVideoTracker.is_bbox_in_tracking_area(bbox, self.supervised_tracking_area):
+                        self.last_box_was_in_tracking_area = True
+                    else:
                         if self.supervised_tracking_is_exit_condition:
                             status = StaticVideoTracker.Status.FEATURE_OUTSIDE
                         else:
-                            bbox = self.last_valid_tracking_box
-                    elif self.supervised_tracking_area is not None and not self.supervised_tracking_is_exit_condition:
-                        # TODO: When we insert the tracking area again make sure the point is below/above the last valid box
-                        pass
+                            if self.last_box_was_in_tracking_area:
+                                self.last_box_was_in_tracking_area = False
+                                self.last_valid_tracking_box = self.get_border_box(self.last_valid_tracking_box, bbox)
+                                self.logger.info("Determine Border Intersection with box: %s", str(self.last_valid_tracking_box))
+                                bbox = self.last_valid_tracking_box
+                            else:
+                                bbox = self.last_valid_tracking_box
 
 
                 self.queue_out.put((status, bbox))
