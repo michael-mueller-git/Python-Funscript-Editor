@@ -68,23 +68,6 @@ def is_ofs_installed():
         error("OFS is not installed. Please download and install OFS. Befor running this installer open OFS once!")
 
 
-def get_download_urls():
-    # sometimes requests failed to fetch the url so we try up to 3 times
-    for i in range(3):
-        try:
-            html_text = requests.get(FUNSCRIPT_GENERATOR_RELEASE_URL).text
-            download_urls = { version.parse(re.search(r'v[^/]*', x).group().lower().replace("v", "")) : "https://github.com" + x \
-                    for x in [link.get('href') for link in BeautifulSoup(html_text, 'html.parser').find_all('a') \
-                        if link.get('href').endswith(".zip") and "/releases/" in link.get('href')]
-            }
-            latest = max(download_urls)
-            return download_urls, latest, ""
-        except:
-            time.sleep(2)
-            if i == 2:
-                error("Download URL not found (" + FUNSCRIPT_GENERATOR_RELEASE_URL + ")")
-
-
 def get_download_urls_with_api():
     # sometimes requests failed to fetch the url so we try up to 3 times
     for i in range(3):
@@ -148,9 +131,9 @@ def update(download_urls, latest, release_notes):
     is_latest_version_installed(version_file, latest)
 
     print('New Version is available')
-    print('')
-    print('Release notes:')
-    print(release_notes)
+    # print('')
+    # print('Release notes:')
+    # print(release_notes)
 
     trial = 0
     while True:
