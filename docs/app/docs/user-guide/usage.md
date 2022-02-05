@@ -26,3 +26,15 @@ The supervised tracking expand this function by an user input of an search area.
 ![Settings Dialog](./images/settings_dialog.png)
 
 All important settings can be set in the settings dialog before the tracking starts.
+
+Description:
+
+- Video Type: Select the type of your video format.
+- Tracking Metric: Select the metric for the movement detection.
+- Tracking Method: Select the desired tracking method. Available methods depend on the selected `Tracking Metric` setting.
+- Processing Speed: Select the processing speed. This option set the skip frames factor. For an higher processing speed we track only every `n % skip_frame == 0` frame and interpolate the skipped frames. Recommend settings is `1 (normal)` for 60 FPS Videos (and above) and `0 (accurate)` for Videos with 30 FPS or less.
+- Number of Tracker: Select the number of trackers per target. We use the average of all tracker for the output. Using a higher number of Tracker should increase the accuracy. For most video scenes i recommend to use only `1` tracker because the accuracy increases only slightly but the processing speed is significantly higher.
+- Points: Select the algorithm to determine the predicted points from the tracking signal.
+- Additional Points: Select an algorithm to add additional points to the output.
+- Top Points Offset: Add an given offset to all predicted top points. Recommend is an value between `10` and `25`.
+- Bottom Points Offset: Add an given offset to all predicted bottom points. Recommend is an value between `-10` and `-25`.
