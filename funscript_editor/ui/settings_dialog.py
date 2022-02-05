@@ -1,8 +1,11 @@
 """ Settings Dialog for the Funscript Generator """
 import json
 import os
+import webbrowser
 
 import funscript_editor.ui.settings_view as settings_view
+import funscript_editor.definitions as definitions
+import funscript_editor.utils.config as config
 
 from funscript_editor.utils.config import PROJECTION
 from funscript_editor.definitions import CONFIG_DIR
@@ -108,6 +111,15 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.processingSpeedComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('skipFrames', value))
         self.ui.topPointOffsetSpinBox.valueChanged.connect(lambda value: self.__set_number_setting("topPointOffset", value))
         self.ui.bottomPointOffsetSpinBox.valueChanged.connect(lambda value: self.__set_number_setting("bottomPointOffset", value))
+        self.ui.docsButton.clicked.connect(self.__open_documentation)
+
+
+    def __open_documentation(self):
+        try:
+            browser = webbrowser.get()
+            browser.open_new(definitions.DOCS_URL.format(tag=str('main' if config.VERSION == '0.0.0' else 'v'+config.VERSION)))
+        except:
+            pass
 
 
     def __setup_combo_boxes(self):

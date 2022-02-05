@@ -15,6 +15,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(ROOT_DIR, 'config')
 UI_DIR = os.path.join(ROOT_DIR, 'ui')
 ICON_PATH = os.path.join(CONFIG_DIR, 'icon.png')
+DOCS_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/{tag}/docs/app/docs"
 
 if os.path.exists(os.path.join(ROOT_DIR, '..', 'docs')):
     APP_DOCUMENTATION_DIR = os.path.join(ROOT_DIR, '..', 'docs', 'app', 'site')
