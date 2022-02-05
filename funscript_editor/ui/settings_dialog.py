@@ -127,14 +127,16 @@ class SettingsDialog(QtWidgets.QDialog):
                 for key in PROJECTION.keys() \
                 if 'vr' not in key.lower() or self.include_vr])
 
-        self.ui.trackingMethodComboBox.addItems([
+        self.trackingMethods = [
             'Unsupervised one moving person',
             'Unsupervised two moving persons',
             'Supervised stopping one moving person',
             'Supervised stopping two moving persons',
             'Supervised ignoring one moving person',
             'Supervised ignoring two moving persons'
-            ]) # set before tracking metric!
+            ]
+
+        self.ui.trackingMethodComboBox.addItems(self.trackingMethods) # set before tracking metric!
 
         self.ui.trackingMetricComboBox.addItems([
             'y (up-down)',
@@ -169,15 +171,18 @@ class SettingsDialog(QtWidgets.QDialog):
 
     def __set_tracking_metric(self, value):
         value = value.split('(')[0].strip()
-        current_tracking_method_items = [self.ui.trackingMethodComboBox.itemText(i) for i in range(self.ui.trackingMethodComboBox.count())]
+        selection = self.ui.trackingMethodComboBox.currentText()
 
+        self.ui.trackingMethodComboBox.clear()
         if value in ['x', 'y', 'x inverted', 'y inverted']:
-            if 'Unsupervised one moving person' not in current_tracking_method_items:
-                self.ui.trackingMethodComboBox.addItems(['Unsupervised one moving person', 'Supervised stopping one moving person'])
+            self.ui.trackingMethodComboBox.addItems(self.trackingMethods)
         else:
-            if 'Unsupervised one moving person' in current_tracking_method_items:
-                self.ui.trackingMethodComboBox.clear()
-                self.ui.trackingMethodComboBox.addItems(['Unsupervised two moving persons', 'Supervised stopping two moving persons'])
+            self.ui.trackingMethodComboBox.addItems(list(filter(lambda x: "one" not in x, self.trackingMethods)))
+
+        index = self.ui.trackingMethodComboBox.findText(selection, QtCore.Qt.MatchFixedString)
+        if index >= 0:
+                self.ui.trackingMethodComboBox.setCurrentIndex(index)
+
 
         self.__set_str_setting('trackingMetric', value)
 
