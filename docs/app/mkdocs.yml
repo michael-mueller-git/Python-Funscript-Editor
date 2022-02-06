@@ -5,6 +5,7 @@ nav:
   - Home: 'index.md'
   - User Guide:
     - 'OFS Integration': 'user-guide/ofs-integration.md'
+    - 'Usage and Settings': 'user-guide/usage.md'
     - 'UI': 'user-guide/ui.md'
     - 'Algorithms': 'user-guide/algorithms.md'
     - 'Config': 'user-guide/config.md'
