@@ -1,6 +1,7 @@
 site_name: Funscript Editor
 site_url: ''
 use_directory_urls: False
+docs_dir: 'docs/app/docs'
 nav:
   - Home: 'index.md'
   - User Guide:
