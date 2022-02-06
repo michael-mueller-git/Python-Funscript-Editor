@@ -11,7 +11,7 @@ from funscript_editor.data.funscript import Funscript
 from funscript_editor.ui.settings_dialog import SettingsDialog
 import funscript_editor.definitions as definitions
 from funscript_editor.ui.theme import setup_theme
-from funscript_editor.utils.config import SETTINGS
+from funscript_editor.utils.config import SETTINGS, PROJECTION
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -122,6 +122,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     def run(self) -> None:
         """ start generator """
         self.__logger.info('settings: %s', str(self.settings))
+        self.settings['videoType'] = list(filter(lambda x: PROJECTION[x]['name'] == self.settings['videoType'], PROJECTION.keys()))[0]
         self.funscript_generator = FunscriptGeneratorThread(
                 FunscriptGeneratorParameter(
                     video_path = self.video_file,
@@ -133,10 +134,10 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                     invert = "inverted" in self.settings['trackingMetric'],
                     start_frame = self.start_frame,
                     end_frame = self.end_frame,
-                    number_of_trackers = int(self.settings['numberOfTrackers']),
+                    number_of_trackers = int(self.settings['numberOfTracker']),
                     points = self.settings['points'].lower().replace(' ', '_'),
                     additional_points = self.settings['additionalPoints'].lower().replace(' ', '_'),
-                    skip_frames = int(self.settings['skipFrames']),
+                    skip_frames = int(self.settings['processingSpeed']),
                     top_points_offset = self.settings['topPointOffset'],
                     bottom_points_offset = self.settings['bottomPointOffset']
                 ),

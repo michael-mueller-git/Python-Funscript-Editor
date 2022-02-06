@@ -86,8 +86,10 @@ class SettingsDialog(QtWidgets.QDialog):
         for key in self.dialog_elements.keys():
             if isinstance(self.dialog_elements[key], QtWidgets.QComboBox):
                 settings[key] = self.dialog_elements[key].currentText()
+                self.__set_str_setting(key, settings[key])
             elif isinstance(self.dialog_elements[key], QtWidgets.QSpinBox):
                 settings[key] = self.dialog_elements[key].value()
+                self.__set_number_setting(key, settings[key])
             else:
                 raise NotImplementedError(str(type(self.dialog_elements[key])) + " type is not implemented")
 
@@ -97,20 +99,7 @@ class SettingsDialog(QtWidgets.QDialog):
 
     def __setup_ui_bindings(self):
         self.ui.okButton.clicked.connect(self.__apply)
-        self.ui.videoTypeComboBox.currentTextChanged.connect(
-                lambda value: self.__set_str_setting(
-                    'videoType',
-                    list(filter(lambda x: PROJECTION[x]['name'] == value, PROJECTION.keys()))[0]
-                )
-            )
         self.ui.trackingMetricComboBox.currentTextChanged.connect(self.__set_tracking_metric)
-        self.ui.trackingMethodComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('trackingMethod', value))
-        self.ui.numberOfTrackerComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('numberOfTrackers', value))
-        self.ui.pointsComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('points', value))
-        self.ui.additionalPointsComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('additionalPoints', value))
-        self.ui.processingSpeedComboBox.currentTextChanged.connect(lambda value: self.__set_str_setting('skipFrames', value))
-        self.ui.topPointOffsetSpinBox.valueChanged.connect(lambda value: self.__set_number_setting("topPointOffset", value))
-        self.ui.bottomPointOffsetSpinBox.valueChanged.connect(lambda value: self.__set_number_setting("bottomPointOffset", value))
         self.ui.docsButton.clicked.connect(self.__open_documentation)
 
 
@@ -182,9 +171,6 @@ class SettingsDialog(QtWidgets.QDialog):
         index = self.ui.trackingMethodComboBox.findText(selection, QtCore.Qt.MatchFixedString)
         if index >= 0:
                 self.ui.trackingMethodComboBox.setCurrentIndex(index)
-
-
-        self.__set_str_setting('trackingMetric', value)
 
 
     def __apply(self):
