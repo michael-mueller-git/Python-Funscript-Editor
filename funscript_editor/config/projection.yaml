@@ -26,30 +26,6 @@ vr_he_180_sbs:
       increase: "-"
       decrease: "+"
 
-vr_he_180_ou:
-  name: '3D VR Video 180 (Vertical)'
-  video_filter: 'v360=input=he:in_stereo=tb:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
-  parameter:
-    height: 720
-    width: 1240
-    fov: 100
-    pitch: -45
-    yaw: 0
-    roll: 0
-  keys:
-    pitch:
-      increase: "w"
-      decrease: "s"
-    yaw:
-      increase: "d"
-      decrease: "a"
-    roll:
-      increase: "e"
-      decrease: "q"
-    fov:
-      increase: "-"
-      decrease: "+"
-
 vr_fisheye_200_sbs:
   name: '3D VR Video Fisheye 200'
   video_filter: 'v360=input=fisheye:in_stereo=sbs:id_fov=200:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
@@ -75,8 +51,32 @@ vr_fisheye_200_sbs:
       decrease: "+"
 
 vr_equirect_360_ou:
-  name: '3D VR Video 360 (Vertical)'
+  name: 'Vertical 3D VR Video 360'
   video_filter: 'v360=input=equirect:in_stereo=tb:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
+  parameter:
+    height: 720
+    width: 1240
+    fov: 100
+    pitch: -45
+    yaw: 0
+    roll: 0
+  keys:
+    pitch:
+      increase: "w"
+      decrease: "s"
+    yaw:
+      increase: "d"
+      decrease: "a"
+    roll:
+      increase: "e"
+      decrease: "q"
+    fov:
+      increase: "-"
+      decrease: "+"
+
+vr_he_180_ou:
+  name: 'Vertical 3D VR Video 180'
+  video_filter: 'v360=input=he:in_stereo=tb:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
   parameter:
     height: 720
     width: 1240
