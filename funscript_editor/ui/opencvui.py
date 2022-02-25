@@ -620,6 +620,7 @@ class OpenCV_GUI(KeypressHandler):
 
         self.clear_keypress_queue()
 
+        self.logger.info("Show VR Menu")
         if len(ui_texte) > 0:
             # we need an user input
             parameter_changed, selected = True, False

@@ -142,6 +142,13 @@ class FFmpegStream:
         Returns:
             np.ndarray: projected opencv image
         """
+        # Ensure the image is large enough to get an output from ffmpeg v360 filter
+        scale_w = 1.25 * config['parameter']['width'] / frame.shape[1]
+        scale_h = 1.25 * config['parameter']['height'] / frame.shape[0]
+        scale = max((scale_w, scale_h))
+        if scale > 1.0:
+            frame = cv2.resize(frame, None, fx=scale, fy=scale)
+
         dimension = '{}x{}'.format(frame.shape[1], frame.shape[0])
 
         video_filter = config['video_filter']
@@ -168,6 +175,7 @@ class FFmpegStream:
                 '-'
             ]
 
+        # print('cmd', command)
         pipe = sp.Popen(
                 command,
                 stdin = sp.PIPE,
