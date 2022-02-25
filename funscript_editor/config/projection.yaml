@@ -1,9 +1,15 @@
 # video projection parameters
-# Do not change any parameters here unless you know exactly what you are doing!
 # For VR video filer options see: https://ffmpeg.org/ffmpeg-filters.html#v360
+#
+# Notes:
+# - You can not use brackets in name.
+# - names must be unique.
+# - root keys should contain _vr_ for vr video projections
+# - root keys should contain _sbs_ for side by side video projections
+# - root keys should contain _ou_ for over/under = top/botoom video projections
 
 vr_he_180_sbs:
-  name: '3D VR Video 180'
+  name: '3D SBS VR Video 180'
   video_filter: 'v360=input=he:in_stereo=sbs:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
   parameter:
     height: 720
@@ -27,7 +33,7 @@ vr_he_180_sbs:
       decrease: "+"
 
 vr_fisheye_200_sbs:
-  name: '3D VR Video Fisheye 200'
+  name: '3D SBS VR Video Fisheye 200'
   video_filter: 'v360=input=fisheye:in_stereo=sbs:id_fov=200:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
   parameter:
     height: 720
@@ -51,7 +57,7 @@ vr_fisheye_200_sbs:
       decrease: "+"
 
 vr_equirect_360_ou:
-  name: 'Vertical 3D VR Video 360/180'
+  name: '3D Vertical VR Video 360/180'
   video_filter: 'v360=input=equirect:in_stereo=tb:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
   parameter:
     height: 720
@@ -75,7 +81,7 @@ vr_equirect_360_ou:
       decrease: "+"
 
 vr_he_180_ou:
-  name: 'Vertical 3D VR Video 180'
+  name: '3D Vertical VR Video 180'
   video_filter: 'v360=input=he:in_stereo=tb:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
   parameter:
     height: 720
