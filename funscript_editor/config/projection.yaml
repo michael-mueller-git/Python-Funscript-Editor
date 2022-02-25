@@ -51,7 +51,7 @@ vr_fisheye_200_sbs:
       decrease: "+"
 
 vr_equirect_360_ou:
-  name: 'Vertical 3D VR Video 360'
+  name: 'Vertical 3D VR Video 360/180'
   video_filter: 'v360=input=equirect:in_stereo=tb:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
   parameter:
     height: 720
