@@ -79,7 +79,7 @@ function import_funscript_generator_result()
     -- save changes
     ofs.Commit(script)
 
-    -- delete temporary file
+    -- delete csv file
     os.remove(tmpFile)
 end
 
@@ -192,6 +192,7 @@ function init()
                 mtfgVersion = string.lower(line):gsub("v", "")
             end
         end
+        f:close()
     end
 end
 
@@ -207,6 +208,7 @@ function update(delta)
         local f = io.open("C:/Temp/funscript_editor.log")
         if f then
             logfileExist = true
+            f:close()
         else
             logfileExist = false
         end
