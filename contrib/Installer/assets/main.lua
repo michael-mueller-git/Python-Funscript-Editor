@@ -204,7 +204,7 @@ function update(delta)
         processHandleMTFG = nil
         import_funscript_generator_result()
     end
-    if math.fmod(updateCounter, 1000) then
+    if math.fmod(updateCounter, 1000) == 1 then
         local f = io.open("C:/Temp/funscript_editor.log")
         if f then
             logfileExist = true
