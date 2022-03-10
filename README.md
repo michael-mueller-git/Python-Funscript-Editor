@@ -1,6 +1,6 @@
 # Python Funscript Editor
 
-[![Documentation Status](https://readthedocs.org/projects/python-funscript-editor/badge/?version=latest)](https://python-funscript-editor.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/python-funscript-editor/badge/?version=latest)](https://python-funscript-editor.readthedocs.io/en/latest/?badge=latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Simple Funscript Editor written in Python with an motion tracking add-on to partially automate the generation of funscripts for static video scenes like vr videos.
 
