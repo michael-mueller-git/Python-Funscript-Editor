@@ -42,5 +42,5 @@ tracking_plausibility_check: False
 # enable logging on windows. logging cause some problems on windows only enable for debugging.
 logging: False
 
-# timeout for an ffmpeg steam
+# timeout for an ffmpeg stream
 ffmpeg_timeout_in_seconds: 15
