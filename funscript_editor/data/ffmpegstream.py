@@ -14,6 +14,7 @@ import subprocess as sp
 import numpy as np
 
 from funscript_editor.utils.watchdog import Watchdog
+from funscript_editor.utils.config import SETTINGS
 
 @dataclass
 class VideoInfo:
@@ -43,9 +44,10 @@ class FFmpegStream:
             skip_frames :int = 0,
             start_frame :int = 0,
             queue_size :int = 256,
-            watchdog_timeout :int = 4,
+            watchdog_timeout_in_seconds :int = max(( 3, int(SETTINGS['ffmpeg_timeout_in_seconds']) )),
             log_queue_overrun :bool = False):
 
+        self.watchdog_timeout_in_seconds = watchdog_timeout_in_seconds
         self.video_path = video_path
         self.config = config
         self.skip_frames = skip_frames
@@ -61,7 +63,7 @@ class FFmpegStream:
         self.video_info = self.get_video_info(video_path)
         self.frame_buffer = Queue(maxsize=queue_size)
 
-        self.watchdog = Watchdog(watchdog_timeout, self.watchdog_timeout)
+        self.watchdog = Watchdog(watchdog_timeout_in_seconds, self.watchdog_timeout_callback)
         self.thread = Thread(target=self.run, args=())
         self.thread.daemon = True
         self.thread.start()
@@ -74,7 +76,7 @@ class FFmpegStream:
     logger = logging.getLogger(__name__)
 
 
-    def watchdog_timeout(self):
+    def watchdog_timeout_callback(self):
         """ Watchdog timeout for ffmpeg stream """
         if not self.stopped:
             self.logger.error("FFmpegStream Timeout")
@@ -380,7 +382,7 @@ class FFmpegStream:
                 ]
 
             self.watchdog.start()
-            self.logger.info("FFmpeg Stream Watchdog started")
+            self.logger.info("FFmpeg Stream Watchdog started with %d sec timeout", self.watchdog_timeout_in_seconds)
             self.logger.info("Open FFmpeg Stream")
             self.pipe = sp.Popen(
                     command,
