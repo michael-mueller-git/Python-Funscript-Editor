@@ -43,4 +43,4 @@ tracking_plausibility_check: False
 logging: False
 
 # timeout for an ffmpeg steam
-ffmpeg_timeout_in_seconds: 11
+ffmpeg_timeout_in_seconds: 15
