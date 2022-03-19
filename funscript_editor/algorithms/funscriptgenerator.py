@@ -524,7 +524,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         first_frame = video.read()
 
         if first_frame is None:
-            return "ffmpeg could not extract video frame"
+            return "FFmpeg could not extract the first video frame"
 
         (first_frame, bboxes, tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men) = self.init_trackers(first_frame)
 
