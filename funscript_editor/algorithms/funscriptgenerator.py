@@ -1,5 +1,6 @@
 """ Top level process to generate the funscript actions by tracking selected features in the video """
 
+from os import read
 import cv2
 import copy
 import time
@@ -383,11 +384,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
 
 
-    def init_trackers(self, ffmpeg_stream: FFmpegStream) -> tuple:
+    def init_trackers(self, first_frame: np.array) -> tuple:
         """ Initialize the trackers
 
         Args:
-            ffmpeg_stream (FFmpegStream): The ffmpeg stream
+            first_frame (np.array): first frame to init the trackers
 
         Returns:
             tuple: (first_frame, bboxes, tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men)
@@ -402,7 +403,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
         trackers_woman = [None for _ in range(self.params.number_of_trackers)]
         trackers_men = [None for _ in range(self.params.number_of_trackers)]
 
-        first_frame = ffmpeg_stream.read()
         preview_frame = first_frame
         for tracker_number in range(self.params.number_of_trackers):
             bbox_woman = self.ui.bbox_selector(
@@ -521,7 +521,12 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 start_frame = self.params.start_frame
             )
 
-        (first_frame, bboxes, tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men) = self.init_trackers(video)
+        first_frame = video.read()
+
+        if first_frame is None:
+            return "ffmpeg could not extract video frame"
+
+        (first_frame, bboxes, tracking_areas_woman, tracking_areas_men, trackers_woman, trackers_men) = self.init_trackers(first_frame)
 
         if self.params.max_playback_fps > (self.params.skip_frames+1):
             cycle_time_in_ms = (float(1000) / float(self.params.max_playback_fps)) * (self.params.skip_frames+1)
