@@ -1,6 +1,6 @@
 """ Top level process to generate the funscript actions by tracking selected features in the video """
 
-from os import read
+from os import error, read
 import cv2
 import copy
 import time
@@ -29,9 +29,7 @@ class FunscriptGeneratorParameter:
     video_path: str
     track_men: bool
     supervised_tracking: bool
-    metric: str
     projection: str
-    invert: bool
     start_frame: int
     end_frame: int = -1 # default is video end (-1)
     number_of_trackers: int = 1
@@ -89,16 +87,16 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
     Args:
         params (FunscriptGeneratorParameter): required parameter for the funscript generator
-        funscript (Funscript): the reference to the Funscript where we store the predicted actions
+        funscript (dict): the references to the Funscript where we store the predicted actions
     """
 
     def __init__(self,
                  params: FunscriptGeneratorParameter,
-                 funscript: Funscript):
+                 funscripts: dict):
         QtCore.QThread.__init__(self)
         self.logger = logging.getLogger(__name__)
         self.params = params
-        self.funscript = funscript
+        self.funscripts = funscripts
         self.video_info = FFmpegStream.get_video_info(self.params.video_path)
         self.tracking_fps = []
         self.score = {
@@ -116,7 +114,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
 
     #: completed event with reference to the funscript with the predicted actions, status message and success flag
-    funscriptCompleted = QtCore.pyqtSignal(object, str, bool)
+    funscriptCompleted = QtCore.pyqtSignal(dict, str, bool)
 
 
 
@@ -227,14 +225,15 @@ class FunscriptGeneratorThread(QtCore.QThread):
             pool[metric].join()
             score[metric] = queue[metric].get()
 
-        if self.params.invert:
-            self.logger.info("Scale Inverted Score to 0 - 100")
-            for metric in score.keys():
-                self.score[metric] = Signal.scale(-1.0*np.array(score[metric]), 0, 100)
-        else:
-            self.logger.info("Scale Score to 0 - 100")
-            for metric in score.keys():
-                self.score[metric] = Signal.scale(score[metric], 0, 100)
+        for metric in score.keys():
+            if metric in self.funscripts.keys() and self.funscripts[metric].is_inverted():
+                self.logger.info("%s: Scale Inverted Score to 0 - 100", metric)
+                score_inv = [-1.0 * x for x in score[metric]]
+                self.score[metric] = Signal.scale(score_inv, 0, 100)
+            else:
+                self.logger.info("%s: Scale Score to 0 - 100", metric)
+                for metric in score.keys():
+                    self.score[metric] = Signal.scale(score[metric], 0, 100)
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:
@@ -360,6 +359,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """
         if not self.params.track_men:
             return "moving person"
+        # else:
+        #     if person == 0:
+        #         return "top/left person"
+        #     else:
+        #         return "bottom/right person"
 
         mapping = {
             'y': {
@@ -687,8 +691,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
             status (str): a process status/error message
             success (bool): True if funscript was generated else False
         """
+        for metric in self.funscripts.keys():
+            # we use this flag internaly to determine if we have to invert the score
+            # ensure not to publish the invertion with our generated funscript
+            # in this case we will invert our result again, what we dont want
+            self.funscripts[metric].data["inverted"] = False
         self.ui.close()
-        self.funscriptCompleted.emit(self.funscript, status, success)
+        self.funscriptCompleted.emit(self.funscripts, status, success)
 
 
     def get_absolute_framenumber(self, frame_number: int) -> int:
@@ -771,34 +780,39 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return 'vr' in self.params.projection.lower().split('_')
 
 
-    def create_funscript(self, idx_dict: dict) -> None:
+    def create_funscript(self, idx_dict: dict, metric: str) -> None:
         """ Generate the Funscript
 
         Args:
             idx_dict (dict): dictionary with all local max and min points in score
                              {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
+            metric: metric key
         """
+        if metric not in self.funscripts.keys():
+            self.logger.error("metric %s not in funscripts keys", metric)
+            return
+
         if self.params.raw_output:
-            output_score = copy.deepcopy(self.score[self.params.metric])
+            output_score = copy.deepcopy(self.score[metric])
             self.logger.warning("Insert %d raw points", len(output_score))
             for idx in range(len(output_score)):
-                self.funscript.add_action(
+                self.funscripts[metric].add_action(
                         round(output_score[idx]),
                         FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps),
                         True
                     )
 
         else:
-            output_score = self.get_score_with_offset(idx_dict, self.params.metric)
+            output_score = self.get_score_with_offset(idx_dict, metric)
 
             for idx in idx_dict['min']:
-                self.funscript.add_action(
+                self.funscripts[metric].add_action(
                         round(output_score[idx]),
                         FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
                     )
 
             for idx in idx_dict['max']:
-                self.funscript.add_action(
+                self.funscripts[metric].add_action(
                         round(output_score[idx]),
                         FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
                     )
@@ -807,7 +821,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
     def run(self) -> None:
         """ The Funscript Generator Thread Function """
         try:
-            if self.params.metric not in ['x', 'y']:
+            if any(metric not in ['x', 'y'] for metric in self.funscripts.keys()):
+                self.logger.info('Force 2 person tracking')
                 self.params.track_men = True # we need 2 tracking points
 
             if self.video_info.fps < 31.0 and self.params.skip_frames > 1:
@@ -820,21 +835,23 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
             status = self.tracking()
 
-            if len(self.score[self.params.metric]) >= HYPERPARAMETER['min_frames']:
-                self.scale_score(status, metric=self.params.metric)
+            for metric in self.funscripts.keys():
+                if len(self.score[metric]) >= HYPERPARAMETER['min_frames']:
+                    self.scale_score(status, metric=metric)
 
-            if len(self.score[self.params.metric]) < HYPERPARAMETER['min_frames']:
+            if all(len(self.score[metric]) < HYPERPARAMETER['min_frames'] for metric in self.funscripts.keys()):
                 self.finished(
                         status + ' -> Tracking time insufficient ({}/{} Frames)'.format(
-                            len(self.score[self.params.metric]),
+                            min([len(self.score[metric]) for metric in self.funscripts.keys()]),
                             HYPERPARAMETER['min_frames']
                         ), False
                 )
                 return
 
-            idx_dict = self.determine_change_points(self.params.metric)
+            for metric in self.funscripts.keys():
+                idx_dict = self.determine_change_points(metric)
+                self.create_funscript(idx_dict, metric)
 
-            self.create_funscript(idx_dict)
             self.finished(status, True)
         except Exception as ex:
             self.logger.critical("The program crashed due to a fatal error", exc_info=ex)

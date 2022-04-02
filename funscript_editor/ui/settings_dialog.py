@@ -42,7 +42,7 @@ class SettingsDialog(QtWidgets.QDialog):
     def __setup_dialog_elements(self):
         self.dialog_elements = {
                 'videoType': self.ui.videoTypeComboBox,
-                'trackingMetric': self.ui.trackingMetricComboBox,
+                'trackingMetrics': self.ui.trackingMetricComboBox,
                 'trackingMethod': self.ui.trackingMethodComboBox,
                 'numberOfTracker': self.ui.numberOfTrackerComboBox,
                 'points': self.ui.pointsComboBox,

@@ -53,6 +53,11 @@ class Funscript:
         self.changed = False
 
 
+    def is_inverted(self):
+        """ Check if script is inverted """
+        return self.data["inverted"]
+
+
     def get_fps(self) -> float:
         """ Get Video FPS
 

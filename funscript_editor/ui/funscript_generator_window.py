@@ -60,7 +60,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             sys.exit()
 
         cap = cv2.VideoCapture(video_file)
-        fps = cap.get(cv2.CAP_PROP_FPS)
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
         height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         video_aspect_ratio = float(width) / max((1, float(height)))
@@ -68,11 +68,10 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         self.video_file = video_file
         self.is_sbs_vr_video = True if 1.9 < video_aspect_ratio < 2.1 else False
-        self.funscript = Funscript(fps)
         self.output_file = output_file
 
-        self.start_frame = int(round(float(start_time)/(float(1000)/float(fps)))) if start_time > 0.0 else 0
-        self.end_frame = int(round(float(end_time)/(float(1000)/float(fps)))) if end_time > 0.0 and start_time < end_time else -1
+        self.start_frame = int(round(float(start_time)/(float(1000)/float(self.fps)))) if start_time > 0.0 else 0
+        self.end_frame = int(round(float(end_time)/(float(1000)/float(self.fps)))) if end_time > 0.0 and start_time < end_time else -1
 
         self.__logger.info("Set End Time to Frame Number %d", self.end_frame)
 
@@ -97,16 +96,18 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         msg.exec_()
 
 
-    def __funscript_generated(self, funscript, msg, success) -> None:
+    def __funscript_generated(self, funscripts, msg, success) -> None:
+        first_metric = [x for x in funscripts.keys()][0]
+
         if isinstance(self.output_file, Funscript):
-            for item in funscript.get_actions():
+            for item in funscripts[first_metric].get_actions():
                 self.output_file.add_action(item['pos'], item['at'], SETTINGS['raw_output'])
             self.funscriptCompleted.emit(self.output_file, msg, success)
         else:
             os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
             with open(self.output_file, 'w') as f:
                 f.write('at;pos\n')
-                for item in funscript.get_actions():
+                for item in funscripts[first_metric].get_actions():
                     f.write('{at};{pos}\n'.format(at=item['at'], pos=item['pos']))
 
             self.__logger.info("Save result to %s", self.output_file)
@@ -123,15 +124,14 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         """ start generator """
         self.__logger.info('settings: %s', str(self.settings))
         self.settings['videoType'] = list(filter(lambda x: PROJECTION[x]['name'] == self.settings['videoType'], PROJECTION.keys()))[0]
+        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps, inverted = "inverted" in k) for k in self.settings['trackingMetrics'].split(',')}
         self.funscript_generator = FunscriptGeneratorThread(
                 FunscriptGeneratorParameter(
                     video_path = self.video_file,
                     track_men = 'two' in self.settings['trackingMethod'],
                     supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
                     supervised_tracking_is_exit_condition = "stopping" in self.settings['trackingMethod'],
-                    metric = self.settings['trackingMetric'].replace('inverted', '').strip(),
                     projection = self.settings['videoType'],
-                    invert = "inverted" in self.settings['trackingMetric'],
                     start_frame = self.start_frame,
                     end_frame = self.end_frame,
                     number_of_trackers = int(self.settings['numberOfTracker']),
@@ -141,6 +141,6 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                     top_points_offset = self.settings['topPointOffset'],
                     bottom_points_offset = self.settings['bottomPointOffset']
                 ),
-                self.funscript)
+                self.funscripts)
         self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
         self.funscript_generator.start()
