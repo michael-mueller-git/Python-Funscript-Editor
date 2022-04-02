@@ -228,12 +228,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
         for metric in score.keys():
             if metric in self.funscripts.keys() and self.funscripts[metric].is_inverted():
                 self.logger.info("%s: Scale Inverted Score to 0 - 100", metric)
-                score_inv = [-1.0 * x for x in score[metric]]
-                self.score[metric] = Signal.scale(score_inv, 0, 100)
+                self.score[metric] = Signal.scale([-1.0 * x for x in score[metric]], 0, 100)
             else:
                 self.logger.info("%s: Scale Score to 0 - 100", metric)
-                for metric in score.keys():
-                    self.score[metric] = Signal.scale(score[metric], 0, 100)
+                self.score[metric] = Signal.scale(score[metric], 0, 100)
+
 
 
     def scale_score(self, status: str, metric : str = 'y') -> None:
@@ -359,32 +358,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """
         if not self.params.track_men:
             return "moving person"
-        # else:
-        #     if person == 0:
-        #         return "top/left person"
-        #     else:
-        #         return "bottom/right person"
-
-        mapping = {
-            'y': {
-                0: 'top person',
-                1: 'bottom person'
-                },
-            'x': {
-                0: 'left person',
-                1: 'right person'
-            },
-            'distance': {
-                0: 'top/left person',
-                1: 'bottom/right person'
-            },
-            'roll': {
-                0: 'top/left person',
-                1: 'bottom/right person'
-            }
-        }
-
-        return mapping[self.params.metric][person]
+        else:
+            return "top/left person" if person == 0 else "bottom/right person"
 
 
 
