@@ -164,6 +164,7 @@ class OpenCV_GUI(KeypressHandler):
         else:
             # asume we use the largest monitor for scipting
             self.monitor_preview_scaling = self.params.preview_scaling * max(scale)
+            self.monitor_preview_scaling = self.monitor_preview_scaling / float(os.getenv("QT_SCALE_FACTOR", 1))
 
 
     def set_background_image(self, image: np.ndarray, copy_image: bool = False) -> None:
