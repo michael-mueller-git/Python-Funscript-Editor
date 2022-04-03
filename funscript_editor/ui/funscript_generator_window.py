@@ -27,13 +27,15 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         start_time (float): start position in video (timestamp in milliseconds)
         end_time (float): end position in video (timestamp in milliseconds) use -1.0 for video end.
         output_file (str, Funscript): csv output file path (Optional you can pass a funscript object where to store the result)
+        include_multiaxis (bool): include multiaxis output
     """
 
     def __init__(self,
             video_file: str,
             start_time: float,
             end_time: float,
-            output_file: str):
+            output_file: str,
+            include_multiaxis: bool = False):
         super(FunscriptGeneratorWindow, self).__init__()
         setup_theme()
         if os.path.exists(definitions.ICON_PATH):
@@ -76,7 +78,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__logger.info("Set End Time to Frame Number %d", self.end_frame)
 
         self.settings = {}
-        self.settings_dialog = SettingsDialog(self.settings, include_vr = True)
+        self.settings_dialog = SettingsDialog(self.settings, include_vr = True, include_multiaxis = include_multiaxis)
         self.settings_dialog.applySettings.connect(self.run)
         self.settings_dialog.show()
 
@@ -124,7 +126,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         """ start generator """
         self.__logger.info('settings: %s', str(self.settings))
         self.settings['videoType'] = list(filter(lambda x: PROJECTION[x]['name'] == self.settings['videoType'], PROJECTION.keys()))[0]
-        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps, inverted = "inverted" in k) for k in self.settings['trackingMetrics'].split(',')}
+        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps, inverted = "inverted" in k) for k in self.settings['trackingMetrics'].split('+')}
         self.funscript_generator = FunscriptGeneratorThread(
                 FunscriptGeneratorParameter(
                     video_path = self.video_file,

@@ -18,11 +18,13 @@ class SettingsDialog(QtWidgets.QDialog):
     Args:
         settings (dict): dict where to store the settings
         include_vr (bool): include vr options
+        include_multiaxis (bool): include multiaxis output
     """
 
-    def __init__(self, settings: dict, include_vr: bool = True):
+    def __init__(self, settings: dict, include_vr: bool = True, include_multiaxis : bool = True):
         super(SettingsDialog, self).__init__()
         self.include_vr = include_vr
+        self.include_multiaxis = include_multiaxis
         self.ui = settings_view.Ui_Form()
         self.form = QtWidgets.QDialog()
         self.ui.setupUi(self.form)
@@ -137,6 +139,11 @@ class SettingsDialog(QtWidgets.QDialog):
             'roll (rotation)',
             'roll inverted (rotation)'
         ])
+
+        if self.include_multiaxis:
+            self.ui.trackingMetricComboBox.addItems([
+                "y + roll (up-down + rotation)"
+            ])
 
         self.ui.pointsComboBox.addItems([
             "Local Min Max",

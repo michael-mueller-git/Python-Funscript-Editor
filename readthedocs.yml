@@ -3,3 +3,7 @@ version: 2
 mkdocs:
   configuration: docs/app/mkdocs.yml
   fail_on_warning: false
+
+python:
+  install:
+    - requirements: docs/requirements.txt
