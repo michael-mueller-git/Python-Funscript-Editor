@@ -16,9 +16,9 @@ function get_platform()
     if ofs.ExtensionDir():find("^/home/") ~= nil then
         local home = os.getenv( "HOME" )
         print("User Home: ", home)
-        if exists(home.."/miniconda/envs/funscript-editor") then
+        if exists(home.."/miniconda3/envs/funscript-editor") then
             return "Linux, Conda"
-        elseif exists(home.."/anaconda/envs/funscript-editor") then
+        elseif exists(home.."/anaconda3/envs/funscript-editor") then
             return "Linux, Conda"
         else
             return "Linux, Python"
@@ -64,13 +64,7 @@ function start_funscript_generator()
         table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/funscript-editor.py")
     elseif platform == "Linux, Conda" then
         cmd = "/usr/bin/bash"
-        table.insert(args, "-i")
-        table.insert(args, "-c")
-        table.insert(args, "'")
-        table.insert(args, "conda")
-        table.insert(args, "activate")
-        table.insert(args, "funscript-editor;")
-        table.insert(args, "python3")
+        table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/conda_wrapper.sh")
     else
         print("ERROR: Platform Not Implemented (", platform, ")")
     end
@@ -88,12 +82,8 @@ function start_funscript_generator()
         table.insert(args, tostring(script.actions[next_action].at))
     end
 
-    if platform == "Linux, Conda" then
-        table.insert(args, "'")
-    end
-
     print("cmd: ", cmd)
-    print("args: ", args)
+    print("args: ", table.unpack(args))
 
     processHandleMTFG = ofs.CreateProcess(cmd, table.unpack(args))
 
