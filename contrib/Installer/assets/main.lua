@@ -62,9 +62,17 @@ function start_funscript_generator()
     elseif platform == "Linux, Python" then
         cmd = "/usr/bin/python3"
         table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/funscript-editor.py")
+    elseif platform == "Linux, Anaconda" or platform == "Linux, Miniconda" then
+        cmd = "/usr/bin/bash"
+        table.insert(args, "-i")
+        table.insert(args, "-c")
+        table.insert(args, "'")
+        table.insert(args, "conda")
+        table.insert(args, "activate")
+        table.insert(args, "funscript-editor;")
+        table.insert(args, "python3")
     else
         print("ERROR: Platform Not Implemented (", platform, ")")
-        cmd = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"  -- fallback is Windows
     end
 
     table.insert(args, "--generator")
@@ -82,8 +90,12 @@ function start_funscript_generator()
         table.insert(args, tostring(script.actions[next_action].at))
     end
 
+    if platform == "Linux, Anaconda" or platform == "Linux, Miniconda" then
+        table.insert(args, "'")
+    end
+
     print("cmd: ", cmd)
-    print("args", args)
+    print("args: ", args)
 
     processHandleMTFG = ofs.CreateProcess(cmd, table.unpack(args))
 
@@ -223,7 +235,17 @@ end
 function init()
     print("Detected OS: ", platform)
     ofs.Bind("start_funscript_generator", "execute the funcript generator")
-    local f = io.open(ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\VERSION.txt")
+    local version_file_path = ""
+    if platform == "Windows" then
+        version_file_path = ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\VERSION.txt"
+    else
+        local mtfg_repo_path = ofs.ExtensionDir().."/Python-Funscript-Editor"
+        local cmd = "git -C "..mtfg_repo_path.." describe --tags `git -C "..mtfg_repo_path.." rev-list --tags --max-count=1` > "..mtfg_repo_path.."/funscript_editor/VERSION.txt"
+        print("cmd: ", cmd)
+        os.execute(cmd)
+        version_file_path = mtfg_repo_path.."/funscript_editor/VERSION.txt"
+    end
+    local f = io.open(version_file_path)
     if f then
         for line in f:lines() do
             if string.find(string.lower(line), "v") then
