@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if command -v apt; then
-    sudo apt install -y build-essential libmpv-dev libglvnd-dev
+    sudo apt install -y cmake build-essential libmpv-dev libglvnd-dev libxext-dev
 fi
 
 if [ -d ./OFS ]; then
