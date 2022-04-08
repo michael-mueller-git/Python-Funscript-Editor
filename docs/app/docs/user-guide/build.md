@@ -76,3 +76,7 @@ Limitation of the flatpak application:
 - Slow build process.
 - Flatpak need non-privileged user namespaces enabled (`sysctl kernel.unprivileged_userns_clone=1'`).
 - The System-Theme is not applied to the application. The problem is that my recipe use conda packages which isolates the python packages inside the flatpak sandbox and we have no access to the system theme. To fix this we have to build all python packages in the flatpak recipe from source and include the system theme inside the flatpak.
+
+## OFS Extension on Linux
+
+Path for extensions is `~/.local/share/OFS/OFS_data/extensions`
