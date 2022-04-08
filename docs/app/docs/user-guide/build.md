@@ -35,7 +35,7 @@ cd Python-Funscript-Editor
 conda env create -f environment_ubuntu.yaml
 ```
 
-On some distributions e.g. Ubuntu 20.04 LTS, the FFmpeg package does not contain the required `v360` filter. Therefore you can download a static linked FFmpeg package for this application with `bash download_ffmpeg.sh` from project root directory. (Perform this step if you are not sure if your FFmpeg version is sufficient!).
+On some distributions e.g. Ubuntu 20.04 LTS, the FFmpeg package does not contain the required `v360` filter. Therefore you can download a static linked FFmpeg package for this application with `bash download_ffmpeg.sh` from project root directory. (Perform this step if you are not sure if your FFmpeg version is sufficient!). The latest ffmpeg downloaded via `download_ffmpeg.sh` break current MTFG. Therefore you should copy the ffmpeg executable from `./assets` to `./funscript_editor/data` for now.
 
 Ubuntu user can alternatively use the `savoury1` ppa:
 
@@ -65,6 +65,8 @@ sudo pacman -Sy python-opencv python-pyqt5
 ```
 
 All other required python packages can be installed from pip.
+
+The latest ffmpeg break current MTFG. Therefore you should copy the ffmpeg executable from `./assets` to `./funscript_editor/data` for now!!
 
 ## Flatpak
 
