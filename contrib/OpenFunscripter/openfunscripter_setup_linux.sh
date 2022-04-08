@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if command -v apt; then
+    sudo apt install -y build-essential libmpv-dev libglvnd-dev
+fi
+
 if [ -d ./OFS ]; then
     echo "OpenFunscripter Source already downloaded"
     pushd OFS

@@ -29,7 +29,7 @@ The OpenCV Package in Ubuntu use the GTK Backend for the preview window. This wi
 After you have setup [miniconda](https://docs.conda.io/en/latest/miniconda.html) on your machine simply type the following commands to use Python-Funscript-Editor:
 
 ```bash
-sudo apt install -y make git gcc g++ libmpv-dev libatlas-base-dev
+sudo apt install -y make git gcc g++ cmake libmpv-dev libatlas-base-dev
 git clone https://github.com/michael-mueller-git/Python-Funscript-Editor.git
 cd Python-Funscript-Editor
 conda env create -f environment_ubuntu.yaml
