@@ -16,9 +16,9 @@ function get_platform()
     if ofs.ExtensionDir():find("^/home/") ~= nil then
         local home = os.getenv( "HOME" )
         print("User Home: ", home)
-        if exists(home.."/miniconda/") then
+        if exists(home.."/miniconda/envs/funscript-editor") then
             return "Linux, Miniconda"
-        elseif exists(home.."/anaconda") then
+        elseif exists(home.."/anaconda/envs/funscript-editor") then
             return "Linux, Anaconda"
         else
             return "Linux, Python"
