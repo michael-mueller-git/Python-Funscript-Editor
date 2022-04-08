@@ -241,7 +241,7 @@ function init()
     else
         local mtfg_repo_path = ofs.ExtensionDir().."/Python-Funscript-Editor"
         local cmd = "git -C "..mtfg_repo_path.." describe --tags `git -C "..mtfg_repo_path.." rev-list --tags --max-count=1` > "..mtfg_repo_path.."/funscript_editor/VERSION.txt"
-        print("cmd: ", cmd)
+        -- print("cmd: ", cmd)
         os.execute(cmd)
         version_file_path = mtfg_repo_path.."/funscript_editor/VERSION.txt"
     end
@@ -299,7 +299,14 @@ function gui()
 
     ofs.SameLine()
     if ofs.Button("Open Config") then
-        processHandleConfigDir = ofs.CreateProcess("explorer.exe", ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\config")
+        if platform == "Windows" then
+            processHandleConfigDir = ofs.CreateProcess("explorer.exe", ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\config")
+        else
+            local cmd = '/usr/bin/dbus-send --session --print-reply --dest=org.freedesktop.FileManager1 --type=method_call /org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItems array:string:"file://'
+                ..ofs.ExtensionDir()..'/Python-Funscript-Editor/funscript_editor/config/" string:""'
+            -- print("cmd: ", cmd)
+            os.execute(cmd)
+        end
     end
 
     -- if logfileExist then
