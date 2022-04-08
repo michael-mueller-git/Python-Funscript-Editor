@@ -54,40 +54,39 @@ function start_funscript_generator()
 
     print("nextAction: ", next_action and tostring(script.actions[next_action].at) or "nil")
 
-    if platform == "Widnows" then
-        local cmd = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"
-        print("cmd: ", cmd)
-        if next_action then
-            processHandleMTFG = ofs.CreateProcess(
-                cmd, "--generator",
-                "-s", tostring(currentTimeMs),
-                "-e", tostring(script.actions[next_action].at),
-                "-i", video,
-                "-o", tmpFile
-            )
-        else
-            processHandleMTFG = ofs.CreateProcess(
-                cmd, "--generator",
-                "-s", tostring(currentTimeMs),
-                "-i", video,
-                "-o", tmpFile
-            )
-        end
+    local cmd = ""
+    local args = {}
+
+    if platform == "Windows" then
+        cmd = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"
+    elseif platform == "Linux, Python" then
+        cmd = "/usr/bin/python3"
+        table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/funscript-editor.py")
     else
-        if platform == "Linux, Python" then
-            local cmd = ofs.ExtensionDir() .. "/Python-Funscript-Editor/funscript-editor.py"
-            print("cmd: ", cmd)
-            processHandleMTFG = ofs.CreateProcess(
-                    "/usr/bin/python3",
-                    cmd, "--generator",
-                    "-s", tostring(currentTimeMs),
-                    "-i", video,
-                    "-o", tmpFile
-            )
-        else
-           print("ERROR: Platform Not Implemented")
-        end
+        print("ERROR: Platform Not Implemented (", platform, ")")
+        cmd = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"  -- fallback is Windows
     end
+
+    table.insert(args, "--generator")
+    table.insert(args, "-s")
+    table.insert(args, tostring(currentTimeMs))
+    table.insert(args, "-e")
+    table.insert(args, tostring(script.actions[next_action].at))
+    table.insert(args, "-i")
+    table.insert(args, video)
+    table.insert(args, "-o")
+    table.insert(args, tmpFile)
+
+    if next_action then
+        table.insert(args, "-e")
+        table.insert(args, tostring(script.actions[next_action].at))
+    end
+
+    print("cmd: ", cmd)
+    print("args", args)
+
+    processHandleMTFG = ofs.CreateProcess(cmd, table.unpack(args))
+
     status = "MTFG running"
 end
 
