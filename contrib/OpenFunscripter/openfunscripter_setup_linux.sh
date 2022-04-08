@@ -31,7 +31,7 @@ popd
 echo "install ofs extension"
 mkdir -p ~/.local/share/OFS/OFS_data/extensions/MTFG
 pushd ~/.local/share/OFS/OFS_data/extensions/MTFG
-if [ -d ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor ]; then
+if [ ! -d ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor ]; then
     git clone https://github.com/michael-mueller-git/Python-Funscript-Editor.git
 fi
 
@@ -40,7 +40,12 @@ git pull
 source ~/anaconda3/etc/profile.d/conda.sh 2>/dev/null
 source ~/miniconda3/etc/profile.d/conda.sh 2>/dev/null
 conda env create -f environment_ubuntu.yaml
-bash download_ffmpeg.sh
+if [ -f ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg ]; then
+    cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg
+else
+    # TODO newes ffmpeg break MTFG!!
+    bash download_ffmpeg.sh
+fi
 popd
 
 cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua ~/.local/share/OFS/OFS_data/extensions/MTFG/main.lua
