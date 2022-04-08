@@ -17,9 +17,9 @@ function get_platform()
         local home = os.getenv( "HOME" )
         print("User Home: ", home)
         if exists(home.."/miniconda/envs/funscript-editor") then
-            return "Linux, Miniconda"
+            return "Linux, Conda"
         elseif exists(home.."/anaconda/envs/funscript-editor") then
-            return "Linux, Anaconda"
+            return "Linux, Conda"
         else
             return "Linux, Python"
         end
@@ -62,7 +62,7 @@ function start_funscript_generator()
     elseif platform == "Linux, Python" then
         cmd = "/usr/bin/python3"
         table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/funscript-editor.py")
-    elseif platform == "Linux, Anaconda" or platform == "Linux, Miniconda" then
+    elseif platform == "Linux, Conda" then
         cmd = "/usr/bin/bash"
         table.insert(args, "-i")
         table.insert(args, "-c")
@@ -90,7 +90,7 @@ function start_funscript_generator()
         table.insert(args, tostring(script.actions[next_action].at))
     end
 
-    if platform == "Linux, Anaconda" or platform == "Linux, Miniconda" then
+    if platform == "Linux, Conda" then
         table.insert(args, "'")
     end
 
