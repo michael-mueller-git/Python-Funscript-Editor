@@ -8,6 +8,28 @@ scriptIdx = 0
 mtfgVersion = "0.0.0"
 status = "MTFG not running"
 
+function exists(file)
+   return os.rename(file, file)
+end
+
+function get_platform()
+    if ofs.ExtensionDir():find("^/home/") ~= nil then
+        local home = os.getenv( "HOME" )
+        print("User Home: ", home)
+        if exists(home.."/miniconda/") then
+            return "Linux, Miniconda"
+        elseif exists(home.."/anaconda") then
+            return "Linux, Anaconda"
+        else
+            return "Linux, Python"
+        end
+    else
+        return "Windows"
+    end
+end
+
+platform = get_platform()
+
 function start_funscript_generator()
     if processHandleMTFG then
         print('MTFG already running')
@@ -19,9 +41,7 @@ function start_funscript_generator()
     local video = player.CurrentVideo()
     local script = ofs.Script(scriptIdx)
     local currentTimeMs = player.CurrentTime() * 1000
-    local cmd = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"
 
-    print("cmd: ", cmd)
     print("tmpFile: ", tmpFile)
     print("video: ", video)
     print("currentScriptIdx: ", scriptIdx)
@@ -34,21 +54,39 @@ function start_funscript_generator()
 
     print("nextAction: ", next_action and tostring(script.actions[next_action].at) or "nil")
 
-   if next_action then
-        processHandleMTFG = ofs.CreateProcess(
-            cmd, "--generator",
-            "-s", tostring(currentTimeMs),
-            "-e", tostring(script.actions[next_action].at),
-            "-i", video,
-            "-o", tmpFile
-        )
+    if platform == "Widnows" then
+        local cmd = ofs.ExtensionDir() .. "/funscript-editor/funscript-editor.exe"
+        print("cmd: ", cmd)
+        if next_action then
+            processHandleMTFG = ofs.CreateProcess(
+                cmd, "--generator",
+                "-s", tostring(currentTimeMs),
+                "-e", tostring(script.actions[next_action].at),
+                "-i", video,
+                "-o", tmpFile
+            )
+        else
+            processHandleMTFG = ofs.CreateProcess(
+                cmd, "--generator",
+                "-s", tostring(currentTimeMs),
+                "-i", video,
+                "-o", tmpFile
+            )
+        end
     else
-        processHandleMTFG = ofs.CreateProcess(
-            cmd, "--generator",
-            "-s", tostring(currentTimeMs),
-            "-i", video,
-            "-o", tmpFile
-        )
+        if platform == "Linux, Python" then
+            local cmd = ofs.ExtensionDir() .. "/Python-Funscript-Editor/funscript-editor.py"
+            print("cmd: ", cmd)
+            processHandleMTFG = ofs.CreateProcess(
+                    "/usr/bin/python3",
+                    cmd, "--generator",
+                    "-s", tostring(currentTimeMs),
+                    "-i", video,
+                    "-o", tmpFile
+            )
+        else
+           print("ERROR: Platform Not Implemented")
+        end
     end
     status = "MTFG running"
 end
@@ -184,6 +222,7 @@ end
 
 
 function init()
+    print("Detected OS: ", platform)
     ofs.Bind("start_funscript_generator", "execute the funcript generator")
     local f = io.open(ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\VERSION.txt")
     if f then
@@ -229,7 +268,11 @@ function gui()
         end
     else
         if ofs.Button("Kill MTFG") then
-            os.execute("taskkill /f /im funscript-editor.exe")
+            if platform == "Windows" then
+                os.execute("taskkill /f /im funscript-editor.exe")
+            else
+                os.execute("pkill -f funscript-editor.py")
+            end
         end
     end
 
