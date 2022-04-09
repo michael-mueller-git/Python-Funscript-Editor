@@ -253,7 +253,13 @@ function update(delta)
         import_funscript_generator_result()
     end
     if math.fmod(updateCounter, 1000) == 1 then
-        local f = io.open("C:/Temp/funscript_editor.log")
+        local logfile = ""
+        if platform == "Windows" then
+            logfile = "C:/Temp/funscript_editor.log"
+        else
+            logfile = "/tmp/funscript_editor.log"
+        end
+        local f = io.open(logfile)
         if f then
             logfileExist = true
             f:close()
@@ -297,12 +303,19 @@ function gui()
         end
     end
 
-    -- if logfileExist then
-    --       ofs.SameLine()
-    --       if ofs.Button("Open Log") then
-    --          processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
-    --       end
-    -- end
+    if logfileExist then
+        if platform == "Windows" then
+            -- ofs.SameLine()
+            -- if ofs.Button("Open Log") then
+            --     processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
+            -- end
+        else
+            ofs.SameLine()
+            if ofs.Button("Open Log") then
+                processHandleLogFile = ofs.CreateProcess("/usr/bin/xdg-open", "/tmp/funscript_editor.log")
+            end
+        end
+    end
 
     ofs.Separator()
     ofs.Text("Post-Processing:")

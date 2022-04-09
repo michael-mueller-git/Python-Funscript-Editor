@@ -615,7 +615,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     (woman_tracker_status, bbox_woman[tracker_number]) = trackers_woman[tracker_number].result()
                     if woman_tracker_status != StaticVideoTracker.Status.OK:
                         status = '{}.1 '.format(tracker_number+1) + woman_tracker_status
-                        delete_last_predictions = (self.params.skip_frames+1)
+                        delete_last_predictions = (self.params.skip_frames+1)*3
                         stop_tracking = True
                         break
 
@@ -623,7 +623,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         (men_tracker_status, bbox_men[tracker_number]) = trackers_men[tracker_number].result()
                         if men_tracker_status != StaticVideoTracker.Status.OK:
                             status = '{}.2 '.format(tracker_number+1) + men_tracker_status
-                            delete_last_predictions = (self.params.skip_frames+1)
+                            delete_last_predictions = (self.params.skip_frames+1)*3
                             stop_tracking = True
                             break
 

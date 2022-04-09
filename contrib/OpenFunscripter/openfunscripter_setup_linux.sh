@@ -4,46 +4,55 @@ if command -v apt; then
     sudo apt install -y cmake build-essential libmpv-dev libglvnd-dev libxext-dev make git gcc g++ cmake libmpv-dev libatlas-base-dev
 fi
 
-if [ -d ./OFS ]; then
-    echo "OpenFunscripter Source already downloaded"
-    pushd OFS
+OFS_DIR="$HOME/.local/share/OFS/application"
+
+if [ -d $OFS_DIR ]; then
+    echo ">> OpenFunscripter Source already downloaded (Updating...)"
+    pushd $OFS_DIR
     git pull
     git submodule update
 else
-    git clone https://github.com/OpenFunscripter/OFS.git
-    pushd OFS
+    mkdir -p `dirname $OFS_DIR`
+    echo ">> Clone OpenFunscripter Source"
+    git clone https://github.com/OpenFunscripter/OFS.git $OFS_DIR
+    pushd $OFS_DIR
     git submodule update --init
-    pushd lib/EASTL
+    pushd $OFS_DIR/lib/EASTL
     git submodule update --init
     popd
-    echo "OpenFunscripter Source downloaded to ./OFS"
+    echo ">> OpenFunscripter Source downloaded to $OFS_DIR"
 fi
 
-echo "build OFS"
+echo ">> Build OFS"
 rm -rf build
 mkdir -p build
 pushd build
 cmake ..
 make -j$(expr $(nproc) \+ 1)
-popd
-popd
+popd  # build
+popd  # $OFS_DIR
 
-echo "install ofs extension"
+echo ">> Install ofs extension"
 mkdir -p ~/.local/share/OFS/OFS_data/extensions/MTFG
 pushd ~/.local/share/OFS/OFS_data/extensions/MTFG
+
 if [ ! -d ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor ]; then
     git clone https://github.com/michael-mueller-git/Python-Funscript-Editor.git
 fi
 
 pushd ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor
 git pull
-source ~/anaconda3/etc/profile.d/conda.sh 2>/dev/null
-source ~/miniconda3/etc/profile.d/conda.sh 2>/dev/null
-conda env create -f environment_ubuntu.yaml
+
+if command -v apt; then
+    source ~/anaconda3/etc/profile.d/conda.sh 2>/dev/null
+    source ~/miniconda3/etc/profile.d/conda.sh 2>/dev/null
+    conda env create -f environment_ubuntu.yaml
+fi
+
 if [ -f ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg ]; then
     cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg
 else
-    # TODO newes ffmpeg break MTFG!!
+    # TODO newest ffmpeg break MTFG!!
     bash download_ffmpeg.sh
 fi
 popd
@@ -51,3 +60,19 @@ popd
 cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua ~/.local/share/OFS/OFS_data/extensions/MTFG/main.lua
 
 popd
+
+if [ ! -e ~/.local/bin/OpenFunscripter ]; then
+    ln -s `realpath $OFS_DIR`/bin/OpenFunscripter ~/.local/bin/OpenFunscripter
+fi
+
+
+mkdir -p ~/.local/share/applications
+
+cat >> ~/.local/share/applications/OpenFunscripter <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=OpenFunscripter
+Exec=$HOME/.local/bin/OpenFunscripter
+Comment=OpenFunscripter
+StartupWMClass=OpenFunscripter
+EOF
