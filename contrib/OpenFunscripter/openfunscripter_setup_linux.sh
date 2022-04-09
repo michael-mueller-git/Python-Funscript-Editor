@@ -31,7 +31,7 @@ echo ">> Build OFS"
 rm -rf build
 mkdir -p build
 pushd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$(expr $(nproc) \+ 1)
 popd  # build
 popd  # $OFS_DIR
