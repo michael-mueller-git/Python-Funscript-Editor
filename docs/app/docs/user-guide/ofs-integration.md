@@ -65,7 +65,18 @@ Manual Installation:
 
 ## Installation Linux
 
-Currently i don't have automated the setup on a Linux host system. Please take a look at the [application build instruction](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/build.md) where the basic setup is explained. If you have any problems or need further help with the setup, please open a issue on GitHub.
+I create an Install script to setup OFS + MTFG Extension. The script is located in [`./contrib/OpenFunscripter/openfunscripter_setup_linux.sh`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/OpenFunscripter/openfunscripter_setup_linux.sh). You may need to adjust the script depending on your Distribution. Or you may want to install it manually by using the script as reference/manual. The script was test on Arch Linux and Ubuntu.
+
+- For Arch Linux the dependency setup for MTFG is not included in the install script.
+- For Debian based distributions (e.g Ubuntu) you first have to install [Miniconda](https://docs.conda.io/en/latest/miniconda.html)!
+
+One liner to run the installer:
+
+```bash
+wget -O - https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/OpenFunscripter/openfunscripter_setup_linux.sh | bash
+```
+
+Please also take a look at the [application build instruction](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/build.md) where the basic setup of Python-Funscript-Editor is explained.
 
 <br>
 
