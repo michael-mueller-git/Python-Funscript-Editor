@@ -74,11 +74,12 @@ fi
 
 mkdir -p ~/.local/share/applications
 
-cat > ~/.local/share/applications/OpenFunscripter.desktop <<'EOF'
+cat >~/.local/share/applications/OpenFunscripter.desktop <<EOL
 [Desktop Entry]
 Type=Application
 Name=OpenFunscripter
-Exec=$HOME/.local/bin/OpenFunscripter
+Exec=`realpath $OFS_DIR`/bin/OpenFunscripter
 Comment=OpenFunscripter
 StartupWMClass=OpenFunscripter
-EOF
+Icon=`realpath $OFS_DIR`/bin/data/logo64.png
+EOL
