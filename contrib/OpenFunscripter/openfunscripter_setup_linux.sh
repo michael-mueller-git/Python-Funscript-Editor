@@ -1,7 +1,11 @@
 #!/bin/bash
+# Description: Installer for OFS + MTFG
+# Requirements: On Debian based systems e.g. Ubuntu you have to install Anaconda or Miniconda
+# befor running this installer.
 
 if command -v apt; then
-    sudo apt install -y cmake build-essential libmpv-dev libglvnd-dev libxext-dev make git gcc g++ cmake libmpv-dev libatlas-base-dev
+    sudo apt install -y cmake build-essential libmpv-dev libglvnd-dev libxext-dev make \
+        git gcc g++ cmake libmpv-dev libatlas-base-dev
 fi
 
 OFS_DIR="$HOME/.local/share/OFS/application"
@@ -50,15 +54,16 @@ if command -v apt; then
 fi
 
 if [ -f ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg ]; then
-    cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg
+    cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg \
+        ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg
 else
     # TODO newest ffmpeg break MTFG!!
     bash download_ffmpeg.sh
 fi
 popd
 
-cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua ~/.local/share/OFS/OFS_data/extensions/MTFG/main.lua
-
+cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua \
+    ~/.local/share/OFS/OFS_data/extensions/MTFG/main.lua
 popd
 
 if [ ! -e ~/.local/bin/OpenFunscripter ]; then
