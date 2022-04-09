@@ -67,7 +67,7 @@ cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contr
 popd
 
 if [ ! -e ~/.local/bin/OpenFunscripter ]; then
-    mkdir -p ~/local/bin
+    mkdir -p ~/.local/bin
     ln -s `realpath $OFS_DIR`/bin/OpenFunscripter ~/.local/bin/OpenFunscripter
 fi
 
