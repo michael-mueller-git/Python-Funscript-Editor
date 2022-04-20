@@ -16,7 +16,7 @@ user_reaction_time_in_milliseconds: 1000
 signal:
 
   # Specify the window size for the calculation of smothed tracking signal for the local min and max search.
-  # For slow actions in you video i recommend to set this to '3' to reduce the false positive predictions.
+  # For slow actions in your video, i recommend to set this to '3' to reduce the false positive predictions.
   local_max_min_filter_len: 1
 
   # Specify the window size for the calculation of the reference value for the local min and max search.
