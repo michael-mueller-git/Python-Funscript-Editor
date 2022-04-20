@@ -12,6 +12,7 @@ from funscript_editor.utils.config import HYPERPARAMETER
 
 @dataclass
 class SignalParameter:
+    local_min_max_filter_len: int = int(HYPERPARAMETER['signal']['local_max_min_filter_len'])
     avg_sec_for_local_min_max_extraction: float = float(HYPERPARAMETER['signal']['avg_sec_for_local_min_max_extraction'])
     additional_points_merge_time_threshold_in_ms: float = float(HYPERPARAMETER['signal']['additional_points_merge_time_threshold_in_ms'])
     additional_points_merge_distance_threshold: float = float(HYPERPARAMETER['signal']['additional_points_merge_distance_threshold'])
@@ -296,7 +297,7 @@ class Signal:
 
 
 
-    def get_local_min_max_points(self, signal: list, filter_len: int = 3) -> list:
+    def get_local_min_max_points(self, signal: list, filter_len: int = 1) -> list:
         """ Get the local max and min positions in given signal
 
         Args:
@@ -306,6 +307,10 @@ class Signal:
         Returns:
             list:  with local max and min indexes
         """
+        filter_len = max((1, filter_len))
+        if filter_len % 2 == 0:
+            filter_len += 1
+
         avg = Signal.moving_average(signal, w=round(self.fps * self.params.avg_sec_for_local_min_max_extraction))
         smothed_signal = Signal.moving_average(signal, w=filter_len)
         points, tmp_min_start_idx, tmp_min_end_idx, tmp_max_start_idx, tmp_max_end_idx = [], -1, -1, -1, -1
@@ -532,7 +537,7 @@ class Signal:
         if base_point_algorithm == self.BasePointAlgorithm.direction_changes:
             decimated_indexes = self.get_direction_changes(signal, filter_len = self.params.direction_change_filter_len)
         elif base_point_algorithm == self.BasePointAlgorithm.local_min_max:
-            decimated_indexes = self.get_local_min_max_points(signal)
+            decimated_indexes = self.get_local_min_max_points(signal, filter_len = self.params.local_min_max_filter_len)
         else:
             raise NotImplementedError("Selected Base Point Algorithm is not implemented")
 
