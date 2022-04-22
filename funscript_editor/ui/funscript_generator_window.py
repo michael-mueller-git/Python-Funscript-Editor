@@ -81,9 +81,12 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__logger.info("Set End Time to Frame Number %d", self.end_frame)
 
         self.settings = {}
-        self.settings_dialog = SettingsDialog(self.settings, include_vr = True, include_multiaxis = include_multiaxis)
-        self.settings_dialog.applySettings.connect(self.run)
-        self.settings_dialog.show()
+        if USE_OPTICALFLOW:
+            self.run_opticalflow()
+        else:
+            self.settings_dialog = SettingsDialog(self.settings, include_vr = True, include_multiaxis = include_multiaxis)
+            self.settings_dialog.applySettings.connect(self.run)
+            self.settings_dialog.show()
 
 
     __logger = logging.getLogger(__name__)
@@ -125,40 +128,43 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             sys.exit()
 
 
+    def run_opticalflow(self) -> None:
+        self.funscripts = {'movement': Funscript(self.fps)}
+        self.funscript_generator = OpticalFlowFunscriptGeneratorThread(
+                OpticalFlowFunscriptGeneratorParameter(
+                    video_path = self.video_file,
+                    projection = "vr_he_180_sbs",
+                    start_frame = self.start_frame,
+                    end_frame = self.end_frame,
+                    skip_frames = 0
+                    ),
+                self.funscripts)
+        self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
+        self.funscript_generator.start()
+
+
     def run(self) -> None:
         """ start generator """
         self.__logger.info('settings: %s', str(self.settings))
         self.settings['videoType'] = list(filter(lambda x: PROJECTION[x]['name'] == self.settings['videoType'], PROJECTION.keys()))[0]
         self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps, inverted = "inverted" in k) for k in self.settings['trackingMetrics'].split('+')}
-
-        if USE_OPTICALFLOW:
-            self.funscript_generator = OpticalFlowFunscriptGeneratorThread(
-                    OpticalFlowFunscriptGeneratorParameter(
-                        video_path = self.video_file,
-                        projection = self.settings['videoType'],
-                        start_frame = self.start_frame,
-                        end_frame = self.end_frame,
-                        skip_frames = int(self.settings['processingSpeed'])
-                        ),
-                    self.funscripts)
-        else:
-            self.funscript_generator = FunscriptGeneratorThread(
-                    FunscriptGeneratorParameter(
-                        video_path = self.video_file,
-                        track_men = 'two' in self.settings['trackingMethod'],
-                        supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
-                        supervised_tracking_is_exit_condition = "stopping" in self.settings['trackingMethod'],
-                        projection = self.settings['videoType'],
-                        start_frame = self.start_frame,
-                        end_frame = self.end_frame,
-                        number_of_trackers = int(self.settings['numberOfTracker']),
-                        points = self.settings['points'].lower().replace(' ', '_'),
-                        additional_points = self.settings['additionalPoints'].lower().replace(' ', '_'),
-                        skip_frames = int(self.settings['processingSpeed']),
-                        top_points_offset = self.settings['topPointOffset'],
-                        bottom_points_offset = self.settings['bottomPointOffset']
-                    ),
-                    self.funscripts)
+        self.funscript_generator = FunscriptGeneratorThread(
+                FunscriptGeneratorParameter(
+                    video_path = self.video_file,
+                    track_men = 'two' in self.settings['trackingMethod'],
+                    supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
+                    supervised_tracking_is_exit_condition = "stopping" in self.settings['trackingMethod'],
+                    projection = self.settings['videoType'],
+                    start_frame = self.start_frame,
+                    end_frame = self.end_frame,
+                    number_of_trackers = int(self.settings['numberOfTracker']),
+                    points = self.settings['points'].lower().replace(' ', '_'),
+                    additional_points = self.settings['additionalPoints'].lower().replace(' ', '_'),
+                    skip_frames = int(self.settings['processingSpeed']),
+                    top_points_offset = self.settings['topPointOffset'],
+                    bottom_points_offset = self.settings['bottomPointOffset']
+                ),
+                self.funscripts)
 
         self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
         self.funscript_generator.start()

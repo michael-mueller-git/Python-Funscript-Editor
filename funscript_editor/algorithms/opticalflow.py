@@ -250,11 +250,6 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
             status (str): a process status/error message
             success (bool): True if funscript was generated else False
         """
-        for metric in self.funscripts.keys():
-            # we use this flag internaly to determine if we have to invert the score
-            # ensure not to publish the invertion with our generated funscript
-            # in this case we will invert our result again, what we dont want
-            self.funscripts[metric].data["inverted"] = False
         self.ui.close()
         self.funscriptCompleted.emit(self.funscripts, status, success)
 
