@@ -15,6 +15,9 @@ from funscript_editor.utils.config import SETTINGS, PROJECTION
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+USE_OPTICALFLOW = True
+if USE_OPTICALFLOW:
+    from funscript_editor.algorithms.opticalflow import OpticalFlowFunscriptGeneratorThread, OpticalFlowFunscriptGeneratorParameter
 
 class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     """ Class to Generate a funscript with minimal UI
@@ -127,22 +130,35 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__logger.info('settings: %s', str(self.settings))
         self.settings['videoType'] = list(filter(lambda x: PROJECTION[x]['name'] == self.settings['videoType'], PROJECTION.keys()))[0]
         self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps, inverted = "inverted" in k) for k in self.settings['trackingMetrics'].split('+')}
-        self.funscript_generator = FunscriptGeneratorThread(
-                FunscriptGeneratorParameter(
-                    video_path = self.video_file,
-                    track_men = 'two' in self.settings['trackingMethod'],
-                    supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
-                    supervised_tracking_is_exit_condition = "stopping" in self.settings['trackingMethod'],
-                    projection = self.settings['videoType'],
-                    start_frame = self.start_frame,
-                    end_frame = self.end_frame,
-                    number_of_trackers = int(self.settings['numberOfTracker']),
-                    points = self.settings['points'].lower().replace(' ', '_'),
-                    additional_points = self.settings['additionalPoints'].lower().replace(' ', '_'),
-                    skip_frames = int(self.settings['processingSpeed']),
-                    top_points_offset = self.settings['topPointOffset'],
-                    bottom_points_offset = self.settings['bottomPointOffset']
-                ),
-                self.funscripts)
+
+        if USE_OPTICALFLOW:
+            self.funscript_generator = OpticalFlowFunscriptGeneratorThread(
+                    OpticalFlowFunscriptGeneratorParameter(
+                        video_path = self.video_file,
+                        projection = self.settings['videoType'],
+                        start_frame = self.start_frame,
+                        end_frame = self.end_frame,
+                        skip_frames = int(self.settings['processingSpeed'])
+                        ),
+                    self.funscripts)
+        else:
+            self.funscript_generator = FunscriptGeneratorThread(
+                    FunscriptGeneratorParameter(
+                        video_path = self.video_file,
+                        track_men = 'two' in self.settings['trackingMethod'],
+                        supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
+                        supervised_tracking_is_exit_condition = "stopping" in self.settings['trackingMethod'],
+                        projection = self.settings['videoType'],
+                        start_frame = self.start_frame,
+                        end_frame = self.end_frame,
+                        number_of_trackers = int(self.settings['numberOfTracker']),
+                        points = self.settings['points'].lower().replace(' ', '_'),
+                        additional_points = self.settings['additionalPoints'].lower().replace(' ', '_'),
+                        skip_frames = int(self.settings['processingSpeed']),
+                        top_points_offset = self.settings['topPointOffset'],
+                        bottom_points_offset = self.settings['bottomPointOffset']
+                    ),
+                    self.funscripts)
+
         self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
         self.funscript_generator.start()

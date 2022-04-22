@@ -98,7 +98,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.params = params
         self.funscripts = funscripts
         self.video_info = FFmpegStream.get_video_info(self.params.video_path)
-        self.tracking_fps = []
         self.score = {
                 'x': [],
                 'y': [],
