@@ -15,7 +15,7 @@ from funscript_editor.utils.config import SETTINGS, PROJECTION
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-USE_OPTICALFLOW = True
+USE_OPTICALFLOW = False
 if USE_OPTICALFLOW:
     from funscript_editor.algorithms.opticalflow import OpticalFlowFunscriptGeneratorThread, OpticalFlowFunscriptGeneratorParameter
 
