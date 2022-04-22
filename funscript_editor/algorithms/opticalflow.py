@@ -100,7 +100,7 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
                 self.trajectories = new_trajectories
 
 
-            if self.frame_idx % self.feature_detect_interval == 0:
+            if len(self.trajectories) == 0 or self.frame_idx % self.feature_detect_interval == 0:
                 mask = np.zeros_like(frame_gray)
                 mask[:] = 255
                 p = cv2.goodFeaturesToTrack(frame_gray, mask = mask, **self.feature_params)
@@ -225,15 +225,20 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
 
         signal = Signal(self.video_info.fps)
         points = signal.get_local_min_max_points(result)
+        categorized_points = signal.categorize_points(result, points)
 
-        val = 0
         for k in self.funscripts:
-            for p in points:
+            for bottom_point in categorized_points['max']:
                 self.funscripts[k].add_action(
-                        val,
-                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(p * (1+self.params.skip_frames)), self.video_info.fps)
+                        0,
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(bottom_point * (1+self.params.skip_frames)), self.video_info.fps)
                     )
-                val = 0 if val  != 0 else 100
+
+            for top_point in categorized_points['min']:
+                self.funscripts[k].add_action(
+                        100,
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(top_point * (1+self.params.skip_frames)), self.video_info.fps)
+                    )
 
         return status
 
