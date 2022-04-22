@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from numpy.linalg import norm
 from funscript_editor.utils.config import HYPERPARAMETER
 
+import matplotlib.pyplot as plt
 
 @dataclass
 class SignalParameter:
@@ -63,10 +64,7 @@ class Signal:
         if w == 1:
             return x
 
-        avg = np.convolve(x, np.ones(int(w*2)), 'valid') / int(w*2)
-        return [avg[0] for _ in range(int(w))] \
-                + list(avg) \
-                + [avg[-1] for _ in range(len(avg)+w,len(x))]
+        return np.convolve(x, np.ones(int(w*2)) / (w*2), 'same')
 
 
     @staticmethod

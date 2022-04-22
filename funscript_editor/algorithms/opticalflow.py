@@ -225,6 +225,7 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
 
         signal = Signal(self.video_info.fps)
         points = signal.get_local_min_max_points(result)
+        # points = signal.get_direction_changes(result, filter_len=4)
         categorized_points = signal.categorize_points(result, points)
 
         for k in self.funscripts:
