@@ -57,6 +57,7 @@ class KeypressHandler:
             key (pynput.keyboard.Key): the pressed key
         """
         if not self.keypress_queue.full():
+            # print('{0}'.format(key))
             self.keypress_queue.put(key)
 
 
@@ -66,14 +67,14 @@ class KeypressHandler:
             self.keypress_queue.get()
 
 
-    def was_space_pressed(self) -> bool:
-        """ Check if 'space' was presssed
+    def was_any_accept_key_pressed(self) -> bool:
+        """ Check if 'space' or 'enter' was presssed
 
         Returns:
-            bool: True if 'space' was pressed else False
+            bool: True if an accept key was pressed else False
         """
         while self.keypress_queue.qsize() > 0:
-            if '{0}'.format(self.keypress_queue.get()) == "Key.space":
+            if any('{0}'.format(self.keypress_queue.get()) == x for x in ["Key.space", "Key.enter"]):
                 return True
 
         return False
@@ -402,7 +403,6 @@ class OpenCV_GUI(KeypressHandler):
         """ Show an loading screen
 
         Args:
-            shape (tuple): image shape of loading screen
             txt (str): text to display
         """
         if self.preview_image is not None:
@@ -473,9 +473,10 @@ class OpenCV_GUI(KeypressHandler):
                 self.print_text("Set {} to {}".format('Min', trackbarValueMin))
                 self.print_text("Set {} to {}".format('Max', trackbarValueMax), text_position_x='column2')
                 self.print_text("Info: " + info)
+                self.print_text("Press 'space' or 'enter' to continue", text_position_x='column2')
                 ret = self.show(25)
 
-                if self.was_space_pressed() or ret == ord(' '):
+                if self.was_any_accept_key_pressed() or any(ret == x for x in [ord(' '), 13]):
                     break
 
                 trackbarValueMin = cv2.getTrackbarPos("Min", self.window_name)
@@ -630,17 +631,17 @@ class OpenCV_GUI(KeypressHandler):
                     parameter_changed = False
                     preview = FFmpegStream.get_projection(image, config)
                     self.set_background_image(preview)
-                    self.print_text("Press 'space' to use current selected region of interest")
+                    self.print_text("Press 'space' or 'enter' to use current viewpoint")
                     self.print_text("Press '0' (NULL) to reset view")
                     self.print_text(ui_texte)
 
                 ret = self.show()
-                if ret in [ord(' ')]:
+                if ret in [ord(' '), 13]:
                     break
 
                 while self.keypress_queue.qsize() > 0:
                     pressed_key = '{0}'.format(self.keypress_queue.get())
-                    if pressed_key == "Key.space":
+                    if pressed_key == "Key.space" or pressed_key == "Key.enter":
                         selected = True
                         break
 

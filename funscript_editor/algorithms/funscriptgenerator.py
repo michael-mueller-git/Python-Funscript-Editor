@@ -575,12 +575,12 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         key = self.ui.preview(
                                 last_frame,
                                 frame_num + self.params.start_frame,
-                                texte = ["Scene change detected, Press 'space' to continue tracking or press 'q' to finalize tracking"],
+                                texte = ["Scene change detected, Press 'space' or 'enter' to continue tracking or press 'q' to finalize tracking"],
                                 boxes = boxes_to_draw,
                                 beep = True
                             )
                         while True:
-                            if self.ui.was_space_pressed() or key == ord(' '):
+                            if self.ui.was_any_accept_key_pressed() or any(key == x for x in [ord(' '), 13]):
                                 break
 
                             if self.ui.was_key_pressed('q') or key == ord('q'):

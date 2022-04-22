@@ -8,6 +8,7 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
+echo "install required packages"
 if command -v apt; then
     # debian based distro:
 
@@ -66,7 +67,7 @@ pushd ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor
 echo "Update MTFG"
 git reset --hard HEAD
 git clean -fd
-git pull
+git pull --all
 
 echo "Checkout latest MTFG release"
 git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
@@ -107,3 +108,6 @@ Comment=OpenFunscripter
 StartupWMClass=OpenFunscripter
 Icon=`realpath $OFS_DIR`/bin/data/logo64.png
 EOL
+
+
+echo "Installation Completed"
