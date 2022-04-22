@@ -58,13 +58,14 @@ class Signal:
         if len(x) == 0:
             return []
 
-        if len(x) <= w+1:
+        if len(x) <= 2*(w+1):
             return[np.mean(x) for _ in range(len(x))]
 
         if w == 1:
             return x
 
-        return np.convolve(x, np.ones(int(w*2)) / (w*2), 'same')
+        avg = np.convolve(x, np.ones(int(w*2)) / (w*2), 'valid')
+        return [sum(x[:i*2]) / (i*2) for i in range(1, w+1)]+list(avg)+[sum(x[-i*2:]) / (i*2) for i in range(w, 1, -1)]
 
 
     @staticmethod
