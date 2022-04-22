@@ -1,11 +1,28 @@
 #!/bin/bash
 # Description: Installer for OFS + MTFG
 # Requirements: On Debian based systems e.g. Ubuntu you have to install Anaconda or Miniconda
-# befor running this installer.
+# befor running this installer!
+
+if [ "$EUID" -eq 0 ]; then
+    echo "ERROR: You can not run this script with sudo!!"
+    exit 1
+fi
 
 if command -v apt; then
+    # debian based distro:
+
+    if [ ! -d ~/anaconda3 ] && [ ! -d ~/miniconda3 ]; then
+        echo "ERROR: miniconda is not properly installed. Please first install [miniconda](https://docs.conda.io/en/latest/miniconda.html)"
+        exit 1
+    fi
+
     sudo apt install -y cmake build-essential libmpv-dev libglvnd-dev libxext-dev make \
         git gcc g++ cmake libmpv-dev libatlas-base-dev
+fi
+
+if command -v pacman; then
+    # arch based distro:
+    sudo pacman -Sy --needed python-opencv python-pyqt5 git base-devel python python-pip mpv cmake
 fi
 
 OFS_DIR="$HOME/.local/share/OFS/application"
@@ -40,26 +57,34 @@ echo ">> Install ofs extension"
 mkdir -p ~/.local/share/OFS/OFS_data/extensions/MTFG
 pushd ~/.local/share/OFS/OFS_data/extensions/MTFG
 
-if [ ! -d ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor ]; then
+if [ ! -d ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/.git ]; then
     git clone https://github.com/michael-mueller-git/Python-Funscript-Editor.git
 fi
 
 pushd ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor
+
+echo "Update MTFG"
+git reset --hard HEAD
+git clean -fd
 git pull
 
+echo "Checkout latest MTFG release"
+git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+
 if command -v apt; then
+    # debian based distro:
     source ~/anaconda3/etc/profile.d/conda.sh 2>/dev/null
     source ~/miniconda3/etc/profile.d/conda.sh 2>/dev/null
     conda env create -f environment_ubuntu.yaml
 fi
 
-if [ -f ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg ]; then
-    cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg \
-        ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg
-else
-    # TODO newest ffmpeg break MTFG!!
-    bash download_ffmpeg.sh
+if command -v pacman; then
+    # arch based distro:
+    pip install -r requirements.txt
 fi
+
+cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg \
+    ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg
 popd
 
 cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua \
@@ -70,7 +95,6 @@ if [ ! -e ~/.local/bin/OpenFunscripter ]; then
     mkdir -p ~/.local/bin
     ln -s `realpath $OFS_DIR`/bin/OpenFunscripter ~/.local/bin/OpenFunscripter
 fi
-
 
 mkdir -p ~/.local/share/applications
 
