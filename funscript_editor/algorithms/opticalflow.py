@@ -9,10 +9,10 @@ import numpy as np
 
 from funscript_editor.data.ffmpegstream import FFmpegStream
 from dataclasses import dataclass
-from sklearn.decomposition import PCA
 from PyQt5 import QtCore
 from funscript_editor.algorithms.signal import Signal
 from funscript_editor.ui.opencvui import OpenCV_GUI, OpenCV_GUI_Parameters
+from funscript_editor.algorithms.ppca import PPCA
 
 import matplotlib.pyplot as plt
 
@@ -24,7 +24,7 @@ class OpticalFlowFunscriptGeneratorParameter:
     start_frame: int
     end_frame: int = -1 # default is video end (-1)
     skip_frames: int = 0
-    min_trajectory_len: int = 50
+    min_trajectory_len: int = 40
     feature_detect_interval: int = 10
     movement_filter: float = 10.0
 
@@ -59,9 +59,10 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
 
     class OpticalFlowPyrLK:
 
-        def __init__(self, min_trajectory_len, feature_detect_interval):
+        def __init__(self, min_trajectory_len, feature_detect_interval, feature_area):
             self.min_trajectory_len = min_trajectory_len
             self.feature_detect_interval = feature_detect_interval
+            self.feature_area = feature_area
             self.trajectories = []
             self.frame_idx = 0
             self.prev_frame_gray = None
@@ -94,6 +95,7 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
                 for trajectory, (x, y), good_flag in zip(self.trajectories, p1.reshape(-1, 2), good):
                     if not good_flag:
                         if len (trajectory) > self.min_trajectory_len:
+                            # print('add trajectorie from', self.frame_idx - len(trajectory), 'to', self.frame_idx)
                             self.result.append({'end': self.frame_idx, 'trajectory': trajectory})
                         continue
                     trajectory.append((x, y))
@@ -103,11 +105,14 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
 
 
             if len(self.trajectories) == 0 or self.frame_idx % self.feature_detect_interval == 0:
-                mask = np.zeros_like(frame_gray)
+                seach_img = frame_gray[self.feature_area[1]:self.feature_area[1]+self.feature_area[3], self.feature_area[0]:self.feature_area[0]+self.feature_area[2]]
+                mask = np.zeros_like(seach_img)
                 mask[:] = 255
-                p = cv2.goodFeaturesToTrack(frame_gray, mask = mask, **self.feature_params)
+                p = cv2.goodFeaturesToTrack(seach_img, mask = mask, **self.feature_params)
                 if p is not None:
                     for x, y in np.float32(p).reshape(-1, 2):
+                        x += self.feature_area[0]
+                        y += self.feature_area[1]
                         if any(abs(t[-1][0] - x) < 3 and abs(t[-1][1] - y) < 3 for t in self.trajectories):
                             continue
 
@@ -135,8 +140,9 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
             zero_before = r['end'] - len(r['trajectory'])
             zero_after = optical_flow_result['meta']['last_idx'] - r['end']
             trajectory_min = min([item[metric_idx] for item in r['trajectory']])
-            y = [0 for _ in range(zero_before)] + [(r['trajectory'][i][metric_idx] - trajectory_min)**2 for i in range(len(r['trajectory']))] + [0 for _ in range(zero_after)]
-            if not filter_static_points or (max(y) - min(y)) > self.params.movement_filter:
+            action = [(r['trajectory'][i][metric_idx] - trajectory_min) for i in range(len(r['trajectory']))]
+            y = [None for _ in range(zero_before)] + action + [None for _ in range(zero_after)]
+            if not filter_static_points or (max(action) - min(action)) > self.params.movement_filter:
                 result.append(y)
 
         return result
@@ -145,13 +151,16 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
     def get_absolute_framenumber(self, frame_number: int) -> int:
         """ Get the absoulte frame number
 
+        Note:
+            We have an offset of 1 because we use the first frame for init
+
         Args:
             frame_number (int): relative frame number
 
         Returns:
             int: absolute frame position
         """
-        return self.params.start_frame + frame_number
+        return self.params.start_frame + frame_number + 1
 
 
     def tracking(self) -> str:
@@ -175,14 +184,43 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
         if first_frame is None:
             return "FFmpeg could not extract the first video frame"
 
-        roi = self.ui.bbox_selector(
-            first_frame,
+        preview_frame = copy.copy(first_frame)
+        search_roi = self.ui.bbox_selector(
+            preview_frame,
             "Select observe area of an single person",
         )
 
+        preview_frame = self.ui.draw_box_to_image(
+                preview_frame,
+                search_roi,
+                color=(0,255,0)
+            )
+
+        while True:
+            feature_roi = self.ui.bbox_selector(
+                preview_frame,
+                "Select feature area inside the observe area",
+            )
+
+            if feature_roi[0] > search_roi[0] \
+                and feature_roi[1] > search_roi[1] \
+                and feature_roi[0] + feature_roi[2] < search_roi[0] + search_roi[2] \
+                and feature_roi[1] + feature_roi[3] < search_roi[1] + search_roi[3]:
+                break
+
+            self.logger.warning("Invalid feature")
+
+        feature_roi = [
+                feature_roi[0] - search_roi[0],
+                feature_roi[1] - search_roi[1],
+                feature_roi[2],
+                feature_roi[3]
+            ]
+
         optical_flow = OpticalFlowFunscriptGeneratorThread.OpticalFlowPyrLK(
                 min_trajectory_len = self.params.min_trajectory_len,
-                feature_detect_interval = self.params.feature_detect_interval
+                feature_detect_interval = self.params.feature_detect_interval,
+                feature_area = feature_roi
             )
 
         status = "End of video reached"
@@ -199,17 +237,17 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
                 status = "Tracking stop at existing action point"
                 break
 
-            frame_roi = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2], :]
+            frame_roi = frame[search_roi[1]:search_roi[1]+search_roi[3], search_roi[0]:search_roi[0]+search_roi[2], :]
             current_features = optical_flow.update(frame_roi)
 
             for f in current_features:
-                cv2.circle(frame, (int(roi[0]+f[0]), int(roi[1]+f[1])), 3, (0, 0, 255), -1)
+                cv2.circle(frame, (int(search_roi[0]+f[0]), int(search_roi[1]+f[1])), 3, (0, 0, 255), -1)
 
             key = self.ui.preview(
                     frame,
                     frame_num + self.params.start_frame,
                     texte = ["Press 'q' to stop tracking"],
-                    boxes = [roi],
+                    boxes = [search_roi],
                 )
 
             if self.ui.was_key_pressed('q') or key == ord('q'):
@@ -217,30 +255,13 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
                 break
 
         result = optical_flow.get_result()
-
-        # for filter_static_points in [True, False]:
-        #     test = self.extract_movement(result, filter_static_points=filter_static_points)
-        #     for i in [1, 2, 3, 4]:
-        #         pca = PCA(n_components=i)
-        #         principalComponents = pca.fit_transform(np.transpose(np.array(test)))
-        #         test_result = np.array(principalComponents)
-        #         plt.plot(test_result)
-        #         plt.savefig('debug_{}_{}.png'.format(filter_static_points, i), dpi=400)
-        #         plt.close()
-
         result = self.extract_movement(result)
 
-        pca = PCA(n_components=1)
-        principalComponents = pca.fit_transform(np.transpose(np.array(result)))
-        result = [x[0] for x in principalComponents]
-
-        # option for pca 2 with two moving persons:
-        # result = np.transpose(np.array(principalComponents))
-        # result = np.array(result[0]) - np.array(result[1])
+        _, _, _, principalComponents, _ = PPCA(np.transpose(np.array(result, dtype=float)), d=1)
+        result = [x[0] for x in principalComponents.tolist()]
 
         signal = Signal(self.video_info.fps)
         points = signal.get_local_min_max_points(result)
-        # points = signal.get_direction_changes(result, filter_len=4)
         categorized_points = signal.categorize_points(result, points)
 
         for k in self.funscripts:
