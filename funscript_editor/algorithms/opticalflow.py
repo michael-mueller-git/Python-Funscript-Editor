@@ -14,6 +14,8 @@ from PyQt5 import QtCore
 from funscript_editor.algorithms.signal import Signal
 from funscript_editor.ui.opencvui import OpenCV_GUI, OpenCV_GUI_Parameters
 
+import matplotlib.pyplot as plt
+
 @dataclass
 class OpticalFlowFunscriptGeneratorParameter:
     """ Funscript Generator Parameter Dataclass with default values """
@@ -22,7 +24,7 @@ class OpticalFlowFunscriptGeneratorParameter:
     start_frame: int
     end_frame: int = -1 # default is video end (-1)
     skip_frames: int = 0
-    min_trajectory_len: int = 60
+    min_trajectory_len: int = 50
     feature_detect_interval: int = 10
     movement_filter: float = 10.0
 
@@ -121,20 +123,20 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
         def get_result(self):
             result = copy.deepcopy(self.result)
             for trajectory in self.trajectories:
-                if len (trajectory) > self.min_trajectory_len:
+                if len (trajectory) > (self.min_trajectory_len / 2):
                     result.append({'end': self.frame_idx, 'trajectory': trajectory})
 
             return { 'meta': { 'last_idx': self.frame_idx }, 'data': result }
 
 
-    def extract_movement(self, optical_flow_result, metric_idx = 1):
+    def extract_movement(self, optical_flow_result, metric_idx = 1, filter_static_points = True):
         result = []
         for r in optical_flow_result['data']:
             zero_before = r['end'] - len(r['trajectory'])
             zero_after = optical_flow_result['meta']['last_idx'] - r['end']
             trajectory_min = min([item[metric_idx] for item in r['trajectory']])
             y = [0 for _ in range(zero_before)] + [(r['trajectory'][i][metric_idx] - trajectory_min)**2 for i in range(len(r['trajectory']))] + [0 for _ in range(zero_after)]
-            if max(y) - min(y) > self.params.movement_filter:
+            if not filter_static_points or (max(y) - min(y)) > self.params.movement_filter:
                 result.append(y)
 
         return result
@@ -175,7 +177,7 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
 
         roi = self.ui.bbox_selector(
             first_frame,
-            "Select ROI",
+            "Select observe area of an single person",
         )
 
         optical_flow = OpticalFlowFunscriptGeneratorThread.OpticalFlowPyrLK(
@@ -215,13 +217,26 @@ class OpticalFlowFunscriptGeneratorThread(QtCore.QThread):
                 break
 
         result = optical_flow.get_result()
+
+        # for filter_static_points in [True, False]:
+        #     test = self.extract_movement(result, filter_static_points=filter_static_points)
+        #     for i in [1, 2, 3, 4]:
+        #         pca = PCA(n_components=i)
+        #         principalComponents = pca.fit_transform(np.transpose(np.array(test)))
+        #         test_result = np.array(principalComponents)
+        #         plt.plot(test_result)
+        #         plt.savefig('debug_{}_{}.png'.format(filter_static_points, i), dpi=400)
+        #         plt.close()
+
         result = self.extract_movement(result)
 
-        pca = PCA(n_components=2)
+        pca = PCA(n_components=1)
         principalComponents = pca.fit_transform(np.transpose(np.array(result)))
-        result = np.transpose(np.array(principalComponents))
+        result = [x[0] for x in principalComponents]
 
-        result = np.array(result[0]) - np.array(result[1])
+        # option for pca 2 with two moving persons:
+        # result = np.transpose(np.array(principalComponents))
+        # result = np.array(result[0]) - np.array(result[1])
 
         signal = Signal(self.video_info.fps)
         points = signal.get_local_min_max_points(result)
