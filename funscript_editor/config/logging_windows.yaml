@@ -23,5 +23,5 @@ handlers:
 
 root:
     level: NOTSET
-    handlers: [console, file_handler]
+    handlers: [file_handler]
     propogate: yes
