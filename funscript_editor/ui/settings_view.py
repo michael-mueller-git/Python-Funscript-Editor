@@ -149,6 +149,7 @@ class Ui_Form(object):
         self.bottomPointOffsetSpinBox.setSizePolicy(sizePolicy)
         self.bottomPointOffsetSpinBox.setMinimum(-100)
         self.bottomPointOffsetSpinBox.setMaximum(100)
+        self.bottomPointOffsetSpinBox.setSingleStep(5)
         self.bottomPointOffsetSpinBox.setProperty("value", -10)
         self.bottomPointOffsetSpinBox.setObjectName("bottomPointOffsetSpinBox")
         self.horizontalLayoutBottomPointOffset.addWidget(self.bottomPointOffsetSpinBox)

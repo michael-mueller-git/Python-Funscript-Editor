@@ -2,7 +2,6 @@
 
 import cv2
 import os
-import funscript_editor.utils.logging as logging
 import time
 import platform
 
@@ -13,8 +12,16 @@ from queue import Queue
 import subprocess as sp
 import numpy as np
 
-from funscript_editor.utils.watchdog import Watchdog
-from funscript_editor.utils.config import SETTINGS
+try:
+    import funscript_editor.utils.logging as logging
+    from funscript_editor.utils.watchdog import Watchdog
+    from funscript_editor.utils.config import SETTINGS
+except:
+    import logging as logging
+    from utils.watchdog import Watchdog
+    SETTINGS = {
+            'ffmpeg_timeout_in_seconds': 16
+    }
 
 @dataclass
 class VideoInfo:
@@ -157,6 +164,9 @@ class FFmpegStream:
         for k, v in config['parameter'].items():
             video_filter = video_filter.replace('${' + k + '}', str(v))
 
+        width_factor = 2 if "out_stereo=sbs" in video_filter else 1
+        height_factor = 2 if "out_stereo=tb" in video_filter else 1
+
         command = [
                 FFmpegStream.get_ffmpeg_command(),
                 '-hide_banner',
@@ -182,15 +192,15 @@ class FFmpegStream:
                 command,
                 stdin = sp.PIPE,
                 stdout = sp.PIPE,
-                bufsize = 3 * config['parameter']['width'] * config['parameter']['height']
+                bufsize = 3 * config['parameter']['width'] * width_factor * config['parameter']['height'] * height_factor
             )
 
         pipe.stdin.write(frame.tobytes())
         projection = np.frombuffer(
-                pipe.stdout.read(config['parameter']['width'] * config['parameter']['height'] * 3),
+                pipe.stdout.read(config['parameter']['width'] * width_factor * config['parameter']['height'] * height_factor * 3),
                 dtype='uint8'
             ).reshape(
-                    (config['parameter']['height'], config['parameter']['width'], 3)
+                    (config['parameter']['height'] * height_factor, config['parameter']['width'] * width_factor, 3)
                 )
 
         pipe.terminate()
@@ -364,6 +374,9 @@ class FFmpegStream:
 
             seek = FFmpegStream.frame_to_timestamp(self.start_frame, self.video_info.fps)
 
+            width_factor = 2 if "out_stereo=sbs" in video_filter else 1
+            height_factor = 2 if "out_stereo=tb" in video_filter else 1
+
             command = [
                     FFmpegStream.get_ffmpeg_command(),
                     '-hide_banner',
@@ -388,17 +401,17 @@ class FFmpegStream:
                     command,
                     stdout = sp.PIPE,
                     stderr = sp.PIPE,
-                    bufsize= 3 * self.config['parameter']['height'] * self.config['parameter']['width']
+                    bufsize= 3 * self.config['parameter']['height'] * height_factor * self.config['parameter']['width'] * width_factor
                 )
 
             while not self.stopped:
                 self.watchdog.trigger()
-                data = self.pipe.stdout.read(self.config['parameter']['width'] * self.config['parameter']['height'] * 3)
+                data = self.pipe.stdout.read(self.config['parameter']['width'] * width_factor * self.config['parameter']['height'] * height_factor * 3)
                 if not data:
                     break
 
                 frame = np.frombuffer(data, dtype='uint8').reshape(
-                        (self.config['parameter']['height'], self.config['parameter']['width'], 3)
+                        (self.config['parameter']['height'] * height_factor, self.config['parameter']['width'] * width_factor, 3)
                     )
                 if frame is None:
                     break
