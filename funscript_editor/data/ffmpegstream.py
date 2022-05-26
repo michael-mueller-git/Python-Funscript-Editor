@@ -187,7 +187,7 @@ class FFmpegStream:
                 '-'
             ]
 
-        # print('cmd', command)
+        # print('cmd:', ' '.join(command))
         pipe = sp.Popen(
                 command,
                 stdin = sp.PIPE,
@@ -196,6 +196,8 @@ class FFmpegStream:
             )
 
         pipe.stdin.write(frame.tobytes())
+        try: pipe.stdin.close()
+        except: pass
         projection = np.frombuffer(
                 pipe.stdout.read(config['parameter']['width'] * width_factor * config['parameter']['height'] * height_factor * 3),
                 dtype='uint8'
@@ -336,6 +338,7 @@ class FFmpegStream:
                 '-ss', str(seek),
                 '-hwaccel', 'auto',
                 '-i', video_path,
+                '-vframes', '1',
                 '-f', 'image2pipe',
                 '-pix_fmt', 'bgr24',
                 '-vsync', 'passthrough',
@@ -345,6 +348,7 @@ class FFmpegStream:
                 '-'
             ]
 
+        # print('cmd:', ' '.join(command))
         pipe = sp.Popen(
                 command,
                 stdout = sp.PIPE,
