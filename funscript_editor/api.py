@@ -26,7 +26,8 @@ def generate_funscript(
         video_file: str,
         start_time: float,
         end_time :float,
-        output_file: str) -> None:
+        output_file: str,
+        include_multiaxis_options: bool = False) -> None:
     """ Generate a funscript with minimal UI
 
     Args:
@@ -34,6 +35,7 @@ def generate_funscript(
         start_time (float): start time in milliseconds
         end_time (float): end time in milliseconds (set -1.0 to use video end)
         output_file (str): path for the output file
+        include_multiaxis_options (bool): include options for multiaxis output
     """
     setup_logging()
     logging.info("Python Funscript Generator %s", VERSION)
@@ -41,5 +43,5 @@ def generate_funscript(
     logging.info("Args: video_file=%s, start_time=%s, end_time=%s, output_file=%s", \
             str(video_file), str(start_time), str(end_time), str(output_file))
     app = QtWidgets.QApplication(sys.argv)
-    _ = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file)
+    _ = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file, include_multiaxis_options)
     sys.exit(app.exec_())

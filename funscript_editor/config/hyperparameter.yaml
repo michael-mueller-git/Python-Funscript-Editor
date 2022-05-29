@@ -29,10 +29,10 @@ signal:
   high_second_derivative_points_threshold: 1.2
 
   # filter length to detect a direction change
-  direction_change_filter_len: 4
+  direction_change_filter_len: 3
 
   # threshold value in milliseconds to merge additional points
-  additional_points_merge_time_threshold_in_ms: 100
+  additional_points_merge_time_threshold_in_ms: 70
 
   # threshold value to merge additional points
   additional_points_merge_distance_threshold: 10.0

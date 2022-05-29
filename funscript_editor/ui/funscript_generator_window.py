@@ -1,6 +1,7 @@
 import sys
 import funscript_editor.utils.logging as logging
 import os
+import json
 import time
 import platform
 import cv2
@@ -15,7 +16,7 @@ from funscript_editor.utils.config import SETTINGS, PROJECTION
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-USE_OPTICALFLOW = False
+USE_OPTICALFLOW = False # Enable some hardcoded optical flow testcode
 if USE_OPTICALFLOW:
     from funscript_editor.algorithms.opticalflow import OpticalFlowFunscriptGeneratorThread, OpticalFlowFunscriptGeneratorParameter
 
@@ -43,6 +44,9 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         setup_theme()
         if os.path.exists(definitions.ICON_PATH):
             self.setWindowIcon(QtGui.QIcon(definitions.ICON_PATH))
+
+        if include_multiaxis:
+            self.__logger.info("Enable multiaxis output")
 
         if not isinstance(output_file, Funscript):
             output_file = os.path.abspath(output_file)
@@ -108,15 +112,34 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         first_metric = [x for x in funscripts.keys()][0]
 
         if isinstance(self.output_file, Funscript):
+            if len(funscripts) > 1:
+                self.__logger.warning("Multiaxis output for build-in UI is not implemented")
             for item in funscripts[first_metric].get_actions():
                 self.output_file.add_action(item['pos'], item['at'], SETTINGS['raw_output'])
             self.funscriptCompleted.emit(self.output_file, msg, success)
         else:
             os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
-            with open(self.output_file, 'w') as f:
-                f.write('at;pos\n')
-                for item in funscripts[first_metric].get_actions():
-                    f.write('{at};{pos}\n'.format(at=item['at'], pos=item['pos']))
+            if self.output_file.lower().endswith('.json'):
+                funscript_json_output = {
+                        'version': 1,
+                        'actions': {}
+                    }
+
+                for key in funscripts.keys():
+                    funscript_json_output['actions'][key] = []
+                    for item in funscripts[key].get_actions():
+                        funscript_json_output['actions'][key].append(item)
+
+                with open(self.output_file, 'w') as f:
+                    json.dump(funscript_json_output, f)
+            else:
+                # dump to CSV
+                if len(funscripts) > 1:
+                    self.__logger.warning("Multiaxis output for csv is  not implemented")
+                with open(self.output_file, 'w') as f:
+                    f.write('at;pos\n')
+                    for item in funscripts[first_metric].get_actions():
+                        f.write('{at};{pos}\n'.format(at=item['at'], pos=item['pos']))
 
             self.__logger.info("Save result to %s", self.output_file)
             if not success: self.__show_message(msg, error=True)
