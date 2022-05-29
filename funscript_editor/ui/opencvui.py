@@ -647,6 +647,12 @@ class OpenCV_GUI(KeypressHandler):
 
                     if pressed_key == "'0'":
                         config = copy.deepcopy(PROJECTION[projection])
+                        if config['parameter']['height'] == -1:
+                            scaling = config['parameter']['width'] / float(w)
+                            config['parameter']['height'] = round(h * scaling)
+                        elif config[projection]['parameter']['width'] == -1:
+                            scaling = config['parameter']['height'] / float(h)
+                            config['parameter']['width'] = round(w * scaling)
                         parameter_changed = True
                         break
 
