@@ -610,14 +610,14 @@ class OpenCV_GUI(KeypressHandler):
         if image.shape[0] > 3000 or image.shape[1] > 3000:
             image = cv2.resize(image, None, fx=0.5, fy=0.5)
 
-        ui_texte = []
+        ui_texte = {}
         if "keys" in config.keys():
             for param in config['keys'].keys():
                 if param in config['parameter'].keys() and all(item in config["keys"][param].keys() for item in ["increase", "decrease"]):
-                    ui_texte.append("Use '{}', '{}' to increase/decrease {}".format(
+                    ui_texte[param] = "Use '{}', '{}' to increase/decrease {} = ${{val}}".format(
                         config["keys"][param]["increase"],
                         config["keys"][param]["decrease"],
-                        param)
+                        param
                     )
 
         self.clear_keypress_queue()
@@ -633,7 +633,8 @@ class OpenCV_GUI(KeypressHandler):
                     self.set_background_image(preview)
                     self.print_text("Press 'space' or 'enter' to use current viewpoint")
                     self.print_text("Press '0' (NULL) to reset view")
-                    self.print_text(ui_texte)
+                    final_ui_texte = [ui_texte[k].replace('${val}', str(config['parameter'][k])) for k in ui_texte.keys()]
+                    self.print_text(final_ui_texte)
 
                 ret = self.show()
                 if ret in [ord(' '), 13]:
