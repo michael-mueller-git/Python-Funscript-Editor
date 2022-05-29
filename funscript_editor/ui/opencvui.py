@@ -622,7 +622,7 @@ class OpenCV_GUI(KeypressHandler):
 
         self.clear_keypress_queue()
 
-        self.logger.info("Show VR Menu")
+        self.logger.info("Show ROI Menu")
         if len(ui_texte) > 0:
             # we need an user input
             parameter_changed, selected = True, False
@@ -650,7 +650,7 @@ class OpenCV_GUI(KeypressHandler):
                         if config['parameter']['height'] == -1:
                             scaling = config['parameter']['width'] / float(w)
                             config['parameter']['height'] = round(h * scaling)
-                        elif config[projection]['parameter']['width'] == -1:
+                        elif config['parameter']['width'] == -1:
                             scaling = config['parameter']['height'] / float(h)
                             config['parameter']['width'] = round(w * scaling)
                         parameter_changed = True

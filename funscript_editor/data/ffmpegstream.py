@@ -170,7 +170,7 @@ class FFmpegStream:
         command = [
                 FFmpegStream.get_ffmpeg_command(),
                 '-hide_banner',
-                '-loglevel', 'warning',
+                '-loglevel', 'error',
                 '-y',
                 '-f', 'rawvideo',
                 '-vcodec','rawvideo',
