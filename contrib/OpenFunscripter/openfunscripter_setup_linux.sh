@@ -90,6 +90,10 @@ popd
 
 cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua \
     ~/.local/share/OFS/OFS_data/extensions/MTFG/main.lua
+
+cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/json.lua \
+    ~/.local/share/OFS/OFS_data/extensions/MTFG/json.lua
+
 popd
 
 if [ ! -e ~/.local/bin/OpenFunscripter ]; then

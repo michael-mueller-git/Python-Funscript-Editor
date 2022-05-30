@@ -1,6 +1,6 @@
 import urllib.request
 import requests
-import re
+import json
 import platform
 import zipfile
 import os
@@ -9,39 +9,17 @@ import time
 import traceback
 import shutil
 import subprocess
-import ctypes
 
 from packaging import version
 from bs4 import BeautifulSoup # beautifulsoup4
 from tqdm import tqdm
 
-VERSION = "v0.0.4"
-LUA_EXTENSION_URL = "https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/main.lua"
+
+VERSION = "v0.1.0"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
 
-USE_HTTP_ONLY=False
-if os.path.exists("HTTP_ONLY.txt"):
-    print("Use HTTP only mode")
-    USE_HTTP_ONLY=True
-    LUA_EXTENSION_URL = LUA_EXTENSION_URL.replace("https:", "http:")
-    FUNSCRIPT_GENERATOR_RELEASE_URL = FUNSCRIPT_GENERATOR_RELEASE_URL.replace("https:", "http:")
-    LATEST_RELEASE_API_URL = LATEST_RELEASE_API_URL.replace("https:", "http:")
-
-
-def Mbox(title, text, style):
-    """
-    ##  Styles:
-    ##  0 : OK
-    ##  1 : OK | Cancel
-    ##  2 : Abort | Retry | Ignore
-    ##  3 : Yes | No | Cancel
-    ##  4 : Yes | No
-    ##  5 : Retry | Cancel
-    ##  6 : Cancel | Try Again | Continue
-    """
-    return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
 class DownloadProgressBar(tqdm):
     def update_to(self, b=1, bsize=1, tsize=None):
@@ -51,8 +29,6 @@ class DownloadProgressBar(tqdm):
 
 
 def download_url(url, output_path):
-    if USE_HTTP_ONLY:
-        url = url.replace("https:", "http:")
     print("Download latest release of Python-Funscript-Editor")
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
         urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
@@ -60,7 +36,7 @@ def download_url(url, output_path):
 
 def error(msg):
     print("ERROR: " + msg)
-    sys.exit()
+    sys.exit(1)
 
 
 def is_ofs_installed():
@@ -86,6 +62,16 @@ def get_download_urls_with_api():
                 error("Download URL not found (" + LATEST_RELEASE_API_URL + ")")
 
 
+def get_required_installer_version(mtfg_dir):
+    if not os.path.exists(os.path.join(mtfg_dir, "install.json")):
+        error("Installer notes missing, please use an newer version")
+
+    with open(os.path.join(mtfg_dir, "install.json"), 'r') as f:
+        installer_notes = json.load(f)
+
+    return installer_notes['minRequiredVersion']
+
+
 def process_exists(process_name):
     try:
         call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
@@ -96,22 +82,12 @@ def process_exists(process_name):
         return False
 
 
-def install_main_lua(extension_dir, dest_dir):
-    if os.path.exists(os.path.join(dest_dir, "main.lua")):
-        shutil.copy2(os.path.join(dest_dir,"main.lua"), os.path.join(extension_dir, "main.lua"))
-    else:
-        print("Download main.lua from GitHub...")
-        # sometimes requests failed to fetch the url so we try up to 3 times
-        for i in range(3):
-            try:
-                with open(os.path.join(extension_dir, "main.lua"), "wb") as f:
-                    f.write(requests.get(LUA_EXTENSION_URL).content)
-                break
-            except:
-                if os.path.exists(dest_dir):
-                    try: shutil.rmtree(dest_dir)
-                    except: pass
-                error('main.lua insallation failed')
+def install_lua_scripts(extension_dir, dest_dir):
+    for script in ["main.lua", "json.lua"]:
+        if os.path.exists(os.path.join(dest_dir, "OFS", script)):
+            shutil.copy2(os.path.join(dest_dir, "OFS", script), os.path.join(extension_dir, script))
+        else:
+            error("Installation failed (" + script + " missing)")
 
 
 def is_latest_version_installed(version_file, version):
@@ -125,15 +101,12 @@ def is_latest_version_installed(version_file, version):
 def update(download_urls, latest, release_notes):
     extension_dir = os.path.join(OFS_EXTENSION_DIR, "Funscript Generator Windows")
     zip_file = os.path.join(extension_dir, "funscript-editor-v" +  str(latest) + ".zip")
-    dest_dir = os.path.join(os.path.dirname(zip_file), "funscript-editor")
+    mtfg_dir = os.path.join(os.path.dirname(zip_file), "funscript-editor")
     version_file = os.path.join(os.path.dirname(zip_file), "funscript-editor", "funscript_editor", "VERSION.txt")
 
     is_latest_version_installed(version_file, latest)
 
     print('New Version is available')
-    # print('')
-    # print('Release notes:')
-    # print(release_notes)
 
     trial = 0
     while True:
@@ -142,14 +115,14 @@ def update(download_urls, latest, release_notes):
             download_url(download_urls[latest], zip_file)
 
         try:
-            if os.path.exists(dest_dir + "_update"):
-                try: shutil.rmtree(dest_dir + "_update")
+            if os.path.exists(mtfg_dir + "_update"):
+                try: shutil.rmtree(mtfg_dir + "_update")
                 except: error('Error while deleting old update Version (Restart you computer and try again)')
 
-            os.makedirs(dest_dir + "_update", exist_ok = True)
+            os.makedirs(mtfg_dir + "_update", exist_ok = True)
             with zipfile.ZipFile(zip_file) as zf:
                 for member in tqdm(zf.infolist(), desc='Extracting '):
-                    zf.extract(member, dest_dir + "_update")
+                    zf.extract(member, mtfg_dir + "_update")
             break
         except:
             trial += 1
@@ -163,12 +136,16 @@ def update(download_urls, latest, release_notes):
     if process_exists("OpenFunscripter.exe"):
         error("OpenFunscripter is currently running, please close OpenFunscripter and execute this installer again, to update the MTFG Extension")
 
-    if os.path.exists(dest_dir):
-        try: shutil.rmtree(dest_dir)
+    if os.path.exists(mtfg_dir):
+        try: shutil.rmtree(mtfg_dir)
         except: error('Error while deleting old Version (Is OFS currenty running?)')
 
-    shutil.move(dest_dir + "_update", dest_dir)
-    install_main_lua(extension_dir, dest_dir)
+    min_required_installer_version = get_required_installer_version(mtfg_dir)
+    if version.parse(min_required_installer_version) < version.parse(VERSION):
+        error("min required installer version is " + str(min_required_installer_version))
+
+    shutil.move(mtfg_dir + "_update", mtfg_dir)
+    install_lua_scripts(extension_dir, mtfg_dir)
 
 
 

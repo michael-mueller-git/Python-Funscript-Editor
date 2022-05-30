@@ -11,8 +11,10 @@ jobs:
         matrix:
             os: ["windows-latest"]
     steps:
+
       - name: Checkout Repository
         uses: actions/checkout@v2
+
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -20,35 +22,52 @@ jobs:
           environment-file: environment_windows.yaml
           python-version: 3.9
           auto-activate-base: false
+
       - name: Collect Conda Info
         shell: bash -l {0}
         run: |
           conda info
           conda env export
+
       - name: Build Application Documentation
         shell: bash -l {0}
         run: |
           cd docs/app
           mkdocs build
           cd ../..
+
       - name: Build Application
         shell: bash -l {0}
         run: |
           pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config" --add-data="assets/*;." --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" --noupx --icon=icon.ico funscript-editor.py
+
       - name: Move Documentation to Application Build Directory
         shell: bash -l {0}
         run: |
           mv "docs/app/site" "dist/funscript-editor/funscript_editor/docs"
-      - name: Add MTFG OFS Extension
+
+      - name: Create OFS Files Directory
         shell: bash -l {0}
         run: |
-          cp "contrib/Installer/assets/main.lua" "dist/funscript-editor/main.lua"
+          mkdir -p "dist/funscript-editor/OFS"
+
+      - name: Add MTFG OFS Lua Extension
+        shell: bash -l {0}
+        run: |
+          cp "contrib/Installer/assets/main.lua" "dist/funscript-editor/OFS/main.lua"
+
+      - name: Add json Lua Extension
+        shell: bash -l {0}
+        run: |
+          cp "contrib/Installer/assets/json.lua" "dist/funscript-editor/OFS/json.lua"
+
       - name: Create Asset Archive
         uses: vimtor/action-zip@v1
         with:
           files: dist/funscript-editor
           recursive: true
           dest: funscript-editor_${{ github.sha }}.zip
+
       - uses: actions/upload-artifact@v2
         with:
           name: funscript-editor_${{ github.sha }}.zip
