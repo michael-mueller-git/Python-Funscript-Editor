@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 def show_editor() -> None:
     """ Show the Funscript Editor Main Window """
-    setup_logging()
+    setup_logging(silent=False)
     logging.info("Python Funscript Editor %s", VERSION)
     logging.info("Startup Path: %s", str(os.getcwd()))
     app = QtWidgets.QApplication(sys.argv)
@@ -37,7 +37,7 @@ def generate_funscript(
         output_file (str): path for the output file
         include_multiaxis_options (bool): include options for multiaxis output
     """
-    setup_logging()
+    setup_logging(silent=True)
     logging.info("Python Funscript Generator %s", VERSION)
     logging.info("Startup Path: %s", str(os.getcwd()))
     logging.info("Args: video_file=%s, start_time=%s, end_time=%s, output_file=%s", \

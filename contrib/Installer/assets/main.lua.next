@@ -44,7 +44,7 @@ function start_funscript_generator()
     end
 
     scriptIdx = ofs.ActiveIdx()
-    local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName 
+    local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName
     local video = player.CurrentVideo()
     local script = ofs.Script(scriptIdx)
     local currentTimeMs = player.CurrentTime() * 1000
@@ -77,7 +77,7 @@ function start_funscript_generator()
     end
 
     table.insert(args, "--generator")
-    
+
     if multiaxis then;
         table.insert(args, "--multiaxis")
     end
@@ -140,7 +140,7 @@ function import_funscript_generator_json_result()
         print('Funscript Generator json output file not found')
         return
     end
-    
+
     local content = f:read("*a")
     f:close()
     json_body = json.decode(content)

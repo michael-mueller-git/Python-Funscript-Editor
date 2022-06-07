@@ -8,7 +8,6 @@ import coloredlogs
 import logging.config
 
 from funscript_editor.definitions import WINDOWS_LOG_CONFIG_FILE, LINUX_LOG_CONFIG_FILE
-from funscript_editor.utils.config import SETTINGS
 
 
 def create_log_directories(config: dict) -> None:
@@ -116,13 +115,7 @@ def getLogger(name) -> LoggerInterface:
     Args:
         name (str): name of the logger instance
     """
-    if platform.system() == 'Windows':
-        if SETTINGS['logging']:
-            return PythonLogger(name)
-        else:
-            return DevZeroLogger(name)
-    else:
-        return PythonLogger(name)
+    return PythonLogger(name)
 
 
 def get_logfiles_paths() -> list:
@@ -145,6 +138,7 @@ def get_logfiles_paths() -> list:
 
 
 def setup_logging(
+        silent=False,
         default_level :int = logging.INFO,
         env_key :str = 'LOG_CFG') -> None:
     """ Logging Setup
@@ -160,16 +154,22 @@ def setup_logging(
         with open(config_path, 'rt') as f:
             try:
                 config = yaml.safe_load(f.read())
+                if silent:
+                    if "console" in config["root"]["handlers"]:
+                        config["root"]["handlers"] = [x for x in config["root"]["handlers"] if x != "console"]
                 create_log_directories(config)
                 logging.config.dictConfig(config)
-                coloredlogs.install(level=default_level)
+                if not silent:
+                    coloredlogs.install(level=default_level)
                 logging.debug('Loging setup completed')
             except Exception as e:
                 print(e)
                 print('Error in Logging Configuration. Using default configs')
                 logging.basicConfig(level=default_level)
-                coloredlogs.install(level=default_level)
+                if not silent:
+                    coloredlogs.install(level=default_level)
     else:
         logging.basicConfig(level=default_level)
-        coloredlogs.install(level=default_level)
+        if not silent:
+            coloredlogs.install(level=default_level)
         print('Failed to load configuration file. Using default configs')
