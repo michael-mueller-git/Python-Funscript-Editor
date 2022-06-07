@@ -6,11 +6,12 @@ processHandleConfigDir = nil
 processHandleLogFile = nil
 logfileExist = false
 updateCounter = 0
-scriptIdx = 0
+scriptIdx = 1
 mtfgVersion = "0.0.0"
 status = "MTFG not running"
 multiaxis = false
 tmpFileName = "funscript_actions.json"
+tmpFileExists = false
 scriptNames = {}
 scriptAssignment = {x={idx=1}, y={idx=1}, roll={idx=1}}
 
@@ -177,7 +178,7 @@ function import_funscript_generator_json_result()
     end
 
     -- delete json file
-    os.remove(tmpFile)
+    -- os.remove(tmpFile)
 end
 
 
@@ -338,6 +339,17 @@ function update_script_names()
     end
 end
 
+function update_tmp_file_exists()
+    local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName
+    local f = io.open(tmpFile)
+    if f then
+        tmpFileExists = true
+        f:close()
+    else
+        tmpFileExists = false
+    end
+end
+
 
 function update(delta)
     updateCounter = updateCounter + 1
@@ -349,6 +361,7 @@ function update(delta)
     if math.fmod(updateCounter, 100) == 1 then
         update_logfile_exists()
         update_script_names()
+        update_tmp_file_exists()
     end
 end
 
@@ -388,15 +401,23 @@ function gui()
 
     if logfileExist then
         if platform == "Windows" then
-            -- ofs.SameLine()
-            -- if ofs.Button("Open Log") then
-            --     processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
-            -- end
+            ofs.SameLine()
+            if ofs.Button("Open Log") then
+                 processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
+            end
         else
             ofs.SameLine()
             if ofs.Button("Open Log") then
                 processHandleLogFile = ofs.CreateProcess("/usr/bin/xdg-open", "/tmp/funscript_editor.log")
             end
+        end
+    end
+
+    if tmpFileExists then
+        ofs.SameLine()
+        if ofs.Button("Force Import") then
+            scriptIdx = ofs.ActiveIdx()
+            import_funscript_generator_json_result()
         end
     end
 
