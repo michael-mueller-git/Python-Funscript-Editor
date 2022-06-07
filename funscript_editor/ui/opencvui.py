@@ -407,6 +407,7 @@ class OpenCV_GUI(KeypressHandler):
         """
         if self.preview_image is not None:
             self.set_background_image(np.full(self.preview_image.shape, 0, dtype=np.uint8))
+            self.preview_image = cv2.resize( self.preview_image, None, fx=1/self.monitor_preview_scaling, fy=1/self.monitor_preview_scaling)
             self.print_text(txt, color=(0,0,255))
             self.show()
 
