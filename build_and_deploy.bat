@@ -6,6 +6,7 @@ rmdir /Q /S "%APPDATA%\\OFS\\OFS_data\\extensions\\Funscript Generator Windows\\
 del "dist\\funscript-editor.zip" 2>NUL
 del funscript-editor.spec 2>NUL
 del "%APPDATA%\\OFS\\OFS_data\\extensions\\Funscript Generator Windows\\main.lua" 2>NUL
+del "%APPDATA%\\OFS\\OFS_data\\extensions\\Funscript Generator Windows\\json.lua" 2>NUL
 if not exist "%APPDATA%\\OFS\\OFS_data\\extensions\\Funscript Generator Windows" mkdir "%APPDATA%\\OFS\\OFS_data\\extensions\\Funscript Generator Windows"
 cd docs/app
 mkdocs build
@@ -15,3 +16,4 @@ move "docs\\app\\site" "dist\\funscript-editor\\funscript_editor\\docs"
 copy /Y "funscript_editor\\VERSION.txt" "dist\\funscript-editor\\funscript_editor"
 move "dist\\funscript-editor" "%APPDATA%\\OFS\\OFS_data\\extensions\\Funscript Generator Windows\\funscript-editor"
 copy /Y "contrib\\Installer\\assets\\main.lua" "%APPDATA%\\OFS\\OFS_data\\extensions\\Funscript Generator Windows"
+copy /Y "contrib\\Installer\\assets\\json.lua" "%APPDATA%\\OFS\\OFS_data\\extensions\\Funscript Generator Windows"
