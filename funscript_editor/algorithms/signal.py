@@ -283,6 +283,9 @@ class Signal:
                     for j in range(base_points[i], base_points[i+1])
                 ]
 
+            if len(distances) == 0:
+                continue
+
             max_distance = max(distances)
 
             if overall_max_distance < max_distance:
