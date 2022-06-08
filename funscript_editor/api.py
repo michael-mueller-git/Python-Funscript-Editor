@@ -19,7 +19,9 @@ def show_editor() -> None:
     app = QtWidgets.QApplication(sys.argv)
     widget = FunscriptEditorWindow()
     widget.show()
-    sys.exit(app.exec_())
+    ret = app.exec_()
+    logger.info("EXIT")
+    sys.exit(ret)
 
 
 def generate_funscript(
@@ -49,4 +51,6 @@ def generate_funscript(
             str(video_file), str(start_time), str(end_time), str(output_file))
     app = QtWidgets.QApplication(sys.argv)
     _ = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file, include_multiaxis_options)
-    sys.exit(app.exec_())
+    ret = app.exec_()
+    logger.info("EXIT")
+    sys.exit(ret)
