@@ -25,7 +25,7 @@ fi
 
 if command -v pacman; then
     # arch based distro:
-    sudo pacman -Sy --needed python-opencv python-pyqt5 git base-devel python python-pip mpv cmake
+    sudo pacman -Sy --needed --noconfirm python-opencv python-pyqt5 git base-devel python python-pip mpv cmake
 fi
 
 OFS_DIR="$HOME/.local/share/OFS/application"
