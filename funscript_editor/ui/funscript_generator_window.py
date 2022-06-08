@@ -150,6 +150,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             self.__logger.info("Save result to %s", self.output_file)
             if not success: self.__show_message(msg, error=True)
             if platform.system() == 'Windows':
+                self.__logger.info("EXIT with Workaround")
                 time.sleep(0.5)
                 os.system("taskkill /f /im funscript-editor.exe")
 
