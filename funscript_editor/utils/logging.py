@@ -138,7 +138,7 @@ def get_logfiles_paths() -> list:
 
 
 def setup_logging(
-        silent=False,
+        silent: bool = False,
         default_level :int = logging.INFO,
         env_key :str = 'LOG_CFG') -> None:
     """ Logging Setup
@@ -173,3 +173,7 @@ def setup_logging(
         if not silent:
             coloredlogs.install(level=default_level)
         print('Failed to load configuration file. Using default configs')
+
+
+def disable_logging():
+    logging.disable(logging.CRITICAL)

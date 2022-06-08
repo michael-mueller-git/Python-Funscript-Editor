@@ -10,6 +10,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--generator", action = 'store_true', help = "Run only the generator")
     parser.add_argument("--multiaxis", action = 'store_true', help = "Show options for multiaxis output")
+    parser.add_argument("--logs", action = 'store_true', help = "Enable logging")
     parser.add_argument("-i", "--input", type = str, help = "Video File")
     parser.add_argument("-o", "--output", type = str, default = "/tmp/funscript_actions.json", help = "Output Path")
     parser.add_argument("-s", "--start", type = float, default = 0.0, help = "Start Time in Milliseconds")
@@ -20,4 +21,4 @@ def main():
         os.environ['PATH'] = os.getcwd() + os.sep + os.environ['PATH']
 
     if not args.generator: show_editor()
-    else: generate_funscript(args.input, args.start, args.end, args.output, args.multiaxis)
+    else: generate_funscript(args.input, args.start, args.end, args.output, args.multiaxis, args.logs)

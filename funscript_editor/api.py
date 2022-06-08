@@ -27,7 +27,8 @@ def generate_funscript(
         start_time: float,
         end_time :float,
         output_file: str,
-        include_multiaxis_options: bool = False) -> None:
+        include_multiaxis_options: bool = False,
+        enable_logging: bool = False) -> None:
     """ Generate a funscript with minimal UI
 
     Args:
@@ -37,7 +38,10 @@ def generate_funscript(
         output_file (str): path for the output file
         include_multiaxis_options (bool): include options for multiaxis output
     """
-    logging.setup_logging(silent=True)
+    if enable_logging:
+        logging.setup_logging(silent=True)
+    else:
+        logging.disable_logging()
     logger = logging.getLogger(__name__)
     logger.info("Python Funscript Generator %s", VERSION)
     logger.info("Startup Path: %s", str(os.getcwd()))
