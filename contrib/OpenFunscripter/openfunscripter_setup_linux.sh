@@ -34,7 +34,10 @@ if [ -d $OFS_DIR ]; then
     echo ">> OpenFunscripter Source already downloaded (Updating...)"
     pushd $OFS_DIR
     git pull
-    git submodule update
+    git submodule update --init
+    pushd $OFS_DIR/lib/EASTL
+    git submodule update --init
+    popd
 else
     mkdir -p `dirname $OFS_DIR`
     echo ">> Clone OpenFunscripter Source"
@@ -45,6 +48,18 @@ else
     git submodule update --init
     popd
     echo ">> OpenFunscripter Source downloaded to $OFS_DIR"
+fi
+
+if [ "$arg1" != "--latest" ]; then
+    echo "Checkout latest OpenFunscripter release"
+    git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+    # git checkout 1.4.4
+    git submodule update --init
+    pushd $OFS_DIR/lib/EASTL
+    git submodule update --init
+    popd
+else
+    echo "Use latest git commit (only for developers!)"
 fi
 
 echo ">> Build OFS"
