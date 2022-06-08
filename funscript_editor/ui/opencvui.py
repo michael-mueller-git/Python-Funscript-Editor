@@ -119,6 +119,7 @@ class OpenCV_GUI(KeypressHandler):
         self.__reset_print_positions()
         self.preview_scaling_applied = False
         self.preview_image = None
+        self.preview_image_without_scale = None
 
 
     def __del__(self):
@@ -406,7 +407,7 @@ class OpenCV_GUI(KeypressHandler):
         Args:
             txt (str): text to display
         """
-        if self.preview_image is not None:
+        if self.preview_image_without_scale is not None:
             self.set_background_image(np.full(self.preview_image_without_scale.shape, 0, dtype=np.uint8))
             self.print_text(txt, color=(0,0,255))
             self.show()
