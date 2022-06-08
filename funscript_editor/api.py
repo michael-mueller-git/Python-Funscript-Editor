@@ -1,9 +1,8 @@
 import sys
-import logging
 import os
 import cv2
 
-from funscript_editor.utils.logging import setup_logging
+import funscript_editor.utils.logging as logging
 from funscript_editor.ui.funscript_editor_window import FunscriptEditorWindow
 from funscript_editor.ui.funscript_generator_window import FunscriptGeneratorWindow
 from funscript_editor.utils.config import VERSION
@@ -13,9 +12,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 def show_editor() -> None:
     """ Show the Funscript Editor Main Window """
-    setup_logging(silent=False)
-    logging.info("Python Funscript Editor %s", VERSION)
-    logging.info("Startup Path: %s", str(os.getcwd()))
+    logging.setup_logging(silent=False)
+    logger = logging.getLogger(__name__)
+    logger.info("Python Funscript Editor %s", VERSION)
+    logger.info("Startup Path: %s", str(os.getcwd()))
     app = QtWidgets.QApplication(sys.argv)
     widget = FunscriptEditorWindow()
     widget.show()
@@ -37,10 +37,11 @@ def generate_funscript(
         output_file (str): path for the output file
         include_multiaxis_options (bool): include options for multiaxis output
     """
-    setup_logging(silent=True)
-    logging.info("Python Funscript Generator %s", VERSION)
-    logging.info("Startup Path: %s", str(os.getcwd()))
-    logging.info("Args: video_file=%s, start_time=%s, end_time=%s, output_file=%s", \
+    logging.setup_logging(silent=True)
+    logger = logging.getLogger(__name__)
+    logger.info("Python Funscript Generator %s", VERSION)
+    logger.info("Startup Path: %s", str(os.getcwd()))
+    logger.info("Args: video_file=%s, start_time=%s, end_time=%s, output_file=%s", \
             str(video_file), str(start_time), str(end_time), str(output_file))
     app = QtWidgets.QApplication(sys.argv)
     _ = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file, include_multiaxis_options)

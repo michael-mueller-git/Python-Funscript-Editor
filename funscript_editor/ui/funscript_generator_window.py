@@ -12,7 +12,7 @@ from funscript_editor.data.funscript import Funscript
 from funscript_editor.ui.settings_dialog import SettingsDialog
 import funscript_editor.definitions as definitions
 from funscript_editor.ui.theme import setup_theme
-from funscript_editor.utils.config import SETTINGS, PROJECTION
+from funscript_editor.utils.config import SETTINGS, PROJECTION, HYPERPARAMETER
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -84,6 +84,9 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         self.__logger.info("Set End Time to Frame Number %d", self.end_frame)
 
+        self.__logger.info("Hyperparameter:" + str(HYPERPARAMETER))
+        self.__logger.info("Config:" + str(SETTINGS))
+
         self.settings = {}
         if USE_OPTICALFLOW:
             self.run_opticalflow()
@@ -132,6 +135,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
                 with open(self.output_file, 'w') as f:
                     json.dump(funscript_json_output, f)
+                    f.flush()
             else:
                 # dump to CSV
                 if len(funscripts) > 1:
@@ -140,6 +144,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                     f.write('at;pos\n')
                     for item in funscripts[first_metric].get_actions():
                         f.write('{at};{pos}\n'.format(at=item['at'], pos=item['pos']))
+
+                    f.flush()
 
             self.__logger.info("Save result to %s", self.output_file)
             if not success: self.__show_message(msg, error=True)
