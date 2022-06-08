@@ -3,6 +3,8 @@
 # Requirements: On Debian based systems e.g. Ubuntu you have to install Anaconda or Miniconda
 # befor running this installer!
 
+arg1="$1"
+
 if [ "$EUID" -eq 0 ]; then
     echo "ERROR: You can not run this script with sudo!!"
     exit 1
@@ -69,8 +71,12 @@ git reset --hard HEAD
 git clean -fd
 git pull --all
 
-echo "Checkout latest MTFG release"
-git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+if [ "$arg1" != "--latest" ]; then
+    echo "Checkout latest MTFG release"
+    git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+else
+    echo "Use latest git commit (only for developers!)"
+fi
 
 if command -v apt; then
     # debian based distro:
