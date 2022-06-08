@@ -141,6 +141,7 @@ class SettingsDialog(QtWidgets.QDialog):
         if self.include_multiaxis:
             self.ui.trackingMetricComboBox.addItems([
                 "y + roll (up-down + rotation)",
+                "x + y (left-right + up-down)",
                 "x + y + roll (left-right + up-down + rotation)",
             ])
         else:
