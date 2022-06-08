@@ -12,6 +12,7 @@ status = "MTFG not running"
 multiaxis = false
 tmpFileName = "funscript_actions.json"
 tmpFileExists = false
+enableLogs = false
 scriptNames = {}
 scriptAssignment = {x={idx=1}, y={idx=1}, roll={idx=1}}
 
@@ -80,6 +81,10 @@ function start_funscript_generator()
 
     if multiaxis then;
         table.insert(args, "--multiaxis")
+    end
+
+    if enableLogs then;
+        table.insert(args, "--logs")
     end
 
     table.insert(args, "-s")
@@ -422,13 +427,14 @@ function gui()
     end
 
     ofs.Separator()
-
-    multiaxis, valueChanged = ofs.Checkbox("multiaxis", multiaxis)
+    ofs.Text("Options:")
+    enableLogs, _ = ofs.Checkbox("Enable logging", enableLogs)
+    multiaxis, _ = ofs.Checkbox("Enable multiaxis", multiaxis)
 
     if multiaxis then
         local comboNum = 1
         for k,v in pairs(scriptAssignment) do
-              ofs.Text(k.." => ")
+              ofs.Text("  o "..k.." ->")
               ofs.SameLine()
               v.idx, _ = ofs.Combo("#"..tostring(comboNum), v.idx, scriptNames)
               comboNum = comboNum + 1
