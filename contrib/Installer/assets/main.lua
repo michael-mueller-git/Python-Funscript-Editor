@@ -1,12 +1,20 @@
+json = require "json"
 
+-- global var
 processHandleMTFG = nil
 processHandleConfigDir = nil
 processHandleLogFile = nil
 logfileExist = false
 updateCounter = 0
-scriptIdx = 0
+scriptIdx = 1
 mtfgVersion = "0.0.0"
 status = "MTFG not running"
+multiaxis = false
+tmpFileName = "funscript_actions.json"
+tmpFileExists = false
+enableLogs = false
+scriptNames = {}
+scriptAssignment = {x={idx=1}, y={idx=1}, roll={idx=1}}
 
 function exists(file)
    return os.rename(file, file)
@@ -37,7 +45,7 @@ function start_funscript_generator()
     end
 
     scriptIdx = ofs.ActiveIdx()
-    local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
+    local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName
     local video = player.CurrentVideo()
     local script = ofs.Script(scriptIdx)
     local currentTimeMs = player.CurrentTime() * 1000
@@ -70,6 +78,15 @@ function start_funscript_generator()
     end
 
     table.insert(args, "--generator")
+
+    if multiaxis then;
+        table.insert(args, "--multiaxis")
+    end
+
+    if enableLogs then;
+        table.insert(args, "--logs")
+    end
+
     table.insert(args, "-s")
     table.insert(args, tostring(currentTimeMs))
     table.insert(args, "-i")
@@ -91,12 +108,12 @@ function start_funscript_generator()
 end
 
 
-function import_funscript_generator_result()
+function import_funscript_generator_csv_result()
     status = "MTFG not running"
-    local tmpFile = ofs.ExtensionDir() .. "/funscript_actions.csv"
+    local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName
     local f = io.open(tmpFile)
     if not f then
-        print('Funscript Generator output file not found')
+        print('Funscript Generator csv output file not found')
         return
     end
 
@@ -118,6 +135,55 @@ function import_funscript_generator_result()
 
     -- delete csv file
     os.remove(tmpFile)
+end
+
+function import_funscript_generator_json_result()
+    status = "MTFG not running"
+    local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName
+    local f = io.open(tmpFile)
+    if not f then
+        print('Funscript Generator json output file not found')
+        return
+    end
+
+    local content = f:read("*a")
+    f:close()
+    json_body = json.decode(content)
+    actions = json_body["actions"]
+
+    if multiaxis then
+        local i = 1
+        while ofs.Script(i) do
+            name = ofs.ScriptTitle(i)
+            for k,v in pairs(scriptAssignment) do
+                if name and name == scriptNames[v.idx] then
+                    if actions[k] then
+                        script = ofs.Script(i)
+                        for _, action in pairs(actions[k]) do
+                            ofs.AddAction(script, action["at"], action["pos"], true)
+                        end
+                        ofs.Commit(script)
+                    end
+                end
+            end
+       	    i = i + 1
+        end
+    else
+        script = ofs.Script(scriptIdx)
+
+        for metric, actions_metric in pairs(actions) do
+            print('add ', metric, ' to ', ofs.ScriptTitle(scriptIdx))
+            for _, action in pairs(actions_metric) do
+                ofs.AddAction(script, action["at"], action["pos"], true)
+            end
+        end
+
+        -- save changes
+        ofs.Commit(script)
+    end
+
+    -- delete json file
+    -- os.remove(tmpFile)
 end
 
 
@@ -244,15 +310,7 @@ function init()
     end
 end
 
-
-function update(delta)
-    updateCounter = updateCounter + 1
-    if processHandleMTFG and not ofs.IsProcessAlive(processHandleMTFG) then
-        print('funscript generator completed import result')
-        processHandleMTFG = nil
-        import_funscript_generator_result()
-    end
-    if math.fmod(updateCounter, 1000) == 1 then
+function update_logfile_exists()
         local logfile = ""
         if platform == "Windows" then
             logfile = "C:/Temp/funscript_editor.log"
@@ -266,6 +324,49 @@ function update(delta)
         else
             logfileExist = false
         end
+end
+
+
+function is_empty(s)
+  return s == nil or s == ''
+end
+
+
+function update_script_names()
+    local i = 1
+    scriptNames = {'ignore'}
+    while ofs.Script(i) do
+       name = ofs.ScriptTitle(i)
+       if not is_empty(name) then
+           table.insert(scriptNames, name)
+       end
+       i = i + 1
+    end
+end
+
+function update_tmp_file_exists()
+    local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName
+    local f = io.open(tmpFile)
+    if f then
+        tmpFileExists = true
+        f:close()
+    else
+        tmpFileExists = false
+    end
+end
+
+
+function update(delta)
+    updateCounter = updateCounter + 1
+    if processHandleMTFG and not ofs.IsProcessAlive(processHandleMTFG) then
+        print('funscript generator completed import result')
+        processHandleMTFG = nil
+        import_funscript_generator_json_result()
+    end
+    if math.fmod(updateCounter, 100) == 1 then
+        update_logfile_exists()
+        update_script_names()
+        update_tmp_file_exists()
     end
 end
 
@@ -305,10 +406,10 @@ function gui()
 
     if logfileExist then
         if platform == "Windows" then
-            -- ofs.SameLine()
-            -- if ofs.Button("Open Log") then
-            --     processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
-            -- end
+            ofs.SameLine()
+            if ofs.Button("Open Log") then
+                 processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
+            end
         else
             ofs.SameLine()
             if ofs.Button("Open Log") then
@@ -317,7 +418,31 @@ function gui()
         end
     end
 
+    if tmpFileExists then
+        ofs.SameLine()
+        if ofs.Button("Force Import") then
+            scriptIdx = ofs.ActiveIdx()
+            import_funscript_generator_json_result()
+        end
+    end
+
     ofs.Separator()
+    ofs.Text("Options:")
+    enableLogs, _ = ofs.Checkbox("Enable logging", enableLogs)
+    multiaxis, _ = ofs.Checkbox("Enable multiaxis", multiaxis)
+
+    if multiaxis then
+        local comboNum = 1
+        for k,v in pairs(scriptAssignment) do
+              ofs.Text("  o "..k.." ->")
+              ofs.SameLine()
+              v.idx, _ = ofs.Combo("#"..tostring(comboNum), v.idx, scriptNames)
+              comboNum = comboNum + 1
+        end
+    end
+
+    ofs.Separator()
+
     ofs.Text("Post-Processing:")
     ofs.SameLine()
     if ofs.Button("Invert") then
