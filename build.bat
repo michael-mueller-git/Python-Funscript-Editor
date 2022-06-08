@@ -9,5 +9,8 @@ cd ../..
 pyinstaller --add-data="funscript_editor/config/*;funscript_editor/config/" --add-data="assets/*;./" --hidden-import "pynput.keyboard._win32" --hidden-import "pynput.mouse._win32" --noupx --icon=icon.ico funscript-editor.py
 move "docs\\app\\site" "dist\\funscript-editor\\funscript_editor\\docs"
 copy /Y "funscript_editor\\VERSION.txt" "dist\\funscript-editor\\funscript_editor"
+md "dist\\funscript-editor\\OFS"
+copy /Y "contrib\\Installer\\assets\\main.lua" "dist\\funscript-editor\\OFS"
+copy /Y "contrib\\Installer\\assets\\json.lua" "dist\\funscript-editor\\OFS"
 powershell Compress-Archive -LiteralPath "dist/funscript-editor" -DestinationPath "dist/funscript-editor.zip"
 
