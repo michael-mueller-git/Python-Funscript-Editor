@@ -25,6 +25,7 @@ fi
 
 if command -v pacman; then
     # arch based distro:
+    sudo pacman -Syu --needed --noconfirm
     sudo pacman -Sy --needed --noconfirm python-opencv python-pyqt5 git base-devel python python-pip mpv cmake
 fi
 
