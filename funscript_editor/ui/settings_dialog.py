@@ -175,7 +175,7 @@ class SettingsDialog(QtWidgets.QDialog):
         selection = self.ui.trackingMethodComboBox.currentText()
 
         self.ui.trackingMethodComboBox.clear()
-        if value in ['x', 'y', 'x inverted', 'y inverted']:
+        if value in ['x', 'y', 'x inverted', 'y inverted', 'x + y']:
             self.ui.trackingMethodComboBox.addItems(self.trackingMethods)
         else:
             self.ui.trackingMethodComboBox.addItems(list(filter(lambda x: "one" not in x, self.trackingMethods)))
