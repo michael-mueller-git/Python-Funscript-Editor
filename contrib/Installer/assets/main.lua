@@ -14,6 +14,7 @@ tmpFileName = "funscript_actions.json"
 tmpFileExists = false
 enableLogs = false
 scriptNames = {}
+scriptNamesCount = 0
 scriptAssignment = {x={idx=1}, y={idx=1}, roll={idx=1}}
 
 function exists(file)
@@ -334,11 +335,14 @@ end
 
 function update_script_names()
     local i = 1
+    scriptNamesCount = 0
     scriptNames = {'ignore'}
+    scriptNamesCount = scriptNamesCount + 1
     while ofs.Script(i) do
-       name = ofs.ScriptTitle(i)
-       if not is_empty(name) then
-           table.insert(scriptNames, name)
+        name = ofs.ScriptTitle(i)
+        if not is_empty(name) then
+            table.insert(scriptNames, name)
+            scriptNamesCount = scriptNamesCount + 1
        end
        i = i + 1
     end
@@ -434,10 +438,13 @@ function gui()
     if multiaxis then
         local comboNum = 1
         for k,v in pairs(scriptAssignment) do
-              ofs.Text("  o "..k.." ->")
-              ofs.SameLine()
-              v.idx, _ = ofs.Combo("#"..tostring(comboNum), v.idx, scriptNames)
-              comboNum = comboNum + 1
+            ofs.Text("  o "..k.." ->")
+            ofs.SameLine()
+            if v.idx > scriptNamesCount then
+                v.idx = 1
+            end
+            v.idx, _ = ofs.Combo("#"..tostring(comboNum), v.idx, scriptNames)
+            comboNum = comboNum + 1
         end
     end
 
