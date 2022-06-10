@@ -98,6 +98,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.params = params
         self.funscripts = funscripts
         self.video_info = FFmpegStream.get_video_info(self.params.video_path)
+        self.tracking_points = {}
         self.score = {
                 'x': [],
                 'y': [],
@@ -252,17 +253,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
         min_frame = np.argmin(np.array(self.score[metric])) + self.params.start_frame
         max_frame = np.argmax(np.array(self.score[metric])) + self.params.start_frame
 
-        if False:
-            cap = cv2.VideoCapture(self.params.video_path)
-            cap.set(cv2.CAP_PROP_POS_FRAMES, min_frame)
-            success_min, imgMin = cap.read()
-            cap.set(cv2.CAP_PROP_POS_FRAMES, max_frame)
-            success_max, imgMax = cap.read()
-            cap.release()
-        else:
-            success_min, success_max = True, True
-            imgMin = FFmpegStream.get_frame(self.params.video_path, min_frame)
-            imgMax = FFmpegStream.get_frame(self.params.video_path, max_frame)
+        success_min, success_max = True, True
+        imgMin = FFmpegStream.get_frame(self.params.video_path, min_frame)
+        imgMax = FFmpegStream.get_frame(self.params.video_path, max_frame)
 
         if success_min and success_max:
             if self.is_vr_video():
@@ -282,6 +275,20 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
             imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
             imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
+
+            min_tracking_points = self.get_tracking_points_by_frame_number(min_frame - self.params.start_frame)
+            max_tracking_points = self.get_tracking_points_by_frame_number(max_frame - self.params.start_frame)
+
+            # TODO: draw points to image
+            # NOTE: Code below does not work because image do not use the same projection
+
+            # for points in min_tracking_points:
+            #     imgMin = OpenCV_GUI.draw_point_to_image(imgMin, points)
+
+            # for points in max_tracking_points:
+            #     imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points)
+
+            # print('min_tracking_points', min_tracking_points, 'max_tracking_points', max_tracking_points)
 
             (desired_min, desired_max) = self.ui.min_max_selector(
                     image_min = imgMin,
@@ -654,8 +661,51 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.logger.info(status)
         self.logger.info('Interpolate tracking boxes')
         interpolated_bboxes = self.interpolate_bboxes(bboxes)
+        self.tracking_points = self.determine_tracking_points(interpolated_bboxes)
         self.calculate_score(interpolated_bboxes)
         return status
+
+
+    def determine_tracking_points(self, interpolated_bboxes: dict) -> dict:
+        """ Determine the final tracking points
+
+        Args:
+            interpolate_bboxes (dict): interpolate bboxes from all trackers
+
+        Returns:
+            dict: final tracking points
+        """
+        result = {}
+        for tracker_type in interpolated_bboxes.keys():
+            result[tracker_type] = {}
+            for tracker_number in interpolated_bboxes[tracker_type].keys():
+                result[tracker_type][tracker_number] = [self.get_center(item) for item in interpolated_bboxes[tracker_type][tracker_number]]
+
+        return result
+
+
+    def get_tracking_points_by_frame_number(self, relative_frame_number: int) -> list:
+        """ Get tracking points by frame number
+
+        Args:
+            relative_frame_number (int): relative frame number
+
+        Returns:
+            list: all tracking points
+        """
+        result = []
+        for tracker_type in self.tracking_points.keys():
+            for idx, tracker_number in enumerate([k for k in self.tracking_points[tracker_type].keys()]):
+                if len(result) < idx + 1:
+                    if relative_frame_number < len(self.tracking_points[tracker_type][tracker_number]):
+                        result.append([self.tracking_points[tracker_type][tracker_number][relative_frame_number]])
+                    else:
+                        result.append([])
+                else:
+                    if relative_frame_number < len(self.tracking_points[tracker_type][tracker_number]):
+                        result[idx].append(self.tracking_points[tracker_type][tracker_number][relative_frame_number])
+
+        return result
 
 
     def finished(self, status: str, success :bool) -> None:

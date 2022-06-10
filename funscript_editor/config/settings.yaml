@@ -20,10 +20,6 @@ tracker: 'CSRT'
 # Specify the wav file in the config directory to play when tracking finished (write 'off' to disable the sound notification)
 notification_sound: 'off'
 
-# Time in milliseconds at which the tracking is stopped if the selected feature is not found
-# THIS feature has no effekt since v0.1.2!
-tracking_lost_time: 0
-
 # Specify the scene detector algorithm. Tracking pause at detected scene changes. Available options:
 # - 'CSV': load scene csv file from [PySceneDetect](https://github.com/Breakthrough/PySceneDetect) if available
 # - 'CONTENT': Detects cuts using changes in colour and intensity between frames.

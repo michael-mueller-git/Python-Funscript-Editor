@@ -228,7 +228,7 @@ class OpenCV_GUI(KeypressHandler):
 
         Args:
             image (np.ndarray): image
-            bbox (tuple): tracking box with (x,y,w,h)
+            bbox (tuple or list): tracking box with (x,y,w,h) or list of tracking boxes
             color (tuple): RGB color values for the box
 
         Returns:
@@ -255,6 +255,33 @@ class OpenCV_GUI(KeypressHandler):
                             color,
                             2
                         )
+
+        return image
+
+
+    @staticmethod
+    def draw_point_to_image(image: np.ndarray, point, color: tuple = (255, 0, 255)) -> np.ndarray:
+        """ Draw an point to given image
+
+        Args:
+            image (np.ndarray): image
+            point (tuple or list): points (x,y) or list of points
+            color (tuple): RGB color values for the box
+
+        Returns:
+            np.ndarray: opencv image
+        """
+        if not isinstance(point, list):
+            point = [point]
+
+        for p in point:
+            cv2.circle(
+                    image,
+                    (p[0], p[1]),
+                    4,
+                    color,
+                    2
+                )
 
         return image
 
