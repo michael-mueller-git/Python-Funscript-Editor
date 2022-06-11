@@ -267,35 +267,17 @@ class FunscriptGeneratorThread(QtCore.QThread):
         imgMax = FFmpegStream.get_frame(self.params.video_path, max_frame)
 
         if success_min and success_max:
-            if self.is_vr_video():
-                if 'sbs' in self.params.projection.split('_'):
-                    imgMin = imgMin[:, :int(imgMin.shape[1]/2)]
-                    imgMax = imgMax[:, :int(imgMax.shape[1]/2)]
-                elif 'ou' in self.params.projection.split('_'):
-                    imgMin = imgMin[:int(imgMin.shape[0]/2), :]
-                    imgMax = imgMax[:int(imgMax.shape[0]/2), :]
-                else:
-                    self.logger.warning("Unknown VR Projection Type: %s", self.params.projection)
-
-            if PROJECTION[self.params.projection]['parameter']['width'] > 0:
-                scale = PROJECTION[self.params.projection]['parameter']['width'] / float(1.75*imgMax.shape[1])
-            else:
-                scale = PROJECTION[self.params.projection]['parameter']['height'] / float(1.75*imgMax.shape[0])
-
-            imgMin = cv2.resize(imgMin, None, fx=scale, fy=scale)
-            imgMax = cv2.resize(imgMax, None, fx=scale, fy=scale)
+            imgMin = FFmpegStream.get_projection(imgMin, self.projection_config)
+            imgMax = FFmpegStream.get_projection(imgMax, self.projection_config)
 
             min_tracking_points = self.get_tracking_points_by_frame_number(min_frame - self.params.start_frame)
             max_tracking_points = self.get_tracking_points_by_frame_number(max_frame - self.params.start_frame)
 
-            # TODO: draw points to image
-            # NOTE: Code below does not work because image do not use the same projection
+            for points in min_tracking_points:
+                imgMin = OpenCV_GUI.draw_point_to_image(imgMin, points)
 
-            # for points in min_tracking_points:
-            #     imgMin = OpenCV_GUI.draw_point_to_image(imgMin, points)
-
-            # for points in max_tracking_points:
-            #     imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points)
+            for points in max_tracking_points:
+                imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points)
 
             # print('min_tracking_points', min_tracking_points, 'max_tracking_points', max_tracking_points)
 
@@ -512,11 +494,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
         """
         first_frame = FFmpegStream.get_frame(self.params.video_path, self.params.start_frame)
 
-        projection_config = self.ui.get_video_projection_config(first_frame, self.params.projection)
+        self.projection_config = self.ui.get_video_projection_config(first_frame, self.params.projection)
 
         video = FFmpegStream(
                 video_path = self.params.video_path,
-                config = projection_config,
+                config = self.projection_config,
                 skip_frames = self.params.skip_frames,
                 start_frame = self.params.start_frame
             )

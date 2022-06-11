@@ -105,14 +105,6 @@ vr_he_180_ou:
       decrease: "+"
 
 
-flat:
-  name: '2D Video'
-  video_filter: "scale=${width}:${height}"
-  parameter:
-    height: 720
-    width: -1
-
-
 flat_with_parameters:
   name: '2D Video with Filters'
   video_filter: "pad='max(ih,iw):max(ih,iw):max(ih,iw)/2:max(ih,iw)/2',scale=${width}:${height},rotate='(PI/180)*${rotation}',crop='iw*1/max(1, ${zoom}/5):ih*1/max(1, ${zoom}/5):2*${x}:2*${y}',scale=${width}:${height}"
