@@ -43,7 +43,7 @@ class StaticVideoTracker:
             first_frame: np.ndarray,
             tracking_bbox: tuple,
             fps: float,
-            limit_searchspace : dict = {'h': 0.45, 'w':0.4},
+            limit_searchspace : dict = {'h': 0.8, 'w':0.8},
             supervised_tracking_area: tuple = None,
             supervised_tracking_is_exit_condition: bool = True,
             queue_size : int = 2):
