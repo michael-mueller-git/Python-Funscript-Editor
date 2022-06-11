@@ -260,13 +260,19 @@ class OpenCV_GUI(KeypressHandler):
 
 
     @staticmethod
-    def draw_point_to_image(image: np.ndarray, point, color: tuple = (255, 0, 255)) -> np.ndarray:
+    def draw_point_to_image(
+            image: np.ndarray,
+            point,
+            color: tuple = (255, 0, 255),
+            connect_points: bool = False
+            ) -> np.ndarray:
         """ Draw an point to given image
 
         Args:
             image (np.ndarray): image
             point (tuple or list): points (x,y) or list of points
             color (tuple): RGB color values for the box
+            connect_points (bool): connect points with an line
 
         Returns:
             np.ndarray: opencv image
@@ -282,6 +288,15 @@ class OpenCV_GUI(KeypressHandler):
                     color,
                     2
                 )
+
+        if len(point) > 1 and connect_points:
+            for i in range(len(point)-1):
+                cv2.line(
+                        image,
+                        point[i],
+                        point[i+1],
+                        color,
+                        2)
 
         return image
 

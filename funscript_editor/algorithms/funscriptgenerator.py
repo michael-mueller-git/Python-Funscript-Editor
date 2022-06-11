@@ -274,10 +274,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
             max_tracking_points = self.get_tracking_points_by_frame_number(max_frame - self.params.start_frame)
 
             for points in min_tracking_points:
-                imgMin = OpenCV_GUI.draw_point_to_image(imgMin, points)
+                imgMin = OpenCV_GUI.draw_point_to_image(imgMin, points, connect_points=(metric == 'roll'))
 
             for points in max_tracking_points:
-                imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points)
+                imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points, connect_points=(metric == 'roll'))
 
             # print('min_tracking_points', min_tracking_points, 'max_tracking_points', max_tracking_points)
 
