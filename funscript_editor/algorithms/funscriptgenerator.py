@@ -206,7 +206,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
                 # invert because math angle is ccw, also scale to 0- 100
                 tmp = score['roll'][tracker_number] # we can not override the list with listcomprehention in python
-                score['roll'][tracker_number] = [-100*item/(math.pi) for item in tmp]
+                score['roll'][tracker_number] = [-100*item/(math.pi) + 100 for item in tmp]
 
             else:
                 min_woman_x = min([x[0] for x in woman_center])
@@ -230,14 +230,14 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if metric in self.funscripts.keys() and self.funscripts[metric].is_inverted():
                 if metric == 'roll':
                     self.logger.info("%s: Get absolute inverted Score", metric)
-                    self.score[metric] = [abs(-1.0 * item) for item in score[metric]]
+                    self.score[metric] = [abs(item) for item in score[metric]]
                 else:
                     self.logger.info("%s: Scale Inverted Score to 0 - 100", metric)
                     self.score[metric] = Signal.scale([-1.0 * x for x in score[metric]], 0, 100)
             else:
                 if metric == 'roll':
                     self.logger.info("%s: Get absolute Score", metric)
-                    self.score[metric] = [abs(item) for item in score[metric]]
+                    self.score[metric] = [abs(-1.0*item) for item in score[metric]]
                 else:
                     self.logger.info("%s: Scale Score to 0 - 100", metric)
                     self.score[metric] = Signal.scale(score[metric], 0, 100)
