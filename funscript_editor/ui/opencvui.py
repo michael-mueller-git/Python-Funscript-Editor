@@ -464,8 +464,8 @@ class OpenCV_GUI(KeypressHandler):
             info: str = "",
             title_min: str = "",
             title_max: str = "",
-            lower_limit: int = 0,
-            upper_limit: int = 99,
+            recommend_lower: int = 0,
+            recommend_upper: int = 99,
             beep: bool = False) -> tuple:
         """ Min Max selection Window
 
@@ -475,23 +475,23 @@ class OpenCV_GUI(KeypressHandler):
             info (str): additional info string th show on the Window
             title_min (str): title for the min selection
             title_max (str): title for the max selection
-            lower_limit (int): the lower possible value
-            upper_limit (int): the highest possible value
+            recommend_lower (int): recommend lower value
+            recommend_upper (int): recommend upper value
             beep (bool): play notification sound
 
         Returns:
             tuple: with selected (min: flaot, max float)
         """
-        cv2.createTrackbar("Min", self.window_name, lower_limit, upper_limit, lambda _: None)
-        cv2.createTrackbar("Max", self.window_name, upper_limit, upper_limit, lambda _: None)
+        cv2.createTrackbar("Min", self.window_name, recommend_lower, 99, lambda _: None)
+        cv2.createTrackbar("Max", self.window_name, recommend_upper, 99, lambda _: None)
         image = np.concatenate((image_min, image_max), axis=1)
 
         if beep:
             self.play_notification_sound()
 
         self.clear_keypress_queue()
-        trackbarValueMin = lower_limit
-        trackbarValueMax = upper_limit
+        trackbarValueMin = recommend_lower
+        trackbarValueMax = recommend_upper
         self.logger.info("Waiting for user input")
 
         while True:
@@ -502,7 +502,7 @@ class OpenCV_GUI(KeypressHandler):
                 self.print_text("Set {} to {}".format('Min', trackbarValueMin))
                 self.print_text("Set {} to {}".format('Max', trackbarValueMax), text_position_x='column2')
                 self.print_text("Info: " + info)
-                self.print_text("Press 'space' or 'enter' to continue", text_position_x='column2')
+                self.print_text("Press 'space' to continue", text_position_x='column2')
                 ret = self.show(25)
 
                 if self.was_any_accept_key_pressed() or any(ret == x for x in [ord(' '), 13]):
@@ -547,7 +547,7 @@ class OpenCV_GUI(KeypressHandler):
         """
         if self.params.use_zoom:
             self.set_background_image(image, copy_image=True)
-            self.print_text("Select area with Mouse and Press 'space' or 'enter' to continue")
+            self.print_text("Select area with Mouse and Press 'space' to continue")
             self.print_text("Zoom selected area")
             while True:
                 zoom_bbox = self.selectROI()
@@ -572,7 +572,7 @@ class OpenCV_GUI(KeypressHandler):
             image = cv2.resize(image, None, fx=self.params.zoom_factor, fy=self.params.zoom_factor)
 
         self.set_background_image(image, copy_image=True)
-        self.print_text("Select area with Mouse and Press 'space' or 'enter' to continue")
+        self.print_text("Select area with Mouse and Press 'space' to continue")
         self.print_text(txt)
 
         while True:
@@ -660,7 +660,7 @@ class OpenCV_GUI(KeypressHandler):
                     parameter_changed = False
                     preview = FFmpegStream.get_projection(image, config)
                     self.set_background_image(preview)
-                    self.print_text("Press 'space' or 'enter' to use current viewpoint")
+                    self.print_text("Press 'space' to use current viewpoint")
                     self.print_text("Press '0' (NULL) to reset view")
                     final_ui_texte = [ui_texte[k].replace('${val}', str(config['parameter'][k])) for k in ui_texte.keys()]
                     self.print_text(final_ui_texte)

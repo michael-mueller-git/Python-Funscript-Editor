@@ -204,10 +204,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         # this should never happen
                         self.logger.error('Calculate score not implement for x=%d, y=%d', x, y)
 
-                # invert because math angle is ccw
-                inverted_roll = copy.deepcopy(score['roll'][tracker_number])
-                score['roll'][tracker_number] = -1*np.array(inverted_roll)
-
+                # invert because math angle is ccw, also scale to 0- 100
+                tmp = score['roll'][tracker_number] # we can not override the list with listcomprehention in python
+                score['roll'][tracker_number] = [-100*item/(math.pi) for item in tmp]
 
             else:
                 min_woman_x = min([x[0] for x in woman_center])
@@ -229,11 +228,19 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         for metric in score.keys():
             if metric in self.funscripts.keys() and self.funscripts[metric].is_inverted():
-                self.logger.info("%s: Scale Inverted Score to 0 - 100", metric)
-                self.score[metric] = Signal.scale([-1.0 * x for x in score[metric]], 0, 100)
+                if metric == 'roll':
+                    self.logger.info("%s: Get absolute inverted Score", metric)
+                    self.score[metric] = [abs(-1.0 * item) for item in score[metric]]
+                else:
+                    self.logger.info("%s: Scale Inverted Score to 0 - 100", metric)
+                    self.score[metric] = Signal.scale([-1.0 * x for x in score[metric]], 0, 100)
             else:
-                self.logger.info("%s: Scale Score to 0 - 100", metric)
-                self.score[metric] = Signal.scale(score[metric], 0, 100)
+                if metric == 'roll':
+                    self.logger.info("%s: Get absolute Score", metric)
+                    self.score[metric] = [abs(item) for item in score[metric]]
+                else:
+                    self.logger.info("%s: Scale Score to 0 - 100", metric)
+                    self.score[metric] = Signal.scale(score[metric], 0, 100)
 
 
 
@@ -297,7 +304,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     image_max = imgMax,
                     info = status,
                     title_min = metric + " Minimum",
-                    title_max = metric + " Maximum"
+                    title_max = metric + " Maximum",
+                    recommend_lower = round(min(self.score[metric])) if metric == 'roll' else 0,
+                    recommend_upper = round(max(self.score[metric])) if metric == 'roll' else 99
                 )
         else:
             self.logger.warning("Determine min and max failed")
@@ -305,7 +314,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
             desired_max = 99
 
         self.logger.info("Scale score %s to user input", metric)
-        self.score[metric] = Signal.scale(self.score[metric], desired_min, desired_max)
+
+        if metric == 'roll':
+            self.score[metric] = Signal.scale_with_center(self.score[metric], desired_min, desired_max, 50)
+        else:
+            self.score[metric] = Signal.scale(self.score[metric], desired_min, desired_max)
 
 
     def get_center(self, box: tuple) -> tuple:
@@ -583,7 +596,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         key = self.ui.preview(
                                 last_frame,
                                 frame_num + self.params.start_frame,
-                                texte = ["Scene change detected, Press 'space' or 'enter' to continue tracking or press 'q' to finalize tracking"],
+                                texte = ["Scene change detected, 'space': continue, 'q': stop"],
                                 boxes = boxes_to_draw,
                                 beep = True
                             )
@@ -609,7 +622,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     key = self.ui.preview(
                             last_frame,
                             frame_num + self.params.start_frame,
-                            texte = ["Press 'q' if the tracking point shifts or a video cut occured"],
+                            texte = ["Press 'q' to stop tracking"],
                             boxes = boxes_to_draw,
                         )
 

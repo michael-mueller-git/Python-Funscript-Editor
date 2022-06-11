@@ -157,6 +157,33 @@ class Signal:
 
 
     @staticmethod
+    def scale_with_center(signal: list, lower: float = 0, upper: float = 99, center: float = 50) -> list:
+        """ Scale an signal (list of float or int) between given lower and upper value with respect to the real center
+
+        Args:
+            signal (list): list with float or int signal values to scale
+            lower (float): lower scale value
+            upper (float): upper scale value
+            center (float): the real center value
+
+        Returns:
+            list: list with scaled signal
+        """
+        if len(signal) == 0:
+            return signal
+
+        if len(signal) == 1:
+            return [center]
+
+        signal_min = min(signal) - center
+        signal_max = max(signal) - center
+        signal_max_offset = max(( abs(signal_min), abs(signal_max) ))
+        signal_min = center - signal_max_offset
+        signal_max = center + signal_max_offset
+
+        return [(float(upper) - float(lower)) * (x - signal_min) / (signal_max - signal_min) + float(lower) for x in signal]
+
+    @staticmethod
     def scale_with_anomalies(
             signal :list,
             lower: float = 0,
@@ -553,5 +580,9 @@ class Signal:
 
             if len(additional_indexes) > 0:
                 decimated_indexes = self.merge_points(signal, decimated_indexes, additional_indexes)
+
+        if len(decimated_indexes) == 0 and len(signal) > 100:
+            self.logger.info("Insert start and end point")
+            decimated_indexes = [1, len(signal)-2]
 
         return decimated_indexes
