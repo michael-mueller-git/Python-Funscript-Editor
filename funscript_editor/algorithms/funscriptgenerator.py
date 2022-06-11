@@ -183,15 +183,15 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if self.params.track_men:
                 men_center = [self.get_center(item) for item in bboxes['Men'][tracker_number]]
 
-                score['x'][tracker_number] = np.array([w[0] - m[0] for w, m in zip(bboxes['Woman'][tracker_number], bboxes['Men'][tracker_number])])
-                score['y'][tracker_number] = np.array([m[1] - w[1] for w, m in zip(bboxes['Woman'][tracker_number], bboxes['Men'][tracker_number])])
+                score['x'][tracker_number] = np.array([w[0] - m[0] for w, m in zip(woman_center, men_center)])
+                score['y'][tracker_number] = np.array([m[1] - w[1] for w, m in zip(woman_center, men_center)])
 
                 score['distance'][tracker_number] = np.array([np.sqrt(np.sum((np.array(m) - np.array(w)) ** 2, axis=0)) \
                         for w, m in zip(woman_center, men_center)])
 
                 for i in range( min(( len(men_center), len(woman_center) )) ):
-                    x = bboxes['Woman'][tracker_number][i][0] - bboxes['Men'][tracker_number][i][0]
-                    y = bboxes['Men'][tracker_number][i][1] - bboxes['Woman'][tracker_number][i][1]
+                    x = woman_center[i][0] - men_center[i][0]
+                    y = men_center[i][1] - woman_center[i][1]
                     if x >= 0 and y >= 0:
                         score['roll'][tracker_number].append(np.arctan(np.array(y / max((10e-3, x)))))
                     elif x >= 0 and y < 0:
@@ -210,8 +210,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
 
             else:
-                score['x'][tracker_number] = np.array([w[0] - min([x[0] for x in bboxes['Woman'][tracker_number]]) for w in bboxes['Woman'][tracker_number]])
-                score['y'][tracker_number] = np.array([max([x[1] for x in bboxes['Woman'][tracker_number]]) - w[1] for w in bboxes['Woman'][tracker_number]])
+                min_woman_x = min([x[0] for x in woman_center])
+                max_woman_y = max([x[1] for x in woman_center])
+                score['x'][tracker_number] = np.array([w[0] - min_woman_x for w in woman_center])
+                score['y'][tracker_number] = np.array([max_woman_y - w[1] for w in woman_center])
 
         self.logger.info("Merge Scores")
 
