@@ -274,10 +274,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
             max_tracking_points = self.get_tracking_points_by_frame_number(max_frame - self.params.start_frame)
 
             for points in min_tracking_points:
-                imgMin = OpenCV_GUI.draw_point_to_image(imgMin, points, connect_points=(metric == 'roll'))
+                imgMin = OpenCV_GUI.draw_point_to_image(imgMin, points, connect_points=True)
 
             for points in max_tracking_points:
-                imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points, connect_points=(metric == 'roll'))
+                imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points, connect_points=True)
 
             # print('min_tracking_points', min_tracking_points, 'max_tracking_points', max_tracking_points)
 
@@ -297,7 +297,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         self.logger.info("Scale score %s to user input", metric)
 
-        if metric == 'roll':
+        if False and metric == 'roll':
             self.score[metric] = Signal.scale_with_center(self.score[metric], desired_min, desired_max, 50)
         else:
             self.score[metric] = Signal.scale(self.score[metric], desired_min, desired_max)
