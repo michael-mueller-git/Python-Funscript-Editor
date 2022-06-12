@@ -100,11 +100,12 @@ class KeypressHandler:
 
 
 class DrawSingleLineWidget(object):
-    def __init__(self, background_img, window_name, preview_scaling):
+    def __init__(self, background_img, window_name, preview_scaling, color=(36,255,12)):
         self.original_image = background_img
         self.clone = self.original_image.copy()
         self.window_name = window_name
         self.preview_scaling = preview_scaling
+        self.color = color
 
         cv2.namedWindow(window_name)
         cv2.setMouseCallback(window_name, self.extract_coordinates)
@@ -122,7 +123,7 @@ class DrawSingleLineWidget(object):
         elif event == cv2.EVENT_LBUTTONUP:
             self.end_coordinate = (x,y)
             self.clone = self.original_image.copy()
-            cv2.line(self.clone, self.start_coordinate, self.end_coordinate, (36,255,12), 2)
+            cv2.line(self.clone, self.start_coordinate, self.end_coordinate, self.color, 2)
 
     def show_image(self):
         return self.clone

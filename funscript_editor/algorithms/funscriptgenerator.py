@@ -275,7 +275,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 max_distance_frame = FFmpegStream.get_frame(self.params.video_path, max_distance_frame_num)
                 max_distance_frame = FFmpegStream.get_projection(max_distance_frame, self.projection_config)
                 center_line = self.ui.line_selector(max_distance_frame, "draw line on center of dick")
+                max_distance_roll_score = self.score['roll'][max_distance_frame_num - self.params.start_frame]
                 print('center line', center_line)
+                # TODO calc angel of line and apply max_distance_roll_score to  get real center offset and appl offset to all items in  roll score
 
             min_tracking_points = self.get_tracking_points_by_frame_number(min_frame - self.params.start_frame)
             max_tracking_points = self.get_tracking_points_by_frame_number(max_frame - self.params.start_frame)
