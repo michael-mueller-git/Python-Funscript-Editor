@@ -99,6 +99,37 @@ class KeypressHandler:
         return False
 
 
+class DrawSingleLineWidget(object):
+    def __init__(self, background_img, window_name, preview_scaling):
+        self.original_image = background_img
+        self.clone = self.original_image.copy()
+        self.window_name = window_name
+        self.preview_scaling = preview_scaling
+
+        cv2.namedWindow(window_name)
+        cv2.setMouseCallback(window_name, self.extract_coordinates)
+
+        self.start_coordinate = None
+        self.end_coordinate = None
+
+    def extract_coordinates(self, event, x, y, flags, parameters):
+        x = round(x/self.preview_scaling)
+        y = round(y/self.preview_scaling)
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.start_coordinate = (x,y)
+
+        elif event == cv2.EVENT_LBUTTONUP:
+            self.end_coordinate = (x,y)
+            self.clone = self.original_image.copy()
+            cv2.line(self.clone, self.start_coordinate, self.end_coordinate, (36,255,12), 2)
+
+    def show_image(self):
+        return self.clone
+
+    def get_result(self):
+        return [ self.start_coordinate, self.end_coordinate ]
+
 
 class OpenCV_GUI(KeypressHandler):
     """ High Level OpenCV GUI.
@@ -471,6 +502,33 @@ class OpenCV_GUI(KeypressHandler):
                     pass
             else:
                 self.logger.warning("Notification sound file not found (%s)", self.params.notification_sound_file)
+
+
+    def line_selector(self,
+            image: np.ndarray,
+            txt: str):
+        """ Line Selector Widget
+
+        Args:
+            image (np.ndarray): background image
+            txt (str): text to display
+
+        Returns:
+            list: start and endpoint of line
+        """
+
+        line_widget = DrawSingleLineWidget(image, self.window_name, self.monitor_preview_scaling)
+        while True:
+            self.set_background_image(line_widget.show_image(), copy_image=False)
+            self.print_text(txt)
+            self.print_text("Press 'space' to continue")
+            ret = self.show(5)
+
+            if self.was_any_accept_key_pressed() or any(ret == x for x in [ord(' '), 13]):
+                result = line_widget.get_result()
+                if result[0] is not None and result[1] is not None:
+                    if abs(result[0][0] - result[1][0]) + abs(result[0][1] - result[1][1]) > 10:
+                        return result
 
 
     def min_max_selector(self,

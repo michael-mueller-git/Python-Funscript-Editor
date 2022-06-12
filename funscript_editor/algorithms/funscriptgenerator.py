@@ -270,6 +270,13 @@ class FunscriptGeneratorThread(QtCore.QThread):
             imgMin = FFmpegStream.get_projection(imgMin, self.projection_config)
             imgMax = FFmpegStream.get_projection(imgMax, self.projection_config)
 
+            if metric == 'roll':
+                max_distance_frame_num = np.argmax(np.array([abs(x) for x in self.score['distance']])) + self.params.start_frame
+                max_distance_frame = FFmpegStream.get_frame(self.params.video_path, max_distance_frame_num)
+                max_distance_frame = FFmpegStream.get_projection(max_distance_frame, self.projection_config)
+                center_line = self.ui.line_selector(max_distance_frame, "draw line on center of dick")
+                print('center line', center_line)
+
             min_tracking_points = self.get_tracking_points_by_frame_number(min_frame - self.params.start_frame)
             max_tracking_points = self.get_tracking_points_by_frame_number(max_frame - self.params.start_frame)
 
@@ -280,6 +287,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points, connect_points=True)
 
             # print('min_tracking_points', min_tracking_points, 'max_tracking_points', max_tracking_points)
+
 
             (desired_min, desired_max) = self.ui.min_max_selector(
                     image_min = imgMin,
