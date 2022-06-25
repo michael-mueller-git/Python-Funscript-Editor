@@ -189,13 +189,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
         max_distance_frame = FFmpegStream.get_projection(max_distance_frame, self.projection_config)
         frame_h, frame_w = max_distance_frame.shape[:2]
         center_line = self.ui.line_selector(max_distance_frame, "draw line on center of dick")
-        print('center_line', center_line)
 
         # last idx: 0 = x, 1 = y
         dick_pos = { 'w': center_line[1], 'm': center_line[0] } \
                 if center_line[0][1] > center_line[1][1] \
                 else { 'w': center_line[0], 'm': center_line[1] }
-        print('dick_pos', dick_pos)
 
         # TODO: dividor is an hyperparameter
         dx = (dick_pos['m'][0] - dick_pos['w'][0]) / 3
