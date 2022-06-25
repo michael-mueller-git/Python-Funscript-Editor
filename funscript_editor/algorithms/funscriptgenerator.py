@@ -3,6 +3,7 @@
 from os import error, read
 import cv2
 import copy
+import sys
 import time
 import math
 import funscript_editor.utils.logging as logging
@@ -188,15 +189,17 @@ class FunscriptGeneratorThread(QtCore.QThread):
         max_distance_frame = FFmpegStream.get_projection(max_distance_frame, self.projection_config)
         frame_h, frame_w = max_distance_frame.shape[:2]
         center_line = self.ui.line_selector(max_distance_frame, "draw line on center of dick")
+        print('center_line', center_line)
 
         # last idx: 0 = x, 1 = y
         dick_pos = { 'w': center_line[1], 'm': center_line[0] } \
-                if center_line[0][0] > center_line[1][0] \
+                if center_line[0][1] > center_line[1][1] \
                 else { 'w': center_line[0], 'm': center_line[1] }
+        print('dick_pos', dick_pos)
 
         # TODO: dividor is an hyperparameter
-        dx = (dick_pos['m'][0] - dick_pos['w'][0]) / 8
-        dy = (dick_pos['m'][1] - dick_pos['w'][1]) / 8
+        dx = (dick_pos['m'][0] - dick_pos['w'][0]) / 3
+        dy = (dick_pos['m'][1] - dick_pos['w'][1]) / 3
         return {
                 'w': (self.clamp(dick_pos['w'][0] - dx, 0, frame_w-1), self.clamp(dick_pos['w'][1] - dy, 0, frame_h-1)),
                 'm': (self.clamp(dick_pos['m'][0] + dx, 0, frame_w-1), self.clamp(dick_pos['m'][1] + dy, 0, frame_h-1))
@@ -239,11 +242,30 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     dick_pos = self.get_dick_pos(max_distance_frame_num)
                     dick_pos['idx'] = max_distance_frame_num - self.params.start_frame
 
+                    if False:
+                        # debugging
+                        frame = FFmpegStream.get_frame(self.params.video_path, max_distance_frame_num)
+                        frame = FFmpegStream.get_projection(frame, self.projection_config)
+                        cv2.circle( frame, (int(dick_pos['w'][0]), int(dick_pos['w'][1])), 4, (0,255,0), 2)
+                        cv2.circle( frame, (int(dick_pos['m'][0]), int(dick_pos['m'][1])), 4, (255,0,0), 2)
+                        cv2.imshow('debug', frame)
+                        cv2.waitKey(10000)
+
                 roll_woman_offset = (dick_pos['w'][0] - woman_center[dick_pos['idx']][0], dick_pos['w'][1] - woman_center[dick_pos['idx']][1])
-                roll_men_offset = (dick_pos['m'][0] - woman_center[dick_pos['idx']][0], dick_pos['m'][1] - woman_center[dick_pos['idx']][1])
+                roll_men_offset = (dick_pos['m'][0] - men_center[dick_pos['idx']][0], dick_pos['m'][1] - men_center[dick_pos['idx']][1])
                 self.logger.info('use roll offset w = %s, m = %s', str(roll_woman_offset), str(roll_men_offset))
 
                 for i in range( min(( len(men_center), len(woman_center) )) ):
+
+                    if False:
+                        #debugging
+                        frame = FFmpegStream.get_frame(self.params.video_path, i + self.params.start_frame)
+                        frame = FFmpegStream.get_projection(frame, self.projection_config)
+                        cv2.circle( frame, (int(woman_center[i][0] + roll_woman_offset[0]), int(woman_center[i][1] + roll_woman_offset[1])), 4, (255,0,255), 2)
+                        cv2.circle( frame, (int(men_center[i][0] + roll_men_offset[0]), int(men_center[i][1] + roll_men_offset[1])), 4, (255,0,255), 2)
+                        cv2.imshow('debug', frame)
+                        cv2.waitKey(1)
+
                     x = woman_center[i][0] + roll_woman_offset[0] - (men_center[i][0] + roll_men_offset[0])
                     y = men_center[i][1] + roll_men_offset[1] - (woman_center[i][1] + roll_woman_offset[1])
                     if x >= 0 and y >= 0:
