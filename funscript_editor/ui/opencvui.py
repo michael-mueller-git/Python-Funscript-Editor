@@ -507,7 +507,7 @@ class OpenCV_GUI(KeypressHandler):
 
     def line_selector(self,
             image: np.ndarray,
-            txt: str):
+            txt: str) -> list:
         """ Line Selector Widget
 
         Args:
@@ -517,19 +517,27 @@ class OpenCV_GUI(KeypressHandler):
         Returns:
             list: start and endpoint of line
         """
-
         line_widget = DrawSingleLineWidget(image, self.window_name, self.monitor_preview_scaling)
+        note = ""
         while True:
             self.set_background_image(line_widget.show_image(), copy_image=False)
             self.print_text(txt)
             self.print_text("Press 'space' to continue")
+            if len(note) > 0:
+                self.print_text(note)
+
             ret = self.show(5)
 
             if self.was_any_accept_key_pressed() or any(ret == x for x in [ord(' '), 13]):
                 result = line_widget.get_result()
                 if result[0] is not None and result[1] is not None:
                     if abs(result[0][0] - result[1][0]) + abs(result[0][1] - result[1][1]) > 10:
+                        self.show_loading_screen()
                         return result
+                    else:
+                        note = "ERROR: Invalid selection"
+                else:
+                    note = "ERROR: Missing Input"
 
 
     def min_max_selector(self,

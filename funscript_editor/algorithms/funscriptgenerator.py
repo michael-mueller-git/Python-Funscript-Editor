@@ -160,6 +160,48 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return interpolated_bboxes
 
 
+    @staticmethod
+    def clamp(val: float, min_value: float, max_value: float) -> float:
+        """ limit a value in a given range
+
+        Args:
+            val (float): input value
+            min_value (float): min allowed value
+            max_value (float): max allowed value
+
+        Returns:
+            float: clamp value
+        """
+        return max(min(val, max_value), min_value)
+
+
+    def get_dick_pos(self, max_distance_frame_num: int) -> dict:
+        """ Get Start and End points of the dick
+
+        Args:
+            max_distance_frame_num (int): absolute frame number with max tracker distance
+
+        Returns:
+            dict: dick points
+        """
+        max_distance_frame = FFmpegStream.get_frame(self.params.video_path, max_distance_frame_num)
+        max_distance_frame = FFmpegStream.get_projection(max_distance_frame, self.projection_config)
+        frame_h, frame_w = max_distance_frame.shape[:2]
+        center_line = self.ui.line_selector(max_distance_frame, "draw line on center of dick")
+
+        # last idx: 0 = x, 1 = y
+        dick_pos = { 'w': center_line[1], 'm': center_line[0] } \
+                if center_line[0][0] > center_line[1][0] \
+                else { 'w': center_line[0], 'm': center_line[1] }
+
+        # TODO: dividor is an hyperparameter
+        dx = (dick_pos['m'][0] - dick_pos['w'][0]) / 8
+        dy = (dick_pos['m'][1] - dick_pos['w'][1]) / 8
+        return {
+                'w': (self.clamp(dick_pos['w'][0] - dx, 0, frame_w-1), self.clamp(dick_pos['w'][1] - dy, 0, frame_h-1)),
+                'm': (self.clamp(dick_pos['m'][0] + dx, 0, frame_w-1), self.clamp(dick_pos['m'][1] + dy, 0, frame_h-1))
+            }
+
 
     def calculate_score(self, bboxes) -> None:
         """ Calculate the score for the predicted tracking boxes
@@ -176,6 +218,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 'distance': [np.array([]) for _ in range(self.params.number_of_trackers)],
                 'roll': [[] for _ in range(self.params.number_of_trackers)]
         }
+
+        dick_pos = None
+
         self.logger.info("Calculate score for %d Tracker(s)", self.params.number_of_trackers)
         for tracker_number in range(self.params.number_of_trackers):
             woman_center = [self.get_center(item) for item in bboxes['Woman'][tracker_number]]
@@ -189,9 +234,18 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['distance'][tracker_number] = np.array([np.sqrt(np.sum((np.array(m) - np.array(w)) ** 2, axis=0)) \
                         for w, m in zip(woman_center, men_center)])
 
+                if dick_pos is None:
+                    max_distance_frame_num = np.argmax(np.array([abs(x) for x in score['distance'][tracker_number]])) + self.params.start_frame
+                    dick_pos = self.get_dick_pos(max_distance_frame_num)
+                    dick_pos['idx'] = max_distance_frame_num - self.params.start_frame
+
+                roll_woman_offset = (dick_pos['w'][0] - woman_center[dick_pos['idx']][0], dick_pos['w'][1] - woman_center[dick_pos['idx']][1])
+                roll_men_offset = (dick_pos['m'][0] - woman_center[dick_pos['idx']][0], dick_pos['m'][1] - woman_center[dick_pos['idx']][1])
+                self.logger.info('use roll offset w = %s, m = %s', str(roll_woman_offset), str(roll_men_offset))
+
                 for i in range( min(( len(men_center), len(woman_center) )) ):
-                    x = woman_center[i][0] - men_center[i][0]
-                    y = men_center[i][1] - woman_center[i][1]
+                    x = woman_center[i][0] + roll_woman_offset[0] - (men_center[i][0] + roll_men_offset[0])
+                    y = men_center[i][1] + roll_men_offset[1] - (woman_center[i][1] + roll_woman_offset[1])
                     if x >= 0 and y >= 0:
                         score['roll'][tracker_number].append(np.arctan(np.array(y / max((10e-3, x)))))
                     elif x >= 0 and y < 0:
@@ -270,15 +324,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
             imgMin = FFmpegStream.get_projection(imgMin, self.projection_config)
             imgMax = FFmpegStream.get_projection(imgMax, self.projection_config)
 
-            if metric == 'roll':
-                max_distance_frame_num = np.argmax(np.array([abs(x) for x in self.score['distance']])) + self.params.start_frame
-                max_distance_frame = FFmpegStream.get_frame(self.params.video_path, max_distance_frame_num)
-                max_distance_frame = FFmpegStream.get_projection(max_distance_frame, self.projection_config)
-                center_line = self.ui.line_selector(max_distance_frame, "draw line on center of dick")
-                max_distance_roll_score = self.score['roll'][max_distance_frame_num - self.params.start_frame]
-                print('center line', center_line)
-                # TODO calc angel of line and apply max_distance_roll_score to  get real center offset and appl offset to all items in  roll score
-
             min_tracking_points = self.get_tracking_points_by_frame_number(min_frame - self.params.start_frame)
             max_tracking_points = self.get_tracking_points_by_frame_number(max_frame - self.params.start_frame)
 
@@ -289,7 +334,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points, connect_points=True)
 
             # print('min_tracking_points', min_tracking_points, 'max_tracking_points', max_tracking_points)
-
 
             (desired_min, desired_max) = self.ui.min_max_selector(
                     image_min = imgMin,
@@ -307,7 +351,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
         self.logger.info("Scale score %s to user input", metric)
 
-        if False and metric == 'roll':
+        if metric == 'roll':
             self.score[metric] = Signal.scale_with_center(self.score[metric], desired_min, desired_max, 50)
         else:
             self.score[metric] = Signal.scale(self.score[metric], desired_min, desired_max)
