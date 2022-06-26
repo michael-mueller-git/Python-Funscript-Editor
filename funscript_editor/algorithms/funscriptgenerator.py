@@ -196,8 +196,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 else { 'w': center_line[0], 'm': center_line[1] }
 
         # TODO: dividor is an hyperparameter
-        dx = (dick_pos['m'][0] - dick_pos['w'][0]) / 3
-        dy = (dick_pos['m'][1] - dick_pos['w'][1]) / 3
+        dx = (dick_pos['m'][0] - dick_pos['w'][0]) / 2.5
+        dy = (dick_pos['m'][1] - dick_pos['w'][1]) / 2.5
         return {
                 'w': (self.clamp(dick_pos['w'][0] - dx, 0, frame_w-1), self.clamp(dick_pos['w'][1] - dy, 0, frame_h-1)),
                 'm': (self.clamp(dick_pos['m'][0] + dx, 0, frame_w-1), self.clamp(dick_pos['m'][1] + dy, 0, frame_h-1))
@@ -221,6 +221,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
         }
 
         dick_pos = None
+        tracking_points_with_offset = {}
+        for tracker_type in bboxes.keys():
+            tracking_points_with_offset[tracker_type] = {}
 
         self.logger.info("Calculate score for %d Tracker(s)", self.params.number_of_trackers)
         for tracker_number in range(self.params.number_of_trackers):
@@ -252,6 +255,20 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 roll_woman_offset = (dick_pos['w'][0] - woman_center[dick_pos['idx']][0], dick_pos['w'][1] - woman_center[dick_pos['idx']][1])
                 roll_men_offset = (dick_pos['m'][0] - men_center[dick_pos['idx']][0], dick_pos['m'][1] - men_center[dick_pos['idx']][1])
                 self.logger.info('use roll offset w = %s, m = %s', str(roll_woman_offset), str(roll_men_offset))
+
+                tracking_points_with_offset['Woman'][tracker_number] = [
+                        (
+                            int(woman_center[i][0] + roll_woman_offset[0]),
+                            int(woman_center[i][1] + roll_woman_offset[1])
+                        ) for i in range( min(( len(men_center), len(woman_center) )) )
+                    ]
+
+                tracking_points_with_offset['Men'][tracker_number] = [
+                        (
+                            int(men_center[i][0] + roll_men_offset[0]),
+                            int(men_center[i][1] + roll_men_offset[1])
+                        ) for i in range( min(( len(men_center), len(woman_center) )) )
+                    ]
 
                 for i in range( min(( len(men_center), len(woman_center) )) ):
 
@@ -287,6 +304,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 max_woman_y = max([x[1] for x in woman_center])
                 score['x'][tracker_number] = np.array([w[0] - min_woman_x for w in woman_center])
                 score['y'][tracker_number] = np.array([max_woman_y - w[1] for w in woman_center])
+
+                tracking_points_with_offset['Woman'][tracker_number] = woman_center
+
+
+        self.tracking_points = tracking_points_with_offset # save so we can use the later for visu
 
         self.logger.info("Merge Scores")
 
@@ -732,27 +754,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
         self.logger.info(status)
         self.logger.info('Interpolate tracking boxes')
         interpolated_bboxes = self.interpolate_bboxes(bboxes)
-        self.tracking_points = self.determine_tracking_points(interpolated_bboxes)
         self.calculate_score(interpolated_bboxes)
         return status
 
-
-    def determine_tracking_points(self, interpolated_bboxes: dict) -> dict:
-        """ Determine the final tracking points
-
-        Args:
-            interpolate_bboxes (dict): interpolate bboxes from all trackers
-
-        Returns:
-            dict: final tracking points
-        """
-        result = {}
-        for tracker_type in interpolated_bboxes.keys():
-            result[tracker_type] = {}
-            for tracker_number in interpolated_bboxes[tracker_type].keys():
-                result[tracker_type][tracker_number] = [self.get_center(item) for item in interpolated_bboxes[tracker_type][tracker_number]]
-
-        return result
 
 
     def get_tracking_points_by_frame_number(self, relative_frame_number: int) -> list:
