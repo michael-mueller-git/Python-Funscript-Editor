@@ -23,7 +23,7 @@ signal:
   avg_sec_for_local_min_max_extraction: 2.0
 
   # threshold value to predict an distance minimization point candidate
-  distance_minimization_threshold: 20.0
+  distance_minimization_threshold: 16.0
 
   # threshold value tor get additional points by comparing second derivative with the rolling standard deviation and given threshold
   high_second_derivative_points_threshold: 1.2
@@ -32,10 +32,13 @@ signal:
   direction_change_filter_len: 3
 
   # threshold value in milliseconds to merge additional points
-  additional_points_merge_time_threshold_in_ms: 70
+  additional_points_merge_time_threshold_in_ms: 60
 
   # threshold value to merge additional points
-  additional_points_merge_distance_threshold: 10.0
+  additional_points_merge_distance_threshold: 8.0
+
+  # number of runs for the additional points algorithm (max number of points that will be insert between 2 base points)
+  additional_points_repetitions: 2
 
 
 # Scene Detector Hyperparameter
