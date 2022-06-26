@@ -308,7 +308,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 tracking_points_with_offset['Woman'][tracker_number] = woman_center
 
 
-        self.tracking_points = tracking_points_with_offset # save so we can use the later for visu
+        self.tracking_points = tracking_points_with_offset # save so we can use them later for visu
 
         self.logger.info("Merge Scores")
 
