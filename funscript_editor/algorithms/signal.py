@@ -21,6 +21,7 @@ class SignalParameter:
     high_second_derivative_points_threshold: float = float(HYPERPARAMETER['signal']['high_second_derivative_points_threshold'])
     direction_change_filter_len: int = int(HYPERPARAMETER['signal']['direction_change_filter_len'])
     additional_points_repetitions: int = int(HYPERPARAMETER['signal']['additional_points_repetitions'])
+    min_evenly_intermediate_interframes: int = int(HYPERPARAMETER['signal']['min_evenly_intermediate_interframes'])
 
 
 class Signal:
@@ -344,7 +345,10 @@ class Signal:
         additional_points = []
         for i in range(len(base_points) - 1):
             diff = base_points[i+1] - base_points[i]
-            if diff < 3:
+            if diff < 2:
+                continue
+
+            if diff < 2*self.params.min_evenly_intermediate_interframes:
                 continue
 
             additional_points.append(base_points[i] + round(diff/2))
