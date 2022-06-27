@@ -861,6 +861,9 @@ class FunscriptGeneratorThread(QtCore.QThread):
         if self.params.additional_points == 'distance_minimization':
             additional_points_algorithms.append(Signal.AdditionalPointAlgorithm.distance_minimization)
 
+        if self.params.additional_points == 'evenly_intermediate':
+            additional_points_algorithms.append(Signal.AdditionalPointAlgorithm.evenly_intermediate)
+
         signal = Signal(self.video_info.fps)
         decimate_indexes = signal.decimate(
                 self.score[metric],

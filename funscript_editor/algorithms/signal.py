@@ -41,6 +41,7 @@ class Signal:
         """ Available additional point algorithms for the decimate process """
         high_second_derivative = 1
         distance_minimization = 2
+        evenly_intermediate = 3
 
 
     @staticmethod
@@ -326,6 +327,31 @@ class Signal:
         return edge_points
 
 
+    def get_evenly_intermediate_points(self, signal: list, base_points: list) -> list:
+        """ Get an aditional evenly intermediated point between 2 base points
+
+        Args:
+            signal (list): the predicted signal
+            base_points (list): current base points
+
+        Returns:
+            list: list with index of the evenly intermediated points (additional points)
+        """
+        if len(base_points) < 2:
+            return []
+
+        base_points.sort()
+        additional_points = []
+        for i in range(len(base_points) - 1):
+            diff = base_points[i+1] - base_points[i]
+            if diff < 3:
+                continue
+
+            additional_points.append(base_points[i] + round(diff/2))
+
+        self.logger.info("Found {} evenly intermediate point candidates".format(len(additional_points)))
+        return additional_points
+
 
     def get_local_min_max_points(self, signal: list, filter_len: int = 1) -> list:
         """ Get the local max and min positions in given signal
@@ -579,6 +605,8 @@ class Signal:
                     additional_indexes = self.get_high_second_derivative_points(signal, alpha = self.params.high_second_derivative_points_threshold)
                 elif algo == self.AdditionalPointAlgorithm.distance_minimization:
                     additional_indexes = self.get_edge_points(signal, decimated_indexes, threshold = self.params.distance_minimization_threshold)
+                elif algo == self.AdditionalPointAlgorithm.evenly_intermediate:
+                    additional_indexes = self.get_evenly_intermediate_points(signal, decimated_indexes)
                 else:
                     raise NotImplementedError("Selected Additional Points Algorithm is not implemented")
 

@@ -158,7 +158,8 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.additionalPointsComboBox.addItems([
             "None",
             "High Second Derivative",
-            "Distance Minimization"
+            "Distance Minimization",
+            "Evenly intermediate"
         ])
 
         self.ui.processingSpeedComboBox.addItems([
