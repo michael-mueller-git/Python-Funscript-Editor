@@ -36,6 +36,8 @@ if [ -d $OFS_APP_DIR ]; then
     echo ">> OpenFunscripter Source already downloaded (Updating...)"
     pushd $OFS_APP_DIR
     git pull
+    git checkout master
+    git pull
     git submodule update --init
     pushd $OFS_APP_DIR/lib/EASTL
     git submodule update --init
@@ -55,7 +57,6 @@ fi
 if [ "$arg1" != "--latest" ]; then
     echo "Checkout latest OpenFunscripter release"
     git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
-    # git checkout 1.4.4
     git submodule update --init
     pushd $OFS_APP_DIR/lib/EASTL
     git submodule update --init
@@ -87,6 +88,8 @@ echo "Update MTFG"
 git reset --hard HEAD
 git clean -fd
 git pull --all
+git checkout main
+git pull
 
 if [ "$arg1" != "--latest" ]; then
     echo "Checkout latest MTFG release"
@@ -143,3 +146,7 @@ EOL
 
 
 echo "Installation Completed"
+
+if [ "$arg1" = "--latest" ]; then
+    echo "WARNING: you have install the latest application code"
+fi
