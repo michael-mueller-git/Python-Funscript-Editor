@@ -134,12 +134,11 @@ function import_funscript_generator_json_result()
                         script = ofs.Script(i)
                         for _, action in pairs(actions[k]) do
                             local closest_action, _ = script:closestAction(action["at"])
-                             local filtered = false
+                            local filtered = false
                             if closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
                                 filtered = true
                             else
-                                local a = Action.new(action["at"]/1000.0, action["pos"], true)
-	                        table.insert(script.actions, a)
+                                script:add(Action.new(action["at"]/1000.0, action["pos"], true))
                             end
                         end
                         script:commit()
@@ -159,8 +158,7 @@ function import_funscript_generator_json_result()
                 if closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
                     filtered = true
                 else
-                    local a = Action.new(action["at"]/1000.0, action["pos"], true)
-	            table.insert(script.actions, a)
+                    script:add(Action.new(action["at"]/1000.0, action["pos"], true))
                 end
             end
         end
@@ -168,8 +166,6 @@ function import_funscript_generator_json_result()
         script:commit()
     end
 
-    -- delete json file
-    -- os.remove(tmpFile)
 end
 
 
@@ -322,7 +318,6 @@ function update_script_names()
     scriptNamesCount = 0
     scriptNames = {'ignore'}
     scriptNamesCount = scriptNamesCount + 1
-    local i = 1
     while i <= ofs.ScriptCount() do
         name = ofs.ScriptName(i)
         if not is_empty(name) then
