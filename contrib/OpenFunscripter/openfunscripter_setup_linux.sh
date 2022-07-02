@@ -36,6 +36,8 @@ if [ -d $OFS_APP_DIR ]; then
     echo ">> OpenFunscripter Source already downloaded (Updating...)"
     pushd $OFS_APP_DIR
     git pull
+    git reset --hard HEAD
+    git clean -fd
     git checkout master
     git pull
     git submodule update --init
