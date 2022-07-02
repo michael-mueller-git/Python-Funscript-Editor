@@ -82,4 +82,10 @@ Limitation of the flatpak application:
 
 ## OFS Extension on Linux
 
+### OFS 1.x.x
+
 Path for extensions is `~/.local/share/OFS/OFS_data/extensions`
+
+### OFS 2.x.x
+
+Path for extensions is `~/.local/share/OFS/OFS_data2/extensions`
