@@ -182,6 +182,7 @@ end
 
 function align_bottom_points(align_value)
     local script = ofs.Script(ofs.ActiveIdx())
+    script:sort()
 
     -- get min value in selection if no align_value was given
     if align_value < 0 then
@@ -195,19 +196,21 @@ function align_bottom_points(align_value)
         end
     end
 
+    print('align bottom points to', align_value)
+
     -- align bottom points
     for idx, action in ipairs(script.actions) do
         if action.selected then
             local bottom_point = true
 
-            local next_action, _ = script:closestActionAfter(action.at / 1000)
+            local next_action, _ = script:closestActionAfter(action.at)
             if next_action then
                 if next_action.pos <= action.pos then
                     bottom_point = false
                 end
             end
 
-            local prev_action, _ = script:closestActionBefore(action.at / 1000)
+            local prev_action, _ = script:closestActionBefore(action.at)
             if prev_action then
                 if prev_action.pos <= action.pos then
                     bottom_point = false
@@ -226,6 +229,7 @@ end
 
 function align_top_points(align_value)
     local script = ofs.Script(ofs.ActiveIdx())
+    script:sort()
 
     -- get max value in selection if no align_value was given
     if align_value < 0 then
@@ -239,19 +243,21 @@ function align_top_points(align_value)
         end
     end
 
+    print('align top points to', align_value)
+
     -- align top points
     for idx, action in ipairs(script.actions) do
         if action.selected then
             local top_point = true
 
-            local next_action, _ = script:closestActionAfter(action.at / 1000)
+            local next_action, _ = script:closestActionAfter(action.at)
             if next_action then
                 if next_action.pos >= action.pos then
                     top_point = false
                 end
             end
 
-            local prev_action, _ = script:closestActionBefore(action.at / 1000)
+            local prev_action, _ = script:closestActionBefore(action.at)
             if prev_action then
                 if prev_action.pos >= action.pos then
                     top_point = false
@@ -430,7 +436,7 @@ function gui()
 
     ofs.Separator()
 
-    local enable_post_processing = false  -- broken
+    local enable_post_processing = true
     if enable_post_processing then
         ofs.Text("Post-Processing:")
         ofs.SameLine()
