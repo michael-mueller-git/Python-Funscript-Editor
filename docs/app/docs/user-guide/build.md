@@ -61,6 +61,7 @@ You can always update the application to the latest version with `git checkout m
 My development platform is Arch Linux. The code should run therefore without problems. When installing the dependencies, make sure you install the following packages from the repositories, as the wrapper will have problems if the versions differ from the pip packages and the local C, C++ libraries.
 
 ```bash
+sudo pacman -Syu  # this ensure the new libraries will be compatible
 sudo pacman -Sy python-opencv python-pyqt5
 ```
 
