@@ -6,7 +6,7 @@ This method use an installer that check for the latest release on GitHub and aut
 
 **Installation:**
 
-1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.4!!!)**
+1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 2.0.0!!!)**
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
 2. Install OFS
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
@@ -45,7 +45,7 @@ Disadvantages with manual installation:
 
 Manual Installation:
 
-1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.4!!!)**
+1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 2.0.0!!!)**
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
 2. Install OFS
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
