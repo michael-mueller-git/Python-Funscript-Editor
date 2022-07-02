@@ -138,7 +138,7 @@ function import_funscript_generator_json_result()
                             if closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
                                 filtered = true
                             else
-                                script:add(Action.new(action["at"]/1000.0, action["pos"], true))
+                                script.actions:add(Action.new(action["at"]/1000.0, action["pos"], true))
                             end
                         end
                         script:commit()
@@ -158,7 +158,7 @@ function import_funscript_generator_json_result()
                 if closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
                     filtered = true
                 else
-                    script:add(Action.new(action["at"]/1000.0, action["pos"], true))
+                    script.actions:add(Action.new(action["at"]/1000.0, action["pos"], true))
                 end
             end
         end
