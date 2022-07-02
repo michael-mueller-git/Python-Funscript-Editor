@@ -18,6 +18,7 @@ from tqdm import tqdm
 VERSION = "v0.2.0"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data2\extensions')
+OFS_V1_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
 
 
@@ -41,7 +42,10 @@ def error(msg):
 
 def is_ofs_installed():
     if not os.path.exists(OFS_EXTENSION_DIR):
-        error("OFS is not installed. Please download and install OFS. Befor running this installer open OFS once!")
+        if os.path.exists(OFS_V1_EXTENSION_DIR):
+            error("Please update your [OFS](https://github.com/OpenFunscripter/OFS/releases) Installation to V2.X.X. Then run this installer again")
+        else:
+            error("OFS is not installed. Please download and install [OFS](https://github.com/OpenFunscripter/OFS/releases). Befor running this installer open OFS once!")
 
 
 def get_download_urls_with_api():
@@ -82,10 +86,10 @@ def process_exists(process_name):
         return False
 
 
-def install_lua_scripts(extension_dir, dest_dir):
+def install_lua_scripts(src_dir, extension_dir):
     for script in ["main.lua", "json.lua"]:
-        if os.path.exists(os.path.join(dest_dir, "OFS", script)):
-            shutil.copy2(os.path.join(dest_dir, "OFS", script), os.path.join(extension_dir, script))
+        if os.path.exists(os.path.join(src_dir, "OFS", script)):
+            shutil.copy2(os.path.join(src_dir, "OFS", script), os.path.join(extension_dir, script))
         else:
             error("Installation failed (" + script + " missing)")
 
@@ -145,7 +149,7 @@ def update(download_urls, latest, release_notes):
         error("min required installer version is " + str(min_required_installer_version))
 
     shutil.move(mtfg_dir + "_update", mtfg_dir)
-    install_lua_scripts(extension_dir, mtfg_dir)
+    install_lua_scripts(mtfg_dir, extension_dir)
 
 
 
