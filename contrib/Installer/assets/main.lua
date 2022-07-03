@@ -14,7 +14,7 @@ multiaxis = false
 tmpFileName = "funscript_actions.json"
 tmpFileExists = false
 enableLogs = false
-filterSimilarTimestamps = false
+filterSimilarTimestamps = true
 scriptNames = {}
 scriptNamesCount = 0
 scriptAssignment = {x={idx=1}, y={idx=1}, roll={idx=1}}
