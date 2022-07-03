@@ -14,6 +14,7 @@ multiaxis = false
 tmpFileName = "funscript_actions.json"
 tmpFileExists = false
 enableLogs = false
+filterSimilarTimestamps = false
 scriptNames = {}
 scriptNamesCount = 0
 scriptAssignment = {x={idx=1}, y={idx=1}, roll={idx=1}}
@@ -124,6 +125,7 @@ function import_funscript_generator_json_result()
     json_body = json.decode(content)
     actions = json_body["actions"]
 
+    local filtered = 0
     if multiaxis then
         local i = 1
         while i <= ofs.ScriptCount() do
@@ -134,9 +136,8 @@ function import_funscript_generator_json_result()
                         script = ofs.Script(i)
                         for _, action in pairs(actions[k]) do
                             local closest_action, _ = script:closestAction(action["at"])
-                            local filtered = false
-                            if closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
-                                filtered = true
+                            if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
+                                filtered = filtered + 1
                             else
                                 script.actions:add(Action.new(action["at"]/1000.0, action["pos"], true))
                             end
@@ -154,9 +155,8 @@ function import_funscript_generator_json_result()
             print('add ', metric, ' to ', ofs.ScriptName(scriptIdx))
             for _, action in pairs(actions_metric) do
                 local closest_action, _ = script:closestAction(action["at"]/1000.0)
-                local filtered = false
-                if closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
-                    filtered = true
+                if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
+                    filtered = filtered + 1
                 else
                     script.actions:add(Action.new(action["at"]/1000.0, action["pos"], true))
                 end
@@ -164,6 +164,10 @@ function import_funscript_generator_json_result()
         end
 
         script:commit()
+    end
+
+    if filterSimilarTimestamps then
+        print('filtered timestamps', filtered)
     end
 
 end
