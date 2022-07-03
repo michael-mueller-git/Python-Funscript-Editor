@@ -53,8 +53,8 @@ fi
 
 if [ "$arg1" != "--latest" ]; then
     echo "Checkout latest OpenFunscripter release"
-    git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
-    # git checkout 1.4.4
+    # git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+    git checkout 1.4.4
     git submodule update --init
     pushd $OFS_DIR/lib/EASTL
     git submodule update --init
