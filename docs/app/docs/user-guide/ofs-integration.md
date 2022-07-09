@@ -12,7 +12,7 @@ This method use an installer that check for the latest release on GitHub and aut
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
 3. Start OFS at least once and close it again.
    <br> ![Start OFS](./images/ofs_installation_04.jpg)
-4. Download the MTFG OFS Extension Installer from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
+4. Download the **latest** MTFG OFS Extension Installer from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
    <br> ![Download MTFG Extension](./images/ofs_extension_01.jpg)
 5. Execute the downloaded executable. Wait for the installation to complete.
    <br> ![Run Extension Installer](./images/ofs_extension_02.jpg)
