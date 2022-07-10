@@ -85,7 +85,7 @@ Please also take a look at the [application build instruction](https://github.co
 
 ### When calling the generator, only a message box is displayed with the message: "Video file was not specified!"
 
-In some cases OFS does not set the path to the video file within the lua script correctly (the variable `VideoFilePath` is empty). This happen when the video path contains some special character like square braked `[` and `]`. **Rename your video files and store them in a path without special character**. Then the variable should be set by OFS and the motion tracking funscript generator should work.
+In some cases OFS does not set the path to the video file within the lua script correctly (the variable `VideoFilePath` is empty). This could be happen when the video path contains some special character. **Rename your video files and store them in a path without special character**. Then the variable should be set by OFS and the motion tracking funscript generator should work. If you still get the error message try to restart OFS and wait about 30 seconds before starting MTFG to ensure OFS is fully initialized.
 
 ### Tracking stops automatically
 
