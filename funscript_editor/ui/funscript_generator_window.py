@@ -59,8 +59,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         if video_file is None or video_file == "":
             self.__show_message("Video file was not specified! " \
-                    + "(Make sure there are no special symbols like squared brackets in the video file path " \
-                    + "-> Rename your video file and store them in a path without special characters)",
+                    + "(Make sure there are no special symbols in the video file path " \
+                    + "-> Rename your video file and store them in a path without special characters you should also try to restart OFS)",
                     error=True)
             sys.exit()
 
