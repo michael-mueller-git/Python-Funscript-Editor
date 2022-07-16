@@ -20,6 +20,7 @@ FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS2_data\extensions')
 OFS_V1_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
+EXTENSION_NAME = "Funscript Generator Windows"
 
 
 class DownloadProgressBar(tqdm):
@@ -34,6 +35,10 @@ def download_url(url, output_path):
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
         urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
 
+def uninstall():
+    version_file = os.path.join(OFS_EXTENSION_DIR, EXTENSION_NAME, "funscript-editor", "funscript_editor", "VERSION.txt")
+    if os.path.exists(version_file):
+        os.remove(version_file)
 
 def error(msg):
     print("ERROR: " + msg)
@@ -46,7 +51,7 @@ def is_ofs_installed():
         if os.path.exists(OFS_V1_EXTENSION_DIR):
             error("Please update your [OFS](https://github.com/OpenFunscripter/OFS/releases) Installation to V2.X.X. Then run this installer again")
         else:
-            error("OFS is not installed. Please download and install [OFS](https://github.com/OpenFunscripter/OFS/releases). Befor running this installer open OFS once!")
+            error("OFS is not installed. Please download and install [OFS](https://github.com/OpenFunscripter/OFS/releases). Befor running this installer open OFS once!!")
 
 
 def get_download_urls_with_api():
@@ -69,6 +74,7 @@ def get_download_urls_with_api():
 
 def get_required_installer_version(mtfg_dir):
     if not os.path.exists(os.path.join(mtfg_dir, "install.json")):
+        uninstall()
         error("Installer notes missing, please use an newer version")
 
     with open(os.path.join(mtfg_dir, "install.json"), 'r') as f:
@@ -89,6 +95,7 @@ def process_exists(process_name):
 
 def install_lua_scripts(root_src_dir, extension_dir):
     if not os.path.exists(root_src_dir):
+        uninstall()
         error(str(root_src_dir) + " do not exists (corrupt install pack?)")
     for src_dir, _, files in os.walk(root_src_dir):
         dst_dir = src_dir.replace(root_src_dir, extension_dir, 1)
@@ -111,7 +118,7 @@ def is_latest_version_installed(version_file, version):
 
 
 def update(download_urls, latest, release_notes):
-    extension_dir = os.path.join(OFS_EXTENSION_DIR, "Funscript Generator Windows")
+    extension_dir = os.path.join(OFS_EXTENSION_DIR, EXTENSION_NAME)
     zip_file = os.path.join(extension_dir, "funscript-editor-v" +  str(latest) + ".zip")
     mtfg_dir = os.path.join(os.path.dirname(zip_file), "funscript-editor")
     version_file = os.path.join(os.path.dirname(zip_file), "funscript-editor", "funscript_editor", "VERSION.txt")
@@ -143,18 +150,23 @@ def update(download_urls, latest, release_notes):
                 os.remove(zip_file)
                 continue
             else:
+                uninstall()
                 error("Installation failed")
 
     if process_exists("OpenFunscripter.exe"):
+        uninstall()
         error("OpenFunscripter is currently running, please close OpenFunscripter and execute this installer again, to update the MTFG Extension")
 
     if os.path.exists(mtfg_dir):
         try: shutil.rmtree(mtfg_dir)
-        except: error('Error while deleting old Version (Is OFS currenty running?)')
+        except:
+            uninstall()
+            error('Error while deleting old Version (Is OFS currenty running?)')
 
     min_required_installer_version = get_required_installer_version(mtfg_dir + "_update")
     print('check min required installer version', min_required_installer_version)
     if version.parse(min_required_installer_version) < version.parse(VERSION.lower().replace('v', '')):
+        uninstall()
         error("min required installer version is " + str(min_required_installer_version))
 
     shutil.move(mtfg_dir + "_update", mtfg_dir)
