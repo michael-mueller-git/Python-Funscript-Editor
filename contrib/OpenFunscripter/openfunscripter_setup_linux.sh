@@ -29,34 +29,38 @@ if command -v pacman; then
     sudo pacman -Sy --needed --noconfirm python-opencv python-pyqt5 git base-devel python python-pip mpv cmake
 fi
 
-OFS_DIR="$HOME/.local/share/OFS/application"
+OFS_APP_DIR="$HOME/.local/share/OFS/application"
+OFS_EXTENSION_DIR="$HOME/.local/share/OFS/OFS2_data/extensions"
 
-if [ -d $OFS_DIR ]; then
+if [ -d $OFS_APP_DIR ]; then
     echo ">> OpenFunscripter Source already downloaded (Updating...)"
-    pushd $OFS_DIR
+    pushd $OFS_APP_DIR
+    git pull
+    git reset --hard HEAD
+    git clean -fd
+    git checkout master
     git pull
     git submodule update --init
-    pushd $OFS_DIR/lib/EASTL
+    pushd $OFS_APP_DIR/lib/EASTL
     git submodule update --init
     popd
 else
-    mkdir -p `dirname $OFS_DIR`
+    mkdir -p `dirname $OFS_APP_DIR`
     echo ">> Clone OpenFunscripter Source"
-    git clone https://github.com/OpenFunscripter/OFS.git $OFS_DIR
-    pushd $OFS_DIR
+    git clone https://github.com/OpenFunscripter/OFS.git $OFS_APP_DIR
+    pushd $OFS_APP_DIR
     git submodule update --init
-    pushd $OFS_DIR/lib/EASTL
+    pushd $OFS_APP_DIR/lib/EASTL
     git submodule update --init
     popd
-    echo ">> OpenFunscripter Source downloaded to $OFS_DIR"
+    echo ">> OpenFunscripter Source downloaded to $OFS_APP_DIR"
 fi
 
 if [ "$arg1" != "--latest" ]; then
     echo "Checkout latest OpenFunscripter release"
-    # git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
-    git checkout 1.4.4
+    git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
     git submodule update --init
-    pushd $OFS_DIR/lib/EASTL
+    pushd $OFS_APP_DIR/lib/EASTL
     git submodule update --init
     popd
 else
@@ -70,28 +74,35 @@ pushd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$(expr $(nproc) \+ 1)
 popd  # build
-popd  # $OFS_DIR
+popd  # $OFS_APP_DIR
 
 echo ">> Install ofs extension"
-mkdir -p ~/.local/share/OFS/OFS_data/extensions/MTFG
-pushd ~/.local/share/OFS/OFS_data/extensions/MTFG
+mkdir -p "$OFS_EXTENSION_DIR/MTFG"
+pushd "$OFS_EXTENSION_DIR/MTFG"
 
-if [ ! -d ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/.git ]; then
+if [ ! -d "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/.git" ]; then
     git clone https://github.com/michael-mueller-git/Python-Funscript-Editor.git
 fi
 
-pushd ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor
+pushd $OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor
 
 echo "Update MTFG"
 git reset --hard HEAD
 git clean -fd
 git pull --all
+git checkout main
+git pull
 
 if [ "$arg1" != "--latest" ]; then
     echo "Checkout latest MTFG release"
     git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 else
     echo "Use latest git commit (only for developers!)"
+    if git branch -a | grep -q "next" ; then
+        echo "Switch to 'next' branch"
+        git checkout next
+        git pull
+    fi
 fi
 
 if command -v apt; then
@@ -106,21 +117,26 @@ if command -v pacman; then
     pip install -r requirements.txt
 fi
 
-cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/assets/ffmpeg \
-    ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg
+cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/assets/ffmpeg" \
+    "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg"
 popd
 
-cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua \
-    ~/.local/share/OFS/OFS_data/extensions/MTFG/main.lua
+cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua" \
+    "$OFS_EXTENSION_DIR/MTFG/main.lua"
 
-cp -fv ~/.local/share/OFS/OFS_data/extensions/MTFG/Python-Funscript-Editor/contrib/Installer/assets/json.lua \
-    ~/.local/share/OFS/OFS_data/extensions/MTFG/json.lua
+cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/contrib/Installer/assets/json.lua" \
+    "$OFS_EXTENSION_DIR/MTFG/json.lua"
+
+mkdir -p "$OFS_EXTENSION_DIR/MTFG/json"
+
+cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/contrib/Installer/assets/json.lua" \
+    "$OFS_EXTENSION_DIR/MTFG/json/lua.lua"
 
 popd
 
 if [ ! -e ~/.local/bin/OpenFunscripter ]; then
     mkdir -p ~/.local/bin
-    ln -s `realpath $OFS_DIR`/bin/OpenFunscripter ~/.local/bin/OpenFunscripter
+    ln -s `realpath $OFS_APP_DIR`/bin/OpenFunscripter ~/.local/bin/OpenFunscripter
 fi
 
 mkdir -p ~/.local/share/applications
@@ -129,11 +145,15 @@ cat >~/.local/share/applications/OpenFunscripter.desktop <<EOL
 [Desktop Entry]
 Type=Application
 Name=OpenFunscripter
-Exec=`realpath $OFS_DIR`/bin/OpenFunscripter
+Exec=`realpath $OFS_APP_DIR`/bin/OpenFunscripter
 Comment=OpenFunscripter
 StartupWMClass=OpenFunscripter
-Icon=`realpath $OFS_DIR`/bin/data/logo64.png
+Icon=`realpath $OFS_APP_DIR`/bin/data/logo64.png
 EOL
 
 
 echo "Installation Completed"
+
+if [ "$arg1" = "--latest" ]; then
+    echo "WARNING: you have install the latest application code"
+fi

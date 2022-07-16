@@ -1,4 +1,5 @@
-json = require "json"
+json = require "json.lua"
+-- MTFG LUA Wrappper Version 2.0.0
 
 -- global var
 processHandleMTFG = nil
@@ -13,6 +14,7 @@ multiaxis = false
 tmpFileName = "funscript_actions.json"
 tmpFileExists = false
 enableLogs = false
+filterSimilarTimestamps = true
 scriptNames = {}
 scriptNamesCount = 0
 scriptAssignment = {x={idx=1}, y={idx=1}, roll={idx=1}}
@@ -39,7 +41,7 @@ end
 
 platform = get_platform()
 
-function start_funscript_generator()
+function binding.start_funscript_generator()
     if processHandleMTFG then
         print('MTFG already running')
         return
@@ -56,12 +58,12 @@ function start_funscript_generator()
     print("currentScriptIdx: ", scriptIdx)
     print("currentTimeMs: ", currentTimeMs)
 
-    local next_action = ofs.ClosestActionAfter(script, currentTimeMs / 1000)
-    if next_action and script.actions[next_action].at < (currentTimeMs + 500) then
-        next_action = ofs.ClosestActionAfter(script, script.actions[next_action].at / 1000)
+    local next_action, _ = script:closestActionAfter(currentTimeMs / 1000.0)
+    if next_action and (next_action.at*1000) < (currentTimeMs + 500) then
+        next_action, _ = script:closestActionAfter(next_action.at)
     end
 
-    print("nextAction: ", next_action and tostring(script.actions[next_action].at) or "nil")
+    print("nextAction: ", next_action and tostring(next_action.at) or "nil")
 
     local cmd = ""
     local args = {}
@@ -97,46 +99,17 @@ function start_funscript_generator()
 
     if next_action then
         table.insert(args, "-e")
-        table.insert(args, tostring(script.actions[next_action].at))
+        table.insert(args, tostring(next_action.at*1000.0))
     end
 
     print("cmd: ", cmd)
     print("args: ", table.unpack(args))
 
-    processHandleMTFG = ofs.CreateProcess(cmd, table.unpack(args))
+    processHandleMTFG = Process.new(cmd, table.unpack(args))
 
     status = "MTFG running"
 end
 
-
-function import_funscript_generator_csv_result()
-    status = "MTFG not running"
-    local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName
-    local f = io.open(tmpFile)
-    if not f then
-        print('Funscript Generator csv output file not found')
-        return
-    end
-
-    script = ofs.Script(scriptIdx)
-    local k = 1
-    for line in f:lines() do
-        -- first line is header
-        if k > 1 then
-            for at, pos in string.gmatch(line, "(%w+);(%w+)") do
-                ofs.AddAction(script, at, pos, true)
-            end
-        end
-        k = k + 1
-    end
-    f:close()
-
-    -- save changes
-    ofs.Commit(script)
-
-    -- delete csv file
-    os.remove(tmpFile)
-end
 
 function import_funscript_generator_json_result()
     status = "MTFG not running"
@@ -152,18 +125,24 @@ function import_funscript_generator_json_result()
     json_body = json.decode(content)
     actions = json_body["actions"]
 
+    local filtered = 0
     if multiaxis then
         local i = 1
-        while ofs.Script(i) do
-            name = ofs.ScriptTitle(i)
+        while i <= ofs.ScriptCount() do
+            name = ofs.ScriptName(i)
             for k,v in pairs(scriptAssignment) do
                 if name and name == scriptNames[v.idx] then
                     if actions[k] then
                         script = ofs.Script(i)
                         for _, action in pairs(actions[k]) do
-                            ofs.AddAction(script, action["at"], action["pos"], true)
+                            local closest_action, _ = script:closestAction(action["at"])
+                            if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
+                                filtered = filtered + 1
+                            else
+                                script.actions:add(Action.new(action["at"]/1000.0, action["pos"], true))
+                            end
                         end
-                        ofs.Commit(script)
+                        script:commit()
                     end
                 end
             end
@@ -173,18 +152,24 @@ function import_funscript_generator_json_result()
         script = ofs.Script(scriptIdx)
 
         for metric, actions_metric in pairs(actions) do
-            print('add ', metric, ' to ', ofs.ScriptTitle(scriptIdx))
+            print('add ', metric, ' to ', ofs.ScriptName(scriptIdx))
             for _, action in pairs(actions_metric) do
-                ofs.AddAction(script, action["at"], action["pos"], true)
+                local closest_action, _ = script:closestAction(action["at"]/1000.0)
+                if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
+                    filtered = filtered + 1
+                else
+                    script.actions:add(Action.new(action["at"]/1000.0, action["pos"], true))
+                end
             end
         end
 
-        -- save changes
-        ofs.Commit(script)
+        script:commit()
     end
 
-    -- delete json file
-    -- os.remove(tmpFile)
+    if filterSimilarTimestamps then
+        print('filtered timestamps', filtered)
+    end
+
 end
 
 
@@ -195,12 +180,13 @@ function invert_selected()
             action.pos = clamp(100 - action.pos, 0, 100)
         end
     end
-    ofs.Commit(script)
+    script:commit()
 end
 
 
 function align_bottom_points(align_value)
     local script = ofs.Script(ofs.ActiveIdx())
+    script:sort()
 
     -- get min value in selection if no align_value was given
     if align_value < 0 then
@@ -214,21 +200,23 @@ function align_bottom_points(align_value)
         end
     end
 
+    print('align bottom points to', align_value)
+
     -- align bottom points
     for idx, action in ipairs(script.actions) do
         if action.selected then
             local bottom_point = true
 
-            local next_action = ofs.ClosestActionAfter(script, action.at / 1000)
+            local next_action, _ = script:closestActionAfter(action.at)
             if next_action then
-                if script.actions[next_action].pos <= action.pos then
+                if next_action.pos <= action.pos then
                     bottom_point = false
                 end
             end
 
-            local prev_action = ofs.ClosestActionBefore(script, action.at / 1000)
+            local prev_action, _ = script:closestActionBefore(action.at)
             if prev_action then
-                if script.actions[prev_action].pos <= action.pos then
+                if prev_action.pos <= action.pos then
                     bottom_point = false
                 end
             end
@@ -239,12 +227,13 @@ function align_bottom_points(align_value)
         end
     end
 
-    ofs.Commit(script)
+    script:commit()
 end
 
 
 function align_top_points(align_value)
     local script = ofs.Script(ofs.ActiveIdx())
+    script:sort()
 
     -- get max value in selection if no align_value was given
     if align_value < 0 then
@@ -258,21 +247,23 @@ function align_top_points(align_value)
         end
     end
 
+    print('align top points to', align_value)
+
     -- align top points
     for idx, action in ipairs(script.actions) do
         if action.selected then
             local top_point = true
 
-            local next_action = ofs.ClosestActionAfter(script, action.at / 1000)
+            local next_action, _ = script:closestActionAfter(action.at)
             if next_action then
-                if script.actions[next_action].pos >= action.pos then
+                if next_action.pos >= action.pos then
                     top_point = false
                 end
             end
 
-            local prev_action = ofs.ClosestActionBefore(script, action.at / 1000)
+            local prev_action, _ = script:closestActionBefore(action.at)
             if prev_action then
-                if script.actions[prev_action].pos >= action.pos then
+                if prev_action.pos >= action.pos then
                     top_point = false
                 end
             end
@@ -283,13 +274,12 @@ function align_top_points(align_value)
         end
     end
 
-    ofs.Commit(script)
+    script:commit()
 end
 
 
 function init()
     print("Detected OS: ", platform)
-    ofs.Bind("start_funscript_generator", "execute the funcript generator")
     local version_file_path = ""
     if platform == "Windows" then
         version_file_path = ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\VERSION.txt"
@@ -338,8 +328,8 @@ function update_script_names()
     scriptNamesCount = 0
     scriptNames = {'ignore'}
     scriptNamesCount = scriptNamesCount + 1
-    while ofs.Script(i) do
-        name = ofs.ScriptTitle(i)
+    while i <= ofs.ScriptCount() do
+        name = ofs.ScriptName(i)
         if not is_empty(name) then
             table.insert(scriptNames, name)
             scriptNamesCount = scriptNamesCount + 1
@@ -362,7 +352,7 @@ end
 
 function update(delta)
     updateCounter = updateCounter + 1
-    if processHandleMTFG and not ofs.IsProcessAlive(processHandleMTFG) then
+    if processHandleMTFG and not processHandleMTFG:alive() then
         print('funscript generator completed import result')
         processHandleMTFG = nil
         import_funscript_generator_json_result()
@@ -384,7 +374,7 @@ function gui()
     if not processHandleMTFG then
 
         if ofs.Button("Start MTFG") then
-            start_funscript_generator()
+            binding.start_funscript_generator()
         end
     else
         if ofs.Button("Kill MTFG") then
@@ -399,7 +389,7 @@ function gui()
     ofs.SameLine()
     if ofs.Button("Open Config") then
         if platform == "Windows" then
-            processHandleConfigDir = ofs.CreateProcess("explorer.exe", ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\config")
+            processHandleConfigDir = Process.new("explorer.exe", ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\config")
         else
             local cmd = '/usr/bin/dbus-send --session --print-reply --dest=org.freedesktop.FileManager1 --type=method_call /org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItems array:string:"file://'
                 ..ofs.ExtensionDir()..'/Python-Funscript-Editor/funscript_editor/config/" string:""'
@@ -412,12 +402,12 @@ function gui()
         if platform == "Windows" then
             ofs.SameLine()
             if ofs.Button("Open Log") then
-                 processHandleLogFile = ofs.CreateProcess("notepad.exe", "C:/Temp/funscript_editor.log")
+                 processHandleLogFile = Process.new("notepad.exe", "C:/Temp/funscript_editor.log")
             end
         else
             ofs.SameLine()
             if ofs.Button("Open Log") then
-                processHandleLogFile = ofs.CreateProcess("/usr/bin/xdg-open", "/tmp/funscript_editor.log")
+                processHandleLogFile = Process.new("/usr/bin/xdg-open", "/tmp/funscript_editor.log")
             end
         end
     end
@@ -450,20 +440,23 @@ function gui()
 
     ofs.Separator()
 
-    ofs.Text("Post-Processing:")
-    ofs.SameLine()
-    if ofs.Button("Invert") then
-        invert_selected()
-    end
+    local enable_post_processing = true
+    if enable_post_processing then
+        ofs.Text("Post-Processing:")
+        ofs.SameLine()
+        if ofs.Button("Invert") then
+            invert_selected()
+        end
 
-    ofs.SameLine()
-    if ofs.Button("Align Bottom Points") then
-        align_bottom_points(-1)
-    end
+        ofs.SameLine()
+        if ofs.Button("Align Bottom Points") then
+            align_bottom_points(-1)
+        end
 
-    ofs.SameLine()
-    if ofs.Button("Align Top Points") then
-        align_top_points(-1)
+        ofs.SameLine()
+        if ofs.Button("Align Top Points") then
+             align_top_points(-1)
+        end
     end
 
 end

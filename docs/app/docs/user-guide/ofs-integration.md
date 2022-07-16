@@ -2,11 +2,11 @@
 
 ## Installation Windows (Easy)
 
-This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the MTFG OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFS_data\extensions` before running the installer.
+This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the MTFG OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFS_data2\extensions` before running the installer.
 
 **Installation:**
 
-1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.4!!!)**
+1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 2.0.0!!!)**
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
 2. Install OFS
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
@@ -27,7 +27,7 @@ This method use an installer that check for the latest release on GitHub and aut
 
 This section for technical interested people who want to understand the installation process. The source code of the installer is in the [`contrib/Installer`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/Installer) directory of this repository. The installer perform the following Steps:
 
-1. Check if the OFS Extension Directory `%APPDATA%\OFS\OFS_data\extensions` exists.
+1. Check if the OFS Extension Directory `%APPDATA%\OFS\OFS_data2\extensions` exists.
 2. Fetch the latest release Version from github rest api.
 3. Check if an (older) MTFG Version is already installed in the OFS Extension Directory: If we have already the latest version installed, we are done here
 4. The installer download the latest release version from github.
@@ -45,20 +45,20 @@ Disadvantages with manual installation:
 
 Manual Installation:
 
-1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 1.4.4!!!)**
+1. Download OFS from https://github.com/OpenFunscripter/OFS/releases. **(min required OFS Version 2.0.0!!!)**
    <br> ![OFS Download](./images/ofs_installation_01.jpg)
 2. Install OFS
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
 3. Start OFS at least once and close it again.
    <br> ![Start OFS](./images/ofs_installation_04.jpg)
 4. Download the application `funscript-editor_vx.x.x.zip` from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
-5. Open your File Explorer and navigate to `%APPDATA%\OFS\OFS_data\extensions`.
+5. Open your File Explorer and navigate to `%APPDATA%\OFS\OFS_data2\extensions`.
 6. Create an directory for the Extension with the name `Funscript Generator Windows`.
 7. Create an other directory inside the `Funscript Generator Windows` directory with the Name `funscript-editor`.
-8. Extract the Downloaded `funscript-editor_vx.x.x.zip` into `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows\funscript-editor`.
-9. Now check that the file `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows\funscript-editor\funscript-editor.exe` exists.
-10. Download the [lua wrapper script](https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/main.lua). Open the URL in your Browser and press `CTRL+S`. Then save the file as `main.lua` to the Directory `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows`.
-11. Download the [lua json extension](https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/json.lua). Open the URL in your Browser and press `CTRL+S`. Then save the file as `json.lua` to the Directory `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows`.
+8. Extract the Downloaded `funscript-editor_vx.x.x.zip` into `%APPDATA%\OFS\OFS_data2\extension\Funscript Generator Windows\funscript-editor`.
+9. Now check that the file `%APPDATA%\OFS\OFS_data2\extension\Funscript Generator Windows\funscript-editor\funscript-editor.exe` exists.
+10. Download the [lua wrapper script](https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/main.lua). Open the URL in your Browser and press `CTRL+S`. Then save the file as `main.lua` to the Directory `%APPDATA%\OFS\OFS_data2\extension\Funscript Generator Windows`.
+11. Download the [lua json extension](https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/Installer/assets/json.lua). Open the URL in your Browser and press `CTRL+S`. Then save the file as `json.lua` to the Directory `%APPDATA%\OFS\OFS_data2\extension\Funscript Generator Windows`.
 12. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!. Before you press the _Start MTFG_ Button you have to open a video in OFS else you get only the Message Box "Video file was not specified!".
     <br> ![Activate MTFG Extension](./images/ofs_extension_03.jpg)
 
