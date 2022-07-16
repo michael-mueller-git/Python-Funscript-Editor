@@ -41,6 +41,7 @@ def error(msg):
 
 
 def is_ofs_installed():
+    print('check if', OFS_EXTENSION_DIR, 'exists')
     if not os.path.exists(OFS_EXTENSION_DIR):
         if os.path.exists(OFS_V1_EXTENSION_DIR):
             error("Please update your [OFS](https://github.com/OpenFunscripter/OFS/releases) Installation to V2.X.X. Then run this installer again")
