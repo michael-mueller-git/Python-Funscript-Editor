@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 VERSION = "v0.2.0"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
-OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data2\extensions')
+OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS2_data\extensions')
 OFS_V1_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
 
