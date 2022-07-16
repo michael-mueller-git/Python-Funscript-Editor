@@ -88,6 +88,8 @@ def process_exists(process_name):
 
 
 def install_lua_scripts(root_src_dir, extension_dir):
+    if not os.path.exists(root_src_dir):
+        error(str(root_src_dir) + " do not exists (corrupt install pack?)")
     for src_dir, _, files in os.walk(root_src_dir):
         dst_dir = src_dir.replace(root_src_dir, extension_dir, 1)
         if not os.path.exists(dst_dir):
@@ -156,7 +158,7 @@ def update(download_urls, latest, release_notes):
         error("min required installer version is " + str(min_required_installer_version))
 
     shutil.move(mtfg_dir + "_update", mtfg_dir)
-    install_lua_scripts(mtfg_dir, extension_dir)
+    install_lua_scripts(os.path.join(mtfg_dir, "OFS"), extension_dir)
 
 
 
