@@ -38,6 +38,7 @@ if [ -d $OFS_APP_DIR ]; then
     git pull
     git reset --hard HEAD
     git clean -fd
+    git remote prune origin
     git checkout master
     git pull
     git submodule update --init
@@ -90,6 +91,7 @@ echo "Update MTFG"
 git reset --hard HEAD
 git clean -fd
 git pull --all
+git remote prune origin
 git checkout main
 git pull
 
