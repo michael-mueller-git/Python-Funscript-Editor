@@ -145,7 +145,8 @@ def update(download_urls, latest, release_notes):
         except: error('Error while deleting old Version (Is OFS currenty running?)')
 
     min_required_installer_version = get_required_installer_version(mtfg_dir + "_update")
-    if version.parse(min_required_installer_version) < version.parse(VERSION):
+    print('check min required installer version', min_required_installer_version)
+    if version.parse(min_required_installer_version) < version.parse(VERSION.lower().replace('v', '')):
         error("min required installer version is " + str(min_required_installer_version))
 
     shutil.move(mtfg_dir + "_update", mtfg_dir)
