@@ -9,7 +9,6 @@ import platform
 from dataclasses import dataclass
 from threading import Thread
 from queue import Queue
-from dataclasses import dataclass
 from funscript_editor.utils.config import SETTINGS, HYPERPARAMETER
 
 import numpy as np
