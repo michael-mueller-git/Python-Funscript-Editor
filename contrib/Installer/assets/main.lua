@@ -51,17 +51,17 @@ function binding.start_funscript_generator()
     local tmpFile = ofs.ExtensionDir() .. "/" .. tmpFileName
     local video = player.CurrentVideo()
     local script = ofs.Script(scriptIdx)
-    local currentTimeMs = player.CurrentTime() * 1000
+    local currentTime = player.CurrentTime()
     local fps = player.FPS()
 
     print("tmpFile: ", tmpFile)
     print("video: ", video)
     print("fps", fps)
     print("currentScriptIdx: ", scriptIdx)
-    print("currentTimeMs: ", currentTimeMs)
+    print("currentTime: ", currentTime)
 
-    local next_action, _ = script:closestActionAfter(currentTimeMs / 1000.0)
-    if next_action and (next_action.at*1000) < (currentTimeMs + 500) then
+    local next_action, _ = script:closestActionAfter(currentTime)
+    if next_action and next_action.at < (currentTime + 0.5) then
         next_action, _ = script:closestActionAfter(next_action.at)
     end
 
@@ -93,7 +93,7 @@ function binding.start_funscript_generator()
     end
 
     table.insert(args, "-s")
-    table.insert(args, tostring(currentTimeMs))
+    table.insert(args, tostring(math.floor(currentTime*1000)))
     table.insert(args, "-i")
     table.insert(args, video)
     table.insert(args, "-o")
@@ -101,7 +101,7 @@ function binding.start_funscript_generator()
 
     if next_action then
         table.insert(args, "-e")
-        table.insert(args, tostring(next_action.at*1000.0))
+        table.insert(args, tostring(math.floor(next_action.at*1000.0)))
     end
 
     print("cmd: ", cmd)
