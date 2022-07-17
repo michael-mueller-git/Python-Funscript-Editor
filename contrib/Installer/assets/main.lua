@@ -1,5 +1,5 @@
 json = require "json"
--- MTFG LUA Wrappper Version 2.0.1
+-- MTFG LUA Wrappper Version 2.0.0
 
 -- global var
 processHandleMTFG = nil
@@ -52,9 +52,11 @@ function binding.start_funscript_generator()
     local video = player.CurrentVideo()
     local script = ofs.Script(scriptIdx)
     local currentTimeMs = player.CurrentTime() * 1000
+    local fps = player.FPS()
 
     print("tmpFile: ", tmpFile)
     print("video: ", video)
+    print("fps", fps)
     print("currentScriptIdx: ", scriptIdx)
     print("currentTimeMs: ", currentTimeMs)
 
@@ -125,6 +127,9 @@ function import_funscript_generator_json_result()
     json_body = json.decode(content)
     actions = json_body["actions"]
 
+    local fps = player.FPS()
+    local frame_time = 1.0/fps
+    print("Frame Time:", frame_time)
     local filtered = 0
     if multiaxis then
         local i = 1
@@ -136,10 +141,11 @@ function import_funscript_generator_json_result()
                         script = ofs.Script(i)
                         for _, action in pairs(actions[k]) do
                             local closest_action, _ = script:closestAction(action["at"])
-                            if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
+                            local new_action = Action.new(action["at"]/1000.0, action["pos"], true)
+                            if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - new_action.at) <= frame_time then
                                 filtered = filtered + 1
                             else
-                                script.actions:add(Action.new(action["at"]/1000.0, action["pos"], true))
+                                script.actions:add(new_action)
                             end
                         end
                         script:commit()
@@ -155,10 +161,11 @@ function import_funscript_generator_json_result()
             print('add ', metric, ' to ', ofs.ScriptName(scriptIdx))
             for _, action in pairs(actions_metric) do
                 local closest_action, _ = script:closestAction(action["at"]/1000.0)
-                if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - (action["at"]/1000.0)) < 0.01 then
+                local new_action = Action.new(action["at"]/1000.0, action["pos"], true)
+                if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - new_action.at) <= frame_time then
                     filtered = filtered + 1
                 else
-                    script.actions:add(Action.new(action["at"]/1000.0, action["pos"], true))
+                    script.actions:add(new_action)
                 end
             end
         end
@@ -279,6 +286,7 @@ end
 
 
 function init()
+    print("OFS Version:", ofs.Version())
     print("Detected OS: ", platform)
     local version_file_path = ""
     if platform == "Windows" then
