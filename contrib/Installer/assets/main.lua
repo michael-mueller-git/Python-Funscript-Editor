@@ -14,6 +14,7 @@ multiaxis = false
 tmpFileName = "funscript_actions.json"
 tmpFileExists = false
 enableLogs = false
+stopAtNextActionPoint = true
 filterSimilarTimestamps = true
 scriptNames = {}
 scriptNamesCount = 0
@@ -54,17 +55,19 @@ function binding.start_funscript_generator()
     local currentTime = player.CurrentTime()
     local fps = player.FPS()
 
+    local next_action = nil
+    if stopAtNextActionPoint then
+        next_action, _ = script:closestActionAfter(currentTime)
+        if next_action and next_action.at < (currentTime + 0.5) then
+            next_action, _ = script:closestActionAfter(next_action.at)
+        end
+    end
+
     print("tmpFile: ", tmpFile)
     print("video: ", video)
     print("fps", fps)
     print("currentScriptIdx: ", scriptIdx)
     print("currentTime: ", currentTime)
-
-    local next_action, _ = script:closestActionAfter(currentTime)
-    if next_action and next_action.at < (currentTime + 0.5) then
-        next_action, _ = script:closestActionAfter(next_action.at)
-    end
-
     print("nextAction: ", next_action and tostring(next_action.at) or "nil")
 
     local cmd = ""
@@ -430,6 +433,7 @@ function gui()
 
     ofs.Separator()
     ofs.Text("Options:")
+    stopAtNextActionPoint, _ = ofs.Checkbox("Stop tracking at next existing point", stopAtNextActionPoint)
     enableLogs, _ = ofs.Checkbox("Enable logging", enableLogs)
     multiaxis, _ = ofs.Checkbox("Enable multiaxis", multiaxis)
 
