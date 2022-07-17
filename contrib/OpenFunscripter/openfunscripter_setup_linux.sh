@@ -129,11 +129,6 @@ cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/contrib/Installer/assets
 cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/contrib/Installer/assets/json.lua" \
     "$OFS_EXTENSION_DIR/MTFG/json.lua"
 
-mkdir -p "$OFS_EXTENSION_DIR/MTFG/json"
-
-cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/contrib/Installer/assets/json.lua" \
-    "$OFS_EXTENSION_DIR/MTFG/json/lua.lua"
-
 popd
 
 if [ ! -e ~/.local/bin/OpenFunscripter ]; then

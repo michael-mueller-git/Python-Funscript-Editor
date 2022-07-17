@@ -1,5 +1,5 @@
-json = require "json.lua"
--- MTFG LUA Wrappper Version 2.0.0
+json = require "json"
+-- MTFG LUA Wrappper Version 2.0.1
 
 -- global var
 processHandleMTFG = nil

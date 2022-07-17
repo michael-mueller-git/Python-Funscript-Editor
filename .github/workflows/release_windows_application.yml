@@ -61,15 +61,10 @@ jobs:
         run: |
           cp "contrib/Installer/assets/main.lua" "dist/funscript-editor/OFS/main.lua"
 
-      - name: Create json lua extensions dir
-        shell: bash -l {0}
-        run: |
-          mkdir -p "dist/funscript-editor/OFS/json"
-
       - name: Add json Lua Extension
         shell: bash -l {0}
         run: |
-          cp "contrib/Installer/assets/json.lua" "dist/funscript-editor/OFS/json/lua.lua"
+          cp "contrib/Installer/assets/json.lua" "dist/funscript-editor/OFS/json.lua"
 
       - name: Add Version to Build
         shell: bash -l {0}
