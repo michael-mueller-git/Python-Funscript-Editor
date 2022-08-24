@@ -596,6 +596,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
             str: a process status message e.g. 'end of video reached'
         """
         first_frame = FFmpegStream.get_frame(self.params.video_path, self.params.start_frame)
+        if first_frame is None or first_frame.shape[0] == 0 or first_frame.shape[1] == 0:
+            return "Could not extract first frame, please re-encode your video"
 
         self.projection_config = self.ui.get_video_projection_config(first_frame, self.params.projection)
 
