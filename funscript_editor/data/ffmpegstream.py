@@ -151,6 +151,9 @@ class FFmpegStream:
         Returns:
             np.ndarray: projected opencv image
         """
+        if frame.shape[0] == 0 or frame.shape[1] == 0:
+            frame = np.zeros((512, 512, 3), dtype = "uint8")
+
         # Ensure the image is large enough to get an output from ffmpeg v360 filter
         scale_w = 1.25 * config['parameter']['width'] / frame.shape[1]
         scale_h = 1.25 * config['parameter']['height'] / frame.shape[0]
