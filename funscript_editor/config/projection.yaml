@@ -106,7 +106,7 @@ vr_he_180_ou:
 
 
 flat_with_parameters:
-  name: '2D Video with Filters'
+  name: '2D Video with Keyboard Menu'
   video_filter: "pad='max(ih,iw):max(ih,iw):max(ih,iw)/2:max(ih,iw)/2',scale=${width}:${height},rotate='(PI/180)*${rotation}',crop='iw*1/max(1, ${zoom}/5):ih*1/max(1, ${zoom}/5):2*${x}:2*${y}',scale=${width}:${height}"
   parameter:
     height: 1024
@@ -128,3 +128,17 @@ flat_with_parameters:
     rotation:
       increase: "e"
       decrease: "q"
+
+# experimental mouse api may change in future version!!!
+flat_with_mouse:
+  name: '2D Video with Mouse Menu'
+  video_filter: "pad='max(ih,iw):max(ih,iw):max(ih,iw)/2:max(ih,iw)/2',scale=${width}:${height},crop='${w}:${h}:${x}:${y}',scale=${width}:${height}"
+  parameter:
+    height: 1024
+    width: 1024
+    x: 0
+    y: 0
+    w: 1024
+    h: 1024
+  mouse: true
+

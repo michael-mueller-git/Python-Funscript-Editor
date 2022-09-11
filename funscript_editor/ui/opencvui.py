@@ -721,6 +721,17 @@ class OpenCV_GUI(KeypressHandler):
         if image.shape[0] > 3000 or image.shape[1] > 3000:
             image = cv2.resize(image, None, fx=0.5, fy=0.5)
 
+        if "mouse" in config and config["mouse"] == True:
+            self.logger.info("Show Mouse ROI Menu")
+            preview = FFmpegStream.get_projection(image, config)
+            selected_bbox = self.bbox_selector(preview, "Select ROI")
+            config['parameter']['x'] = selected_bbox[0]
+            config['parameter']['y'] = selected_bbox[1]
+            config['parameter']['w'] = selected_bbox[2]
+            config['parameter']['h'] = selected_bbox[3]
+            self.show_loading_screen()
+            return config
+
         ui_texte = {}
         if "keys" in config.keys():
             for param in config['keys'].keys():

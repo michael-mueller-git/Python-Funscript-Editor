@@ -438,14 +438,19 @@ class FFmpegStream:
                         if self.log_queue_overrun:
                             self.logger.error("FFmpeg Frame Buffer overrun!!!")
 
-                if 'zoom' in self.config.keys():
-                    frame = frame[
-                        int(self.config['zoom'][1]):int(self.config['zoom'][1]+self.config['zoom'][3]),
-                        int(self.config['zoom'][0]):int(self.config['zoom'][0]+self.config['zoom'][2])
-                    ]
+                if 'postParameter' in self.config.keys():
+                    if 'zoom' in self.config['postParameter'].keys():
+                        frame = frame[
+                            int(self.config['zoom'][1]):int(self.config['zoom'][1]+self.config['zoom'][3]),
+                            int(self.config['zoom'][0]):int(self.config['zoom'][0]+self.config['zoom'][2])
+                        ]
 
-                if 'resize' in self.config.keys():
-                    frame = cv2.resize(frame, self.config['resize'])
+                    if 'resize' in self.config['postParameter'].keys():
+                        frame = cv2.resize(frame, self.config['resize'])
+
+                # TODO remove this after testing
+                assert('zoom' not in self.config)
+                assert('resize' not in self.config)
 
                 self.frame_buffer.put(frame)
 
