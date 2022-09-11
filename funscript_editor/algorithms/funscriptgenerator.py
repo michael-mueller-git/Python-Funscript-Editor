@@ -232,7 +232,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             if self.params.track_men:
                 men_center = [self.get_center(item) for item in bboxes['Men'][tracker_number]]
 
-                if len(men_center) == 0:
+                if len(men_center) == 0 or len(woman_center) == 0:
                     score['x'][tracker_number] = []
                     score['y'][tracker_number] = []
                     score['distance'][tracker_number] = []
@@ -307,6 +307,11 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 score['roll'][tracker_number] = [-100*item/(math.pi) + 100 for item in tmp]
 
             else:
+                if len(woman_center) == 0:
+                    score['x'][tracker_number] = []
+                    score['y'][tracker_number] = []
+                    continue
+
                 min_woman_x = min([x[0] for x in woman_center])
                 max_woman_y = max([x[1] for x in woman_center])
                 score['x'][tracker_number] = np.array([w[0] - min_woman_x for w in woman_center])
