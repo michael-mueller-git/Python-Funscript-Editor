@@ -9,7 +9,6 @@ from queue import Queue
 from datetime import datetime
 from funscript_editor.data.ffmpegstream import FFmpegStream, VideoInfo
 from funscript_editor.utils.config import PROJECTION, SETTINGS, NOTIFICATION_SOUND_FILE
-from screeninfo import get_monitors
 from dataclasses import dataclass
 
 import funscript_editor.utils.logging as logging
@@ -181,6 +180,7 @@ class OpenCV_GUI(KeypressHandler):
         """ Determine the scaling for current monitor setup """
         scale = []
         try:
+            from screeninfo import get_monitors
             for monitor in get_monitors():
                 if monitor.width > monitor.height:
                     scale.append(

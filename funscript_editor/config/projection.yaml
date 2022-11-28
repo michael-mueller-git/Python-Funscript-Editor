@@ -32,6 +32,30 @@ vr_he_180_sbs:
       increase: "-"
       decrease: "+"
 
+vr_he_180_sbs_lr:
+  name: '3D SBS VR Video 180 L+R'
+  video_filter: 'v360=input=he:in_stereo=sbs:pitch=${pitch}:yaw=${yaw}:roll=${roll}:out_stereo=sbs:output=flat:d_fov=${fov}:w=${width}:h=${height}'
+  parameter:
+    height: 800
+    width: 800
+    fov: 80
+    pitch: -45
+    yaw: 0
+    roll: 0
+  keys:
+    pitch:
+      increase: "w"
+      decrease: "s"
+    yaw:
+      increase: "d"
+      decrease: "a"
+    roll:
+      increase: "e"
+      decrease: "q"
+    fov:
+      increase: "-"
+      decrease: "+"
+
 vr_fisheye_200_sbs:
   name: '3D SBS VR Video Fisheye 200'
   video_filter: 'v360=input=fisheye:in_stereo=sbs:id_fov=200:pitch=${pitch}:yaw=${yaw}:roll=${roll}:output=flat:d_fov=${fov}:w=${width}:h=${height}'
