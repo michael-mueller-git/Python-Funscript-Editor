@@ -111,7 +111,11 @@ if command -v apt; then
     # debian based distro:
     source ~/anaconda3/etc/profile.d/conda.sh 2>/dev/null
     source ~/miniconda3/etc/profile.d/conda.sh 2>/dev/null
+    export CONDA_ALWAYS_YES="true"
     conda env create -f environment_ubuntu.yaml
+    conda activate funscript-editor
+    conda env update --file environment_ubuntu.yaml --prune
+    unset CONDA_ALWAYS_YES
 fi
 
 if command -v pacman; then
@@ -148,7 +152,7 @@ StartupWMClass=OpenFunscripter
 Icon=`realpath $OFS_APP_DIR`/bin/data/logo64.png
 EOL
 
-
+echo -e "\n"
 echo "Installation Completed"
 
 if [ "$arg1" = "--latest" ]; then
