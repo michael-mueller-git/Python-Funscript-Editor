@@ -15,13 +15,15 @@ from bs4 import BeautifulSoup # beautifulsoup4
 from tqdm import tqdm
 
 
-VERSION = "v0.2.0"
+VERSION = "v0.2.1"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS2_data\extensions')
 OFS_V1_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
 EXTENSION_NAME = "Funscript Generator Windows"
 
+if os.path.exists(os.path.expandvars(r'%APPDATA%\OFS\OFS3_data')):
+    OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS3_data\extensions')
 
 class DownloadProgressBar(tqdm):
     def update_to(self, b=1, bsize=1, tsize=None):
@@ -49,7 +51,7 @@ def is_ofs_installed():
     print('check if', OFS_EXTENSION_DIR, 'exists')
     if not os.path.exists(OFS_EXTENSION_DIR):
         if os.path.exists(OFS_V1_EXTENSION_DIR):
-            error("Please update your [OFS](https://github.com/OpenFunscripter/OFS/releases) Installation to V2.X.X. Then run this installer again")
+            error("Please update your [OFS](https://github.com/OpenFunscripter/OFS/releases) Installation. Then run this installer again")
         else:
             error("OFS is not installed. Please download and install [OFS](https://github.com/OpenFunscripter/OFS/releases). Befor running this installer open OFS once!!")
 
