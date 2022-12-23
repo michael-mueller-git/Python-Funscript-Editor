@@ -59,6 +59,11 @@ else
     echo "Use latest git commit (only for developers!)"
 fi
 
+if command -v pacman; then
+    echo "apply fixes for arch linux"
+    sed -i 's/libmpv.so.1/libmpv.so.2/g' OFS-lib/OFS_MpvLoader.cpp
+fi
+
 echo ">> Build OFS in $PWD"
 rm -rf build
 mkdir -p build
