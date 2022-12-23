@@ -89,3 +89,7 @@ Path for extensions is `~/.local/share/OFS/OFS_data/extensions`
 ### OFS 2.x.x
 
 Path for extensions is `~/.local/share/OFS/OFS_data2/extensions`
+
+### OFS 3.x.x
+
+Path for extensions is `~/.local/share/OFS/OFS_data3/extensions`

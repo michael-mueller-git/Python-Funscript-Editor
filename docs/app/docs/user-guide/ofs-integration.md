@@ -2,7 +2,7 @@
 
 ## Installation Windows (Easy)
 
-This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the MTFG OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFS_data2\extensions` before running the installer.
+This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the MTFG OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFS_dataX\extensions` (the `X` in `OFS_dataX` is an placeholder for your OFS Version) before running the installer.
 
 **Installation:**
 
@@ -27,7 +27,7 @@ This method use an installer that check for the latest release on GitHub and aut
 
 This section for technical interested people who want to understand the installation process. The source code of the installer is in the [`contrib/Installer`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/Installer) directory of this repository. The installer perform the following Steps:
 
-1. Check if the OFS Extension Directory `%APPDATA%\OFS\OFS_data2\extensions` exists.
+1. Check if the OFS Extension Directory `%APPDATA%\OFS\OFS_dataX\extensions` exists (the `X` in `OFS_dataX` is an placeholder for your OFS Version).
 2. Fetch the latest release Version from github rest api.
 3. Check if an (older) MTFG Version is already installed in the OFS Extension Directory: If we have already the latest version installed, we are done here
 4. The installer download the latest release version from github.
@@ -51,15 +51,16 @@ Manual Installation:
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
 3. Start OFS at least once and close it again.
    <br> ![Start OFS](./images/ofs_installation_04.jpg)
-4. Download the application `funscript-editor_vx.x.x.zip` from https://github.com/michael-mueller-git/Python-Funscript-Editor/releases.
-5. Open your File Explorer and navigate to `%APPDATA%\OFS\OFS_data2\extensions`.
-6. Create an directory for the Extension with the name `Funscript Generator Windows`.
-7. Create an other directory inside the `Funscript Generator Windows` directory with the Name `funscript-editor`.
-8. Extract the Downloaded `funscript-editor_vx.x.x.zip` into `%APPDATA%\OFS\OFS_data2\extension\Funscript Generator Windows\funscript-editor`.
-9. Now check that the file `%APPDATA%\OFS\OFS_data2\extension\Funscript Generator Windows\funscript-editor\funscript-editor.exe` exists.
-10. Copy the content from `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows\funscript-editor\OFS` to `%APPDATA%\OFS\OFS_data\extension\Funscript Generator Windows` and override existing files.
-11. Now check that the file `%APPDATA%\OFS\OFS_data2\extension\Funscript Generator Windows\main.lua` exists.
-12. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!. Before you press the _Start MTFG_ Button you have to open a video in OFS else you get only the Message Box "Video file was not specified!".
+4. Determine OFS extension directory in `%APPDATA%\OFS`. For OFS Version 3 the `OFS_EXTENSION_PATH` is `%APPDATA%\OFS\OFS_data3\extension`.
+5. Download the application `funscript-editor_vx.x.x.zip` from `https://github.com/michael-mueller-git/Python-Funscript-Editor/releases`.
+6. Open your File Explorer and navigate to `%OFS_EXTENSION_PATH%` (determined in step 4).
+7. Create an directory for the Extension with the name `Funscript Generator Windows`.
+8. Create an other directory inside the `Funscript Generator Windows` directory with the Name `funscript-editor`.
+9. Extract the Downloaded `funscript-editor_vx.x.x.zip` into `%OFS_EXTENSION_PATH%\Funscript Generator Windows\funscript-editor`.
+10. Now check that the file `%OFS_EXTENSION_PATH%\extension\Funscript Generator Windows\funscript-editor\funscript-editor.exe` exists.
+11. Copy the content from `%OFS_EXTENSION_PATH%\extension\Funscript Generator Windows\funscript-editor\OFS` to `%OFS_EXTENSION_PATH%\Funscript Generator Windows` and override existing files.
+12. Now check that the file `%OFS_EXTENSION_PATH%\Funscript Generator Windows\main.lua` exists.
+13. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!. Before you press the _Start MTFG_ Button you have to open a video in OFS else you get only the Message Box "Video file was not specified!".
     <br> ![Activate MTFG Extension](./images/ofs_extension_03.jpg)
 
 <br>
