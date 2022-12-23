@@ -167,7 +167,7 @@ def update(download_urls, latest, release_notes):
 
     min_required_installer_version = get_required_installer_version(mtfg_dir + "_update")
     print('check min required installer version', min_required_installer_version)
-    if version.parse(min_required_installer_version) < version.parse(VERSION.lower().replace('v', '')):
+    if version.parse(min_required_installer_version) > version.parse(VERSION.lower().replace('v', '')):
         uninstall()
         error("min required installer version is " + str(min_required_installer_version))
 
