@@ -2,7 +2,7 @@
 
 ## Installation Windows (Easy)
 
-This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the MTFG OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFS_dataX\extensions` (the `X` in `OFS_dataX` is an placeholder for your OFS Version) before running the installer.
+This method use an installer that check for the latest release on GitHub and automatically update the existing Motion Tracking Funscript Generator (MTFG) OFS Extension on your computer. If you want to make an clean install of the MTFG OFS Extension you can delete the existing folder `Funscript Generator Windows` in `%APPDATA%\OFS\OFSX_data\extensions` (the `X` in `OFSX_data` is an placeholder for your OFS Version) before running the installer.
 
 **Installation:**
 
@@ -27,7 +27,7 @@ This method use an installer that check for the latest release on GitHub and aut
 
 This section for technical interested people who want to understand the installation process. The source code of the installer is in the [`contrib/Installer`](https://github.com/michael-mueller-git/Python-Funscript-Editor/tree/main/contrib/Installer) directory of this repository. The installer perform the following Steps:
 
-1. Check if the OFS Extension Directory `%APPDATA%\OFS\OFS_dataX\extensions` exists (the `X` in `OFS_dataX` is an placeholder for your OFS Version).
+1. Check if the OFS Extension Directory `%APPDATA%\OFS\OFSX_data\extensions` exists (the `X` in `OFSX_data` is an placeholder for your OFS Version).
 2. Fetch the latest release Version from github rest api.
 3. Check if an (older) MTFG Version is already installed in the OFS Extension Directory: If we have already the latest version installed, we are done here
 4. The installer download the latest release version from github.
@@ -51,7 +51,7 @@ Manual Installation:
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
 3. Start OFS at least once and close it again.
    <br> ![Start OFS](./images/ofs_installation_04.jpg)
-4. Determine OFS extension directory in `%APPDATA%\OFS`. For OFS Version 3 the `OFS_EXTENSION_PATH` is `%APPDATA%\OFS\OFS_data3\extension`.
+4. Determine OFS extension directory in `%APPDATA%\OFS`. For OFS Version 3 the `OFS_EXTENSION_PATH` is `%APPDATA%\OFS\OFS3_data\extension`.
 5. Download the application `funscript-editor_vx.x.x.zip` from `https://github.com/michael-mueller-git/Python-Funscript-Editor/releases`.
 6. Open your File Explorer and navigate to `%OFS_EXTENSION_PATH%` (determined in step 4).
 7. Create an directory for the Extension with the name `Funscript Generator Windows`.
