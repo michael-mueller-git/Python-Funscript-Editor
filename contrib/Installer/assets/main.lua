@@ -1,5 +1,5 @@
 json = require "json"
--- MTFG LUA Wrappper Version 2.0.0
+-- MTFG LUA Wrappper Version 2.0.1
 
 -- global var
 processHandleMTFG = nil
@@ -32,6 +32,8 @@ function get_platform()
             return "Linux, Conda"
         elseif exists(home.."/anaconda3/envs/funscript-editor") then
             return "Linux, Conda"
+        elseif exists("/nix/store") then
+            return "Linux, Nix"
         else
             return "Linux, Python"
         end
@@ -81,6 +83,9 @@ function binding.start_funscript_generator()
     elseif platform == "Linux, Conda" then
         cmd = "/usr/bin/bash"
         table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/conda_wrapper.sh")
+    elseif platform == "Linux, Nix" then
+        cmd = "/usr/bin/bash"
+        table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh")
     else
         print("ERROR: Platform Not Implemented (", platform, ")")
     end
