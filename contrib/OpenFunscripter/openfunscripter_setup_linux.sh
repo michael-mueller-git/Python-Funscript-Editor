@@ -30,7 +30,7 @@ if command -v pacman; then
 fi
 
 OFS_APP_DIR="$HOME/.local/share/OFS/application"
-OFS_EXTENSION_DIR="$HOME/.local/share/OFS/OFS2_data/extensions"
+OFS_EXTENSION_DIR="$HOME/.local/share/OFS/OFS3_data/extensions"
 
 if [ -d $OFS_APP_DIR ]; then
     echo ">> OpenFunscripter Source already downloaded (Updating...)"
