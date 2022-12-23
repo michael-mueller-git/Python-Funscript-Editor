@@ -51,14 +51,14 @@ Manual Installation:
    <br> ![Install OFS](./images/ofs_installation_03.jpg)
 3. Start OFS at least once and close it again.
    <br> ![Start OFS](./images/ofs_installation_04.jpg)
-4. Determine OFS extension directory in `%APPDATA%\OFS`. For OFS Version 3 the `OFS_EXTENSION_PATH` is `%APPDATA%\OFS\OFS3_data\extension`.
+4. Determine OFS extension directory in `%APPDATA%\OFS`. For OFS Version 3 the `OFS_EXTENSION_PATH` is `%APPDATA%\OFS\OFS3_data\extensions`.
 5. Download the application `funscript-editor_vx.x.x.zip` from `https://github.com/michael-mueller-git/Python-Funscript-Editor/releases`.
 6. Open your File Explorer and navigate to `%OFS_EXTENSION_PATH%` (determined in step 4).
 7. Create an directory for the Extension with the name `Funscript Generator Windows`.
 8. Create an other directory inside the `Funscript Generator Windows` directory with the Name `funscript-editor`.
 9. Extract the Downloaded `funscript-editor_vx.x.x.zip` into `%OFS_EXTENSION_PATH%\Funscript Generator Windows\funscript-editor`.
-10. Now check that the file `%OFS_EXTENSION_PATH%\extension\Funscript Generator Windows\funscript-editor\funscript-editor.exe` exists.
-11. Copy the content from `%OFS_EXTENSION_PATH%\extension\Funscript Generator Windows\funscript-editor\OFS` to `%OFS_EXTENSION_PATH%\Funscript Generator Windows` and override existing files.
+10. Now check that the file `%OFS_EXTENSION_PATH%\Funscript Generator Windows\funscript-editor\funscript-editor.exe` exists.
+11. Copy the content from `%OFS_EXTENSION_PATH%\Funscript Generator Windows\funscript-editor\OFS` to `%OFS_EXTENSION_PATH%\Funscript Generator Windows` and override existing files.
 12. Now check that the file `%OFS_EXTENSION_PATH%\Funscript Generator Windows\main.lua` exists.
 13. Open OFS, activate the extension (3) and enable the window (4). Now you can use the extension at any position in the Video with the _Start MTFG_ Button (5). On slow computers, the program may take several seconds to start!. Before you press the _Start MTFG_ Button you have to open a video in OFS else you get only the Message Box "Video file was not specified!".
     <br> ![Activate MTFG Extension](./images/ofs_extension_03.jpg)
