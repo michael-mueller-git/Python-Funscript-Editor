@@ -10,15 +10,16 @@ import traceback
 import shutil
 import subprocess
 
+import tkinter as tk
+from tkinter import filedialog
 from packaging import version
 from bs4 import BeautifulSoup # beautifulsoup4
 from tqdm import tqdm
 
 
-VERSION = "v0.2.1"
+VERSION = "v0.2.2"
 FUNSCRIPT_GENERATOR_RELEASE_URL = "https://github.com/michael-mueller-git/Python-Funscript-Editor/releases"
 OFS_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS2_data\extensions')
-OFS_V1_EXTENSION_DIR = os.path.expandvars(r'%APPDATA%\OFS\OFS_data\extensions')
 LATEST_RELEASE_API_URL = 'https://api.github.com/repos/michael-mueller-git/Python-Funscript-Editor/releases/latest'
 EXTENSION_NAME = "Funscript Generator Windows"
 
@@ -37,23 +38,40 @@ def download_url(url, output_path):
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
         urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
 
+
 def uninstall():
     version_file = os.path.join(OFS_EXTENSION_DIR, EXTENSION_NAME, "funscript-editor", "funscript_editor", "VERSION.txt")
     if os.path.exists(version_file):
         os.remove(version_file)
+
 
 def error(msg):
     print("ERROR: " + msg)
     sys.exit(1)
 
 
+# Some user report problems with auto determined OFS extension directory.
+def get_ofs_extension_dir_by_userinput():
+    global OFS_EXTENSION_DIR
+    root = tk.Tk()
+    root.withdraw()
+    print("Please select the OFS extensions directory manually")
+    dir_path = filedialog.askdirectory(initialdir=os.path.expandvars(r'%APPDATA%'), title='Please select the OFS extensions directory')
+    if os.path.exists(dir_path):
+        parent = os.path.dirname(dir_path)
+        if os.path.exists(os.path.join(parent, "extension.json")):
+            OFS_EXTENSION_DIR = dir_path
+            print("Use ofs extension directory:", OFS_EXTENSION_DIR)
+            return
+
+    error("Invalid OFS extensions path seleced")
+
+
 def is_ofs_installed():
-    print('check if', OFS_EXTENSION_DIR, 'exists')
+    print('Check if', OFS_EXTENSION_DIR, 'exists...')
     if not os.path.exists(OFS_EXTENSION_DIR):
-        if os.path.exists(OFS_V1_EXTENSION_DIR):
-            error("Please update your [OFS](https://github.com/OpenFunscripter/OFS/releases) Installation. Then run this installer again")
-        else:
-            error("OFS is not installed. Please download and install [OFS](https://github.com/OpenFunscripter/OFS/releases). Befor running this installer open OFS once!!")
+        print("The program could not automatically determine the OFS extension directory")
+        get_ofs_extension_dir_by_userinput()
 
 
 def get_download_urls_with_api():
