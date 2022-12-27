@@ -1,6 +1,6 @@
 # usage: `nix develop --impure`
 {
-  description = "my project description";
+  description = "MTFG";
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
