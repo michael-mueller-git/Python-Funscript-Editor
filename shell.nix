@@ -27,6 +27,7 @@ in
         playsound
         pynput
         pyqt5
+        pyqtgraph
         pyyaml
         scipy
         screeninfo

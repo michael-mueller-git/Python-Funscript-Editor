@@ -1,3 +1,5 @@
+Pillow
+PyYAML
 coloredlogs
 cycler
 gitpython
@@ -5,14 +7,13 @@ humanfriendly
 kiwisolver
 matplotlib
 numpy
-Pillow
 playsound
 pynput
 pyparsing
+pyqtgraph
 pyreadline
 python-dateutil
 python-mpv
-PyYAML
 scipy
 screeninfo
 six
