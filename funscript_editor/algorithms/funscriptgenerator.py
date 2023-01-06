@@ -10,7 +10,7 @@ import funscript_editor.utils.logging as logging
 import threading
 
 from dataclasses import dataclass
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from scipy.interpolate import interp1d
 
 from funscript_editor.algorithms.videotracker import StaticVideoTracker
@@ -20,6 +20,7 @@ from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
 from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneContentDetector, SceneThresholdDetector
 from funscript_editor.algorithms.signal import Signal
 from funscript_editor.ui.opencvui import OpenCV_GUI, OpenCV_GUI_Parameters
+from funscript_editor.ui.cut_tracking_result import CutTrackingResultWidget
 
 import multiprocessing as mp
 import numpy as np
@@ -965,6 +966,12 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 return
 
             for metric in self.funscripts.keys():
+                # TODO does not work hear we are not in main thread
+                # app = QtWidgets.QApplication(sys.argv)
+                # w = CutTrackingResultWidget(self.score, [metric])
+                # w.show()
+                # app.exec_()
+                # print("result", w.result)
                 idx_dict = self.determine_change_points(metric)
                 self.create_funscript(idx_dict, metric)
 
