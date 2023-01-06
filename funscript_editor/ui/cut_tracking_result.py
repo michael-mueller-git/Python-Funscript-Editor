@@ -80,6 +80,8 @@ class CutTrackingResultWidget(QWidget):
             "start": start,
             "stop": stop
         }
+
+        # TODO always rescal cuted signal
         for k in self.curve:
             if start < stop:
                 new_score = self.raw_score[k][start:stop]
