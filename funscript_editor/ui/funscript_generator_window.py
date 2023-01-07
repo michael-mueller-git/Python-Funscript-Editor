@@ -16,9 +16,6 @@ from funscript_editor.utils.config import SETTINGS, PROJECTION, HYPERPARAMETER
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-USE_OPTICALFLOW = False # Enable some hardcoded optical flow testcode
-if USE_OPTICALFLOW:
-    from funscript_editor.algorithms.opticalflow import OpticalFlowFunscriptGeneratorThread, OpticalFlowFunscriptGeneratorParameter
 
 class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     """ Class to Generate a funscript with minimal UI
@@ -88,12 +85,9 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__logger.info("Config:" + str(SETTINGS))
 
         self.settings = {}
-        if USE_OPTICALFLOW:
-            self.run_opticalflow()
-        else:
-            self.settings_dialog = SettingsDialog(self.settings, include_vr = True, include_multiaxis = include_multiaxis)
-            self.settings_dialog.applySettings.connect(self.run)
-            self.settings_dialog.show()
+        self.settings_dialog = SettingsDialog(self.settings, include_vr = True, include_multiaxis = include_multiaxis)
+        self.settings_dialog.applySettings.connect(self.run)
+        self.settings_dialog.show()
 
 
     __logger = logging.getLogger(__name__)
