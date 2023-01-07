@@ -79,11 +79,12 @@ class TrackingManagerThread(QtCore.QThread):
     """
 
     def __init__(self,
+                 video_info,
                  params: TrackingManagerParameter):
         QtCore.QThread.__init__(self)
         self.logger = logging.getLogger(__name__)
         self.params = params
-        self.video_info = FFmpegStream.get_video_info(self.params.video_path)
+        self.video_info = video_info
         self.tracking_points = {}
         self.score = {
                 'x': [],

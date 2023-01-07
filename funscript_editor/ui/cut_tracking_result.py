@@ -4,6 +4,8 @@ import random
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout, QWidget
 
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 import pyqtgraph as pg
 from funscript_editor.algorithms.signal import Signal
 
@@ -43,6 +45,8 @@ class CutTrackingResultWidget(QWidget):
         self.raw_score = raw_score
         data_len = max([len(raw_score[k]) for k in raw_score if k in metrics])
 
+        self.verticalLayout.addWidget(QLabel("Cut tracking result before postprocessing"))
+
         self.w1 = Slider("Start at Frame", data_len, 0)
         self.verticalLayout.addWidget(self.w1)
 
@@ -51,7 +55,7 @@ class CutTrackingResultWidget(QWidget):
 
         self.btn = QPushButton("OK")
         self.verticalLayout.addWidget(self.btn)
-        self.btn.clicked.connect(self.close)
+        self.btn.clicked.connect(self.confirm)
 
         self.win = pg.GraphicsLayoutWidget(title="Cut Tracking result")
         self.verticalLayout.addWidget(self.win)
@@ -72,6 +76,14 @@ class CutTrackingResultWidget(QWidget):
             "stop": data_len
         }
 
+    cutCompleted = QtCore.pyqtSignal(dict)
+
+
+    def confirm(self):
+        self.hide()
+        self.cutCompleted.emit(self.result)
+        self.close()
+
 
     def update_plot(self):
         start = self.w1.x
@@ -81,23 +93,10 @@ class CutTrackingResultWidget(QWidget):
             "stop": stop
         }
 
-        # TODO always rescal cuted signal
         for k in self.curve:
             if start < stop:
-                new_score = self.raw_score[k][start:stop]
+                new_score = Signal.scale(self.raw_score[k][start:stop], 0 , 100)
                 self.curve[k].setData([start+i for i in range(stop-start)], new_score)
             else:
                 self.curve[k].setData([])
 
-
-if __name__ == '__main__':
-    raw_data = {
-            'd': [random.randint(0, 99) for _ in range(500)],
-            'x': [random.randint(0, 99) for _ in range(500)],
-            'y': [random.randint(0, 99) for _ in range(500)]
-            }
-    app = QApplication(sys.argv)
-    w = CutTrackingResultWidget(raw_data, ["x", "y"])
-    w.show()
-    app.exec_()
-    print(w.result)

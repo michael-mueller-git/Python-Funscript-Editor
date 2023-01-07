@@ -13,7 +13,10 @@ from funscript_editor.ui.settings_dialog import SettingsDialog
 import funscript_editor.definitions as definitions
 from funscript_editor.ui.theme import setup_theme
 from funscript_editor.utils.config import SETTINGS, PROJECTION, HYPERPARAMETER
+from funscript_editor.algorithms.scale import ScalingUiThread, ScalingUiParameter
 from funscript_editor.algorithms.postprocessing import Postprocessing, PostprocessingParameter
+from funscript_editor.ui.cut_tracking_result import CutTrackingResultWidget
+from funscript_editor.data.ffmpegstream import FFmpegStream
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -66,6 +69,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             self.__show_message("Video file not found ({})".format(video_file), error=True)
             sys.exit()
 
+        self.video_info = FFmpegStream.get_video_info(video_file)
         cap = cv2.VideoCapture(video_file)
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -94,6 +98,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     __logger = logging.getLogger(__name__)
 
     funscriptCompleted = QtCore.pyqtSignal(object, str, bool)
+    openCutWidget = QtCore.pyqtBoundSignal
 
 
     def __show_message(self, message :str, error: bool = False) -> None:
@@ -107,24 +112,59 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
 
     def __tracking_completed(self, score, projection_config, tracking_points, msg, success) -> None:
-        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps) for k in self.settings['trackingMetrics'].split('+')}
-        if not success:
-            self.funscript_generated(self.funscripts, msg, success)
+        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps) \
+                for k in self.settings['trackingMetrics'].split('+')}
 
-        self.postprocessing = Postprocessing(PostprocessingParameter(
+        if not success:
+            self.__funscript_generated(self.funscripts, msg, success)
+            return
+
+        self.score = score
+        self.projection_config = projection_config
+        self.tracking_points = tracking_points
+        self.msg = msg
+
+        self.cut_tracking_result_widget = CutTrackingResultWidget(self.score, [k for k in self.funscripts])
+        self.cut_tracking_result_widget.cutCompleted.connect(self.__cut_completed)
+        self.cut_tracking_result_widget.show()
+
+
+    def __cut_completed(self, cut_values):
+        self.__logger.info('cut values: %s', str(cut_values))
+        for k in self.score:
+            try:
+                self.score[k] = self.score[k][cut_values["start"]:cut_values["stop"]]
+            except:
+                pass
+        self.scaling = ScalingUiThread(
+                self.video_info,
+                ScalingUiParameter(
                    video_path = self.video_file,
-                    projection_config = projection_config,
+                    projection_config = self.projection_config,
+                    metrics = [k for k in self.funscripts],
+                    start_frame = self.start_frame,
+                    end_frame = self.end_frame,
+            ), self.score, self.tracking_points, self.msg)
+
+        self.scaling.scalingCompleted.connect(self.__scaling_completed)
+        self.scaling.start()
+
+
+    def __scaling_completed(self, score):
+        self.score = score
+        self.__logger.info('scaling completed')
+        self.postprocessing = Postprocessing(
+                self.video_info,
+                PostprocessingParameter(
                     start_frame = self.start_frame,
                     end_frame = self.end_frame,
                     skip_frames = int(self.settings['processingSpeed']),
-            ), score, tracking_points, self.funscripts, msg)
+            ), self.score, self.funscripts)
 
-        self.funscripts = self.postprocessing.run()
-
-        self.funscript_generated(self.funscripts, msg, True)
+        self.__funscript_generated(self.postprocessing.run(), "OK", True)
 
 
-    def funscript_generated(self, funscripts, msg, success) -> None:
+    def __funscript_generated(self, funscripts, msg, success) -> None:
         first_metric = [x for x in funscripts.keys()][0]
 
         if isinstance(self.output_file, Funscript):
@@ -176,7 +216,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__logger.info('settings: %s', str(self.settings))
         self.settings['videoType'] = list(filter(lambda x: PROJECTION[x]['name'] == self.settings['videoType'], PROJECTION.keys()))[0]
         self.metrics = {k.replace('inverted', '').strip(): {"inverted": "inverted" in k} for k in self.settings['trackingMetrics'].split('+')}
-        self.funscript_generator = TrackingManagerThread(
+        self.tracking_manager = TrackingManagerThread(
+                self.video_info,
                 TrackingManagerParameter(
                     video_path = self.video_file,
                     projection = self.settings['videoType'],
@@ -190,5 +231,5 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                     skip_frames = int(self.settings['processingSpeed']),
                 ))
 
-        self.funscript_generator.trackingCompleted.connect(self.__tracking_completed)
-        self.funscript_generator.start()
+        self.tracking_manager.trackingCompleted.connect(self.__tracking_completed)
+        self.tracking_manager.start()
