@@ -131,6 +131,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
     def __cut_completed(self, cut_values):
         self.__logger.info('cut values: %s', str(cut_values))
+        self.start_frame += cut_values["start"]
         for k in self.score:
             try:
                 self.score[k] = self.score[k][cut_values["start"]:cut_values["stop"]]
