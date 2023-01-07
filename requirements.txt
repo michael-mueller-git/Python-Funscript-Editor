@@ -16,4 +16,5 @@ python-dateutil
 python-mpv
 scipy
 screeninfo
+simplification
 six

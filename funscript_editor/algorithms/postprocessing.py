@@ -11,6 +11,7 @@ import numpy as np
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 @dataclass
 class PostprocessingParameter:
     """ Postprocessing Parameter Dataclass with default values """
@@ -38,11 +39,6 @@ class Postprocessing():
         self.video_info = video_info
         self.score = score
         self.funscripts = funscripts
-        self.ui = OpenCV_GUI(OpenCV_GUI_Parameters(
-            video_info = self.video_info,
-            skip_frames = self.params.skip_frames,
-            end_frame_number = self.params.end_frame
-            ))
 
 
     def get_absolute_framenumber(self, frame_number: int) -> int:
@@ -157,9 +153,7 @@ class Postprocessing():
         return score
 
 
-    def run(self) -> dict:
+    def run(self):
         for metric in self.funscripts:
             idx_dict = self.determine_change_points(metric)
             self.create_funscript(idx_dict, metric)
-
-        return self.funscripts

@@ -17,6 +17,7 @@ from funscript_editor.algorithms.scale import ScalingUiThread, ScalingUiParamete
 from funscript_editor.algorithms.postprocessing import Postprocessing, PostprocessingParameter
 from funscript_editor.ui.cut_tracking_result import CutTrackingResultWidget
 from funscript_editor.data.ffmpegstream import FFmpegStream
+from funscript_editor.ui.postprocessing import PostprocessingWidget
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -142,7 +143,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.scaling = ScalingUiThread(
                 self.video_info,
                 ScalingUiParameter(
-                   video_path = self.video_file,
+                    video_path = self.video_file,
                     projection_config = self.projection_config,
                     metrics = [k for k in self.funscripts],
                     start_frame = self.start_frame,
@@ -157,18 +158,40 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     def __scaling_completed(self, score):
         self.score = score
         self.__logger.info('scaling completed')
-        self.postprocessing = Postprocessing(
-                self.video_info,
-                PostprocessingParameter(
-                    start_frame = self.start_frame,
-                    end_frame = self.end_frame,
-                    skip_frames = int(self.settings['processingSpeed']),
-            ), self.score, self.funscripts)
+        self.__next_postprocessing(None, {})
+        # self.postprocessing = Postprocessing(
+        #         self.video_info,
+        #         PostprocessingParameter(
+        #             start_frame = self.start_frame,
+        #             end_frame = self.end_frame,
+        #             skip_frames = int(self.settings['processingSpeed']),
+        #     ), self.score, self.funscripts)
 
-        self.__funscript_generated(self.postprocessing.run(), "OK", True)
+        # self.__funscript_generated(self.postprocessing.run(), "OK", True)
 
 
     # Setp 4
+    def __next_postprocessing(self, last_metric, score):
+        found_last = last_metric is None
+        if found_last:
+            self.__logger.info("apply score %s", last_metric)
+            # TODO assign score to funscript
+
+        for metric in self.funscripts:
+            if metric == last_metric:
+                found_last = True
+                continue
+
+            if found_last:
+                self.postprocessing_widget = PostprocessingWidget(metric, self.score[metric])
+                self.postprocessing_widget.postprocessingCompleted.connect(self.__next_postprocessing)
+                self.postprocessing_widget.show()
+                return
+
+        self.__funscript_generated(self.funscripts, "OK", True)
+
+
+    # Setp 5
     def __funscript_generated(self, funscripts, msg, success) -> None:
         first_metric = [x for x in funscripts.keys()][0]
 
