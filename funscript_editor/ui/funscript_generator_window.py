@@ -111,6 +111,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         msg.exec_()
 
 
+    # Step 1
     def __tracking_completed(self, score, projection_config, tracking_points, msg, success) -> None:
         self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps) \
                 for k in self.settings['trackingMetrics'].split('+')}
@@ -129,6 +130,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.cut_tracking_result_widget.show()
 
 
+    # Step 2
     def __cut_completed(self, cut_values):
         self.__logger.info('cut values: %s', str(cut_values))
         self.start_frame += cut_values["start"]
@@ -151,6 +153,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.scaling.start()
 
 
+    # Step 3
     def __scaling_completed(self, score):
         self.score = score
         self.__logger.info('scaling completed')
@@ -165,6 +168,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__funscript_generated(self.postprocessing.run(), "OK", True)
 
 
+    # Setp 4
     def __funscript_generated(self, funscripts, msg, success) -> None:
         first_metric = [x for x in funscripts.keys()][0]
 
