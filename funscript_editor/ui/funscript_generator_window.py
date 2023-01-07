@@ -102,6 +102,18 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     openCutWidget = QtCore.pyqtBoundSignal
 
 
+    def get_absolute_framenumber(self, frame_number: int) -> int:
+        """ Get the absoulte frame number
+
+        Args:
+            frame_number (int): relative frame number
+
+        Returns:
+            int: absolute frame position
+        """
+        return self.start_frame + frame_number
+
+
     def __show_message(self, message :str, error: bool = False) -> None:
         if error: self.__logger.error(message)
         else: self.__logger.info(message)
@@ -159,24 +171,19 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.score = score
         self.__logger.info('scaling completed')
         self.__next_postprocessing(None, {})
-        # self.postprocessing = Postprocessing(
-        #         self.video_info,
-        #         PostprocessingParameter(
-        #             start_frame = self.start_frame,
-        #             end_frame = self.end_frame,
-        #             skip_frames = int(self.settings['processingSpeed']),
-        #     ), self.score, self.funscripts)
-
-        # self.__funscript_generated(self.postprocessing.run(), "OK", True)
 
 
     # Setp 4
-    def __next_postprocessing(self, last_metric, score):
-        found_last = last_metric is None
-        if found_last:
-            self.__logger.info("apply score %s", last_metric)
-            # TODO assign score to funscript
+    def __next_postprocessing(self, last_metric, idx_keep):
+        if last_metric is not None:
+            self.__logger.info("apply score %s with %d idx", last_metric, len(idx_keep))
+            for idx in idx_keep:
+                self.funscripts[last_metric].add_action(
+                        round(self.score[last_metric][idx]),
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
+                    )
 
+        found_last = last_metric is None
         for metric in self.funscripts:
             if metric == last_metric:
                 found_last = True
