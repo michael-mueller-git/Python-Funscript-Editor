@@ -7,12 +7,13 @@ import platform
 import cv2
 
 from funscript_editor.utils.logging import setup_logging
-from funscript_editor.algorithms.funscriptgenerator import FunscriptGeneratorThread, FunscriptGeneratorParameter
+from funscript_editor.algorithms.trackingmanager import TrackingManagerThread, TrackingManagerParameter
 from funscript_editor.data.funscript import Funscript
 from funscript_editor.ui.settings_dialog import SettingsDialog
 import funscript_editor.definitions as definitions
 from funscript_editor.ui.theme import setup_theme
 from funscript_editor.utils.config import SETTINGS, PROJECTION, HYPERPARAMETER
+from funscript_editor.algorithms.postprocessing import Postprocessing, PostprocessingParameter
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -105,7 +106,25 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         msg.exec_()
 
 
-    def __funscript_generated(self, funscripts, msg, success) -> None:
+    def __tracking_completed(self, score, projection_config, tracking_points, msg, success) -> None:
+        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps) for k in self.settings['trackingMetrics'].split('+')}
+        if not success:
+            self.funscript_generated(self.funscripts, msg, success)
+
+        self.postprocessing = Postprocessing(PostprocessingParameter(
+                   video_path = self.video_file,
+                    projection_config = projection_config,
+                    start_frame = self.start_frame,
+                    end_frame = self.end_frame,
+                    skip_frames = int(self.settings['processingSpeed']),
+            ), score, tracking_points, self.funscripts, msg)
+
+        self.funscripts = self.postprocessing.run()
+
+        self.funscript_generated(self.funscripts, msg, True)
+
+
+    def funscript_generated(self, funscripts, msg, success) -> None:
         first_metric = [x for x in funscripts.keys()][0]
 
         if isinstance(self.output_file, Funscript):
@@ -152,43 +171,24 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             sys.exit()
 
 
-    def run_opticalflow(self) -> None:
-        self.funscripts = {'movement': Funscript(self.fps)}
-        self.funscript_generator = OpticalFlowFunscriptGeneratorThread(
-                OpticalFlowFunscriptGeneratorParameter(
-                    video_path = self.video_file,
-                    projection = "vr_he_180_sbs",
-                    start_frame = self.start_frame,
-                    end_frame = self.end_frame,
-                    skip_frames = 0
-                    ),
-                self.funscripts)
-        self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
-        self.funscript_generator.start()
-
-
     def run(self) -> None:
         """ start generator """
         self.__logger.info('settings: %s', str(self.settings))
         self.settings['videoType'] = list(filter(lambda x: PROJECTION[x]['name'] == self.settings['videoType'], PROJECTION.keys()))[0]
-        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps, inverted = "inverted" in k) for k in self.settings['trackingMetrics'].split('+')}
-        self.funscript_generator = FunscriptGeneratorThread(
-                FunscriptGeneratorParameter(
+        self.metrics = {k.replace('inverted', '').strip(): {"inverted": "inverted" in k} for k in self.settings['trackingMetrics'].split('+')}
+        self.funscript_generator = TrackingManagerThread(
+                TrackingManagerParameter(
                     video_path = self.video_file,
-                    track_men = 'two' in self.settings['trackingMethod'],
-                    supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
-                    supervised_tracking_is_exit_condition = "stopping" in self.settings['trackingMethod'],
                     projection = self.settings['videoType'],
                     start_frame = self.start_frame,
+                    track_men = 'two' in self.settings['trackingMethod'],
+                    supervised_tracking = 'Supervised' in self.settings['trackingMethod'],
+                    tracking_metrics = self.metrics,
                     end_frame = self.end_frame,
                     number_of_trackers = int(self.settings['numberOfTracker']),
-                    points = self.settings['points'].lower().replace(' ', '_'),
-                    additional_points = self.settings['additionalPoints'].lower().replace(' ', '_'),
+                    supervised_tracking_is_exit_condition = "stopping" in self.settings['trackingMethod'],
                     skip_frames = int(self.settings['processingSpeed']),
-                    top_points_offset = self.settings['topPointOffset'],
-                    bottom_points_offset = self.settings['bottomPointOffset']
-                ),
-                self.funscripts)
+                ))
 
-        self.funscript_generator.funscriptCompleted.connect(self.__funscript_generated)
+        self.funscript_generator.trackingCompleted.connect(self.__tracking_completed)
         self.funscript_generator.start()

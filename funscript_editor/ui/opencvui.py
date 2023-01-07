@@ -564,9 +564,16 @@ class OpenCV_GUI(KeypressHandler):
         Returns:
             tuple: with selected (min: flaot, max float)
         """
+        image = np.concatenate((image_min, image_max), axis=1)
+
+        if False:
+            self.preview(image, 0, [], [], 1, False, False, False)
+        else:
+            self.set_background_image(image, copy_image=True)
+            self.show(1)
+
         cv2.createTrackbar("Min", self.window_name, recommend_lower, 99, lambda _: None)
         cv2.createTrackbar("Max", self.window_name, recommend_upper, 99, lambda _: None)
-        image = np.concatenate((image_min, image_max), axis=1)
 
         if beep:
             self.play_notification_sound()
@@ -801,7 +808,7 @@ class OpenCV_GUI(KeypressHandler):
 
     def preview(self,
             image: np.ndarray,
-            current_frame_number,
+            current_frame_number: int = 0,
             texte: list = [],
             boxes: list = [],
             wait: int = 1,

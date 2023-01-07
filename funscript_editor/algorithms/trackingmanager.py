@@ -1,53 +1,40 @@
-""" Top level process to generate the funscript actions by tracking selected features in the video """
+""" Top level process to track selected features in the video """
 
-from os import error, read
 import cv2
-import copy
-import sys
 import time
 import math
 import funscript_editor.utils.logging as logging
 import threading
 
 from dataclasses import dataclass
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 from scipy.interpolate import interp1d
 
 from funscript_editor.algorithms.videotracker import StaticVideoTracker
 from funscript_editor.data.ffmpegstream import FFmpegStream
-from funscript_editor.data.funscript import Funscript
-from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS, PROJECTION
+from funscript_editor.utils.config import HYPERPARAMETER, SETTINGS
 from funscript_editor.algorithms.scenedetect import SceneDetectFromFile, SceneContentDetector, SceneThresholdDetector
 from funscript_editor.algorithms.signal import Signal
 from funscript_editor.ui.opencvui import OpenCV_GUI, OpenCV_GUI_Parameters
-from funscript_editor.ui.cut_tracking_result import CutTrackingResultWidget
 
 import multiprocessing as mp
 import numpy as np
 
 @dataclass
-class FunscriptGeneratorParameter:
+class TrackingManagerParameter:
     """ Funscript Generator Parameter Dataclass with default values """
     video_path: str
-    track_men: bool
-    supervised_tracking: bool
     projection: str
     start_frame: int
+    track_men: bool
+    supervised_tracking: bool
+    tracking_metrics: dict # key metric, value { inverted: bool }
     end_frame: int = -1 # default is video end (-1)
     number_of_trackers: int = 1
     supervised_tracking_is_exit_condition: bool = True
-
-    # Settings
-    points: str = "local_min_max"
-    additional_points: str = "none"
-    raw_output: bool = SETTINGS["raw_output"]
+    skip_frames: int = 1
     max_playback_fps: int = max((0, int(SETTINGS['max_playback_fps'])))
     scene_detector: str = SETTINGS['scene_detector']
-
-    # General Hyperparameter
-    skip_frames: int = 1
-    top_points_offset: float = 10.0
-    bottom_points_offset: float = -10.0
 
 
 def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue = None) -> list:
@@ -84,21 +71,18 @@ def merge_score(item: list, number_of_trackers: int, return_queue: mp.Queue = No
             return list(filter(None.__ne__, arr.mean(axis=1).tolist()))
 
 
-class FunscriptGeneratorThread(QtCore.QThread):
-    """ Funscript Generator Thread
+class TrackingManagerThread(QtCore.QThread):
+    """ Tracking Manager Thread
 
     Args:
-        params (FunscriptGeneratorParameter): required parameter for the funscript generator
-        funscript (dict): the references to the Funscript where we store the predicted actions
+        params (TrackingManagerParameter): required parameter for the tracking manager
     """
 
     def __init__(self,
-                 params: FunscriptGeneratorParameter,
-                 funscripts: dict):
+                 params: TrackingManagerParameter):
         QtCore.QThread.__init__(self)
         self.logger = logging.getLogger(__name__)
         self.params = params
-        self.funscripts = funscripts
         self.video_info = FFmpegStream.get_video_info(self.params.video_path)
         self.tracking_points = {}
         self.score = {
@@ -115,8 +99,8 @@ class FunscriptGeneratorThread(QtCore.QThread):
             ))
 
 
-    #: completed event with reference to the funscript with the predicted actions, status message and success flag
-    funscriptCompleted = QtCore.pyqtSignal(dict, str, bool)
+    #: completed event with tracking scores, projection config, raw tracking points, status message and success flag
+    trackingCompleted = QtCore.pyqtSignal(dict, dict, dict, str, bool)
 
 
 
@@ -251,15 +235,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     dick_pos = self.get_dick_pos(max_distance_frame_num)
                     dick_pos['idx'] = max_distance_frame_num - self.params.start_frame
 
-                    if False:
-                        # debugging
-                        frame = FFmpegStream.get_frame(self.params.video_path, max_distance_frame_num)
-                        frame = FFmpegStream.get_projection(frame, self.projection_config)
-                        cv2.circle( frame, (int(dick_pos['w'][0]), int(dick_pos['w'][1])), 4, (0,255,0), 2)
-                        cv2.circle( frame, (int(dick_pos['m'][0]), int(dick_pos['m'][1])), 4, (255,0,0), 2)
-                        cv2.imshow('debug', frame)
-                        cv2.waitKey(10000)
-
                 roll_woman_offset = (dick_pos['w'][0] - woman_center[dick_pos['idx']][0], dick_pos['w'][1] - woman_center[dick_pos['idx']][1])
                 roll_men_offset = (dick_pos['m'][0] - men_center[dick_pos['idx']][0], dick_pos['m'][1] - men_center[dick_pos['idx']][1])
                 self.logger.info('use roll offset w = %s, m = %s', str(roll_woman_offset), str(roll_men_offset))
@@ -279,16 +254,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                     ]
 
                 for i in range( min(( len(men_center), len(woman_center) )) ):
-
-                    if False:
-                        #debugging
-                        frame = FFmpegStream.get_frame(self.params.video_path, i + self.params.start_frame)
-                        frame = FFmpegStream.get_projection(frame, self.projection_config)
-                        cv2.circle( frame, (int(woman_center[i][0] + roll_woman_offset[0]), int(woman_center[i][1] + roll_woman_offset[1])), 4, (255,0,255), 2)
-                        cv2.circle( frame, (int(men_center[i][0] + roll_men_offset[0]), int(men_center[i][1] + roll_men_offset[1])), 4, (255,0,255), 2)
-                        cv2.imshow('debug', frame)
-                        cv2.waitKey(1)
-
                     x = woman_center[i][0] + roll_woman_offset[0] - (men_center[i][0] + roll_men_offset[0])
                     y = men_center[i][1] + roll_men_offset[1] - (woman_center[i][1] + roll_woman_offset[1])
                     if x >= 0 and y >= 0:
@@ -336,7 +301,7 @@ class FunscriptGeneratorThread(QtCore.QThread):
             score[metric] = queue[metric].get()
 
         for metric in score.keys():
-            if metric in self.funscripts.keys() and self.funscripts[metric].is_inverted():
+            if metric in self.params.tracking_metrics and "inverted" in self.params.tracking_metrics and self.params.tracking_metrics["inverted"]:
                 if metric == 'roll':
                     self.logger.info("%s: Get absolute inverted Score", metric)
                     self.score[metric] = [abs(-1.0*item + 100) for item in score[metric]]
@@ -350,66 +315,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
                 else:
                     self.logger.info("%s: Scale Score to 0 - 100", metric)
                     self.score[metric] = Signal.scale(score[metric], 0, 100)
-
-
-
-    def scale_score(self, status: str, metric : str = 'y') -> None:
-        """ Scale the score to desired stroke high
-
-        Note:
-            We determine the lowerst and highes positions in the score and request the real position from user.
-
-        Args:
-            status (str): a status/info message to display in the window
-            metric (str): scale the 'y' or 'x' score
-        """
-        if metric not in self.score.keys():
-            self.logger.error("key %s is not in score dict", metric)
-            return
-
-        if len(self.score[metric]) < 2: return
-        min_frame = np.argmin(np.array(self.score[metric])) + self.params.start_frame
-        max_frame = np.argmax(np.array(self.score[metric])) + self.params.start_frame
-
-        success_min, success_max = True, True
-        imgMin = FFmpegStream.get_frame(self.params.video_path, min_frame)
-        imgMax = FFmpegStream.get_frame(self.params.video_path, max_frame)
-
-        if success_min and success_max:
-            imgMin = FFmpegStream.get_projection(imgMin, self.projection_config)
-            imgMax = FFmpegStream.get_projection(imgMax, self.projection_config)
-
-            min_tracking_points = self.get_tracking_points_by_frame_number(min_frame - self.params.start_frame)
-            max_tracking_points = self.get_tracking_points_by_frame_number(max_frame - self.params.start_frame)
-
-            for points in min_tracking_points:
-                imgMin = OpenCV_GUI.draw_point_to_image(imgMin, points, connect_points=True)
-
-            for points in max_tracking_points:
-                imgMax = OpenCV_GUI.draw_point_to_image(imgMax, points, connect_points=True)
-
-            # print('min_tracking_points', min_tracking_points, 'max_tracking_points', max_tracking_points)
-
-            (desired_min, desired_max) = self.ui.min_max_selector(
-                    image_min = imgMin,
-                    image_max = imgMax,
-                    info = status,
-                    title_min = metric + " Minimum",
-                    title_max = metric + " Maximum",
-                    recommend_lower = round(min(self.score[metric])) if metric == 'roll' else 0,
-                    recommend_upper = round(max(self.score[metric])) if metric == 'roll' else 99
-                )
-        else:
-            self.logger.warning("Determine min and max failed")
-            desired_min = 0
-            desired_max = 99
-
-        self.logger.info("Scale score %s to user input", metric)
-
-        if metric == 'roll':
-            self.score[metric] = Signal.scale_with_center(self.score[metric], desired_min, desired_max, 50)
-        else:
-            self.score[metric] = Signal.scale(self.score[metric], desired_min, desired_max)
 
 
     def get_center(self, box: tuple) -> tuple:
@@ -799,19 +704,14 @@ class FunscriptGeneratorThread(QtCore.QThread):
 
 
     def finished(self, status: str, success :bool) -> None:
-        """ Process necessary steps to complete the predicted funscript
+        """ Process necessary steps to complete the predicted tracking score
 
         Args:
             status (str): a process status/error message
-            success (bool): True if funscript was generated else False
+            success (bool): True if tracking was successful else False
         """
-        for metric in self.funscripts.keys():
-            # we use this flag internaly to determine if we have to invert the score
-            # ensure not to publish the invertion with our generated funscript
-            # in this case we will invert our result again, what we dont want
-            self.funscripts[metric].data["inverted"] = False
         self.ui.close()
-        self.funscriptCompleted.emit(self.funscripts, status, success)
+        self.trackingCompleted.emit(self.score, self.projection_config, self.tracking_points, status, success)
 
 
     def get_absolute_framenumber(self, frame_number: int) -> int:
@@ -826,68 +726,6 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return self.params.start_frame + frame_number
 
 
-    def get_score_with_offset(self, idx_dict: dict, metric: str) -> list:
-        """ Apply the offsets form settings dialog
-
-        Args:
-            idx_dict (dict): the idx dictionary with {'min':[], 'max':[]} idx lists
-            metric (str): the metric for the score calculation
-
-        Returns:
-            list: score with offset
-        """
-        offset_max = self.params.top_points_offset
-        offset_min = self.params.bottom_points_offset
-
-        score = copy.deepcopy(self.score[metric])
-        score_min, score_max = min(score), max(score)
-
-        for idx in idx_dict['max']:
-            score[idx] = max(( score_min, min((score_max, score[idx] + offset_max)) ))
-
-        for idx in idx_dict['min']:
-            score[idx] = max(( score_min, min((score_max, score[idx] + offset_min)) ))
-
-        return score
-
-
-    def determine_change_points(self, metric: str) -> dict:
-        """ Determine all change points
-
-        Args:
-            metric (str): from which metric you want to have the chainge points
-
-        Returns:
-            dict: all local max and min points in score {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
-        """
-        self.logger.info("Determine change points for %s", metric)
-        if metric not in self.score.keys():
-            self.logger.error("key %s not in score metrics dict", metric)
-            return dict()
-
-        base_point_algorithm = Signal.BasePointAlgorithm.local_min_max
-        if self.params.points == 'direction_changed':
-            base_point_algorithm = Signal.BasePointAlgorithm.direction_changes
-
-        additional_points_algorithms = []
-        if self.params.additional_points == 'high_second_derivative':
-            additional_points_algorithms.append(Signal.AdditionalPointAlgorithm.high_second_derivative)
-
-        if self.params.additional_points == 'distance_minimization':
-            additional_points_algorithms.append(Signal.AdditionalPointAlgorithm.distance_minimization)
-
-        if self.params.additional_points == 'evenly_intermediate':
-            additional_points_algorithms.append(Signal.AdditionalPointAlgorithm.evenly_intermediate)
-
-        signal = Signal(self.video_info.fps)
-        decimate_indexes = signal.decimate(
-                self.score[metric],
-                base_point_algorithm,
-                additional_points_algorithms
-        )
-        return signal.categorize_points(self.score[metric], decimate_indexes)
-
-
     def is_vr_video(self):
         """ Check if current video is set to VR
 
@@ -897,48 +735,10 @@ class FunscriptGeneratorThread(QtCore.QThread):
         return 'vr' in self.params.projection.lower().split('_')
 
 
-    def create_funscript(self, idx_dict: dict, metric: str) -> None:
-        """ Generate the Funscript
-
-        Args:
-            idx_dict (dict): dictionary with all local max and min points in score
-                             {'min':[idx1, idx2, ...], 'max':[idx1, idx2, ...]}
-            metric: metric key
-        """
-        if metric not in self.funscripts.keys():
-            self.logger.error("metric %s not in funscripts keys", metric)
-            return
-
-        if self.params.raw_output:
-            output_score = copy.deepcopy(self.score[metric])
-            self.logger.warning("Insert %d raw points", len(output_score))
-            for idx in range(len(output_score)):
-                self.funscripts[metric].add_action(
-                        round(output_score[idx]),
-                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps),
-                        True
-                    )
-
-        else:
-            output_score = self.get_score_with_offset(idx_dict, metric)
-
-            for idx in idx_dict['min']:
-                self.funscripts[metric].add_action(
-                        round(output_score[idx]),
-                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
-                    )
-
-            for idx in idx_dict['max']:
-                self.funscripts[metric].add_action(
-                        round(output_score[idx]),
-                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
-                    )
-
-
     def run(self) -> None:
-        """ The Funscript Generator Thread Function """
+        """ The Tracking Manager Thread Function """
         try:
-            if any(metric not in ['x', 'y'] for metric in self.funscripts.keys()):
+            if any(metric not in ['x', 'y'] for metric in self.params.tracking_metrics):
                 self.logger.info('Force 2 person tracking')
                 self.params.track_men = True # we need 2 tracking points
 
@@ -947,35 +747,18 @@ class FunscriptGeneratorThread(QtCore.QThread):
                         + "this can lead to inaccuracies when predicting the changepoint positions! (consider to set skip_frames to 0 or 1)" \
                         , self.params.skip_frames)
 
-            if self.params.raw_output:
-                self.logger.warning("Raw output is enabled!")
-
             status = self.tracking()
 
-            for metric in self.funscripts.keys():
-                if len(self.score[metric]) >= HYPERPARAMETER['min_frames']:
-                    self.scale_score(status, metric=metric)
-
-            if all(len(self.score[metric]) < HYPERPARAMETER['min_frames'] for metric in self.funscripts.keys()):
+            if all(len(self.score[metric]) < HYPERPARAMETER['min_frames'] for metric in self.params.tracking_metrics):
                 self.finished(
                         status + ' -> Tracking time insufficient ({}/{} Frames)'.format(
-                            min([len(self.score[metric]) for metric in self.funscripts.keys()]),
+                            min([len(self.score[metric]) for metric in self.params.tracking_metrics]),
                             HYPERPARAMETER['min_frames']
                         ), False
                 )
                 return
 
-            for metric in self.funscripts.keys():
-                # TODO does not work hear we are not in main thread
-                # app = QtWidgets.QApplication(sys.argv)
-                # w = CutTrackingResultWidget(self.score, [metric])
-                # w.show()
-                # app.exec_()
-                # print("result", w.result)
-                idx_dict = self.determine_change_points(metric)
-                self.create_funscript(idx_dict, metric)
-
             self.finished(status, True)
         except Exception as ex:
-            self.logger.critical("The program crashed due to a fatal error", exc_info=ex)
-            self.finished("The program crashed due to a fatal error", False)
+            self.logger.critical("The program crashed in TrackingManager due to a fatal error", exc_info=ex)
+            self.finished("The program crashed in TrackingManager due to a fatal error", False)

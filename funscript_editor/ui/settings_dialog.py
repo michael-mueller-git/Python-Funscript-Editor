@@ -47,11 +47,7 @@ class SettingsDialog(QtWidgets.QDialog):
                 'trackingMetrics': self.ui.trackingMetricComboBox,
                 'trackingMethod': self.ui.trackingMethodComboBox,
                 'numberOfTracker': self.ui.numberOfTrackerComboBox,
-                'points': self.ui.pointsComboBox,
-                'additionalPoints': self.ui.additionalPointsComboBox,
                 'processingSpeed': self.ui.processingSpeedComboBox,
-                'topPointOffset': self.ui.topPointOffsetSpinBox,
-                'bottomPointOffset': self.ui.bottomPointOffsetSpinBox,
             }
 
 
@@ -149,18 +145,6 @@ class SettingsDialog(QtWidgets.QDialog):
                 'distance (p1-p2)',
                 'distance inverted (p2-p1)',
             ])
-
-        self.ui.pointsComboBox.addItems([
-            "Local Min Max",
-            "Direction Changed"
-        ])
-
-        self.ui.additionalPointsComboBox.addItems([
-            "None",
-            "High Second Derivative",
-            "Distance Minimization",
-            "Evenly intermediate"
-        ])
 
         self.ui.processingSpeedComboBox.addItems([
             "0 (accurate)",
