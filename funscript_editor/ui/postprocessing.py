@@ -86,7 +86,6 @@ class PostprocessingWidget(QtWidgets.QWidget):
 
     def update_plot(self):
         current_tab_name = self.get_current_tab_name()
-        print("update for", current_tab_name)
 
         if current_tab_name == "Ramer–Douglas–Peucker":
             self.result_idx = simplify_coords_idx(self.raw_score_np, float(self.tabs_content[current_tab_name]["widgets"]["epsilon"].x) / 10.0)

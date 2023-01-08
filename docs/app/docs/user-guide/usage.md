@@ -21,6 +21,9 @@ The Unsupervised Tracking simply track the selected feature in the video until t
 
 The supervised tracking expand this function by an user input of an search area. As soon as the predicted tracking box leaves this area, we can trigger an event. This event can currently represent either an abort condition for the tracking or an ignore condition. Therefore you have to define the region where you expect the selected features in the future video frames for each tracked feature when you select the supervised tracking option. When you use the supervised tracking process as abort condition it will increases the quality of the generated funscript actions due to the additional quality check. With the ignore condition we ignore all tracking prediction outside the specified area and use the last valid tracking position inside the specified area until the tracking insert the defined supervised tracking area again. This method is useful to script actions where the actor not always have contact.
 
+In short: The Supervised options track a feature inside a specified area. It asks for pair of parameters: first the small area containing the feature to track, then a larger bounding area that must contain the feature area at every moment. If you use more than 1 tracker then it goes `(feature1, bounding area1)`, `(feature2, bounding area2)` etc.
+You can then specify blocking/non blocking: the first means that when the feature "escape" the bounding box the process stop, the second option keeps going and if the feature gets back into that bounding box it continues tracking the movement.
+
 ## Settings
 
 ![Settings Dialog](./images/settings_dialog.png)
