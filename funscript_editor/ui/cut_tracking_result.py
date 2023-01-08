@@ -66,7 +66,6 @@ class CutTrackingResultWidget(QWidget):
         self.p6.setMouseEnabled(y=False)
         colors = ["b", "r", "g", "c", "m", "k", "y"]
         self.curve = { k: self.p6.plot(pen=pg.mkPen(c, width=2.0)) for c,k in zip(colors, metrics) }
-        self.update_plot()
 
         self.w1.slider.valueChanged.connect(self.update_plot)
         self.w2.slider.valueChanged.connect(self.update_plot)
@@ -75,6 +74,7 @@ class CutTrackingResultWidget(QWidget):
             "start": 0,
             "stop": data_len
         }
+        self.update_plot()
 
     cutCompleted = QtCore.pyqtSignal(dict)
 

@@ -37,11 +37,10 @@ class PostprocessingWidget(QtWidgets.QWidget):
         self.p6.setMouseEnabled(y=False)
         self.curve_raw = self.p6.plot(pen=pg.mkPen("b", width=2.0))
         self.curve_result = self.p6.plot(pen=pg.mkPen("r", width=2.0))
-        self.update_plot()
 
         self.w1.slider.valueChanged.connect(self.update_plot)
-
         self.result = []
+        self.update_plot()
 
     postprocessingCompleted = QtCore.pyqtSignal(str, list)
 

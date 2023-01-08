@@ -102,7 +102,7 @@ class ScalingUiThread(QtCore.QThread):
 
         self.ui.show_loading_screen(
                 txt = "Please wait...",
-                background_size = (self.params.projection_config['parameter']['height'], self.params.projection_config['parameter']['width']*2)
+                background_size = (self.params.projection_config['parameter']['height'], self.params.projection_config['parameter']['width']*2, 3)
             )
 
         min_frame = np.argmin(np.array(self.score[metric])) + self.params.start_frame

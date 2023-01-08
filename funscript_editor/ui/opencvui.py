@@ -488,7 +488,7 @@ class OpenCV_GUI(KeypressHandler):
 
         Args:
             txt (str): text to display
-            image_size (tuple): optional tuple with (h,w)
+            image_size (tuple): optional tuple with (h,w,c)
         """
         if background_size is not None:
             self.set_background_image(np.full(background_size, 0, dtype=np.uint8))
