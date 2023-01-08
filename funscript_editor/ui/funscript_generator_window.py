@@ -14,7 +14,6 @@ import funscript_editor.definitions as definitions
 from funscript_editor.ui.theme import setup_theme
 from funscript_editor.utils.config import SETTINGS, PROJECTION, HYPERPARAMETER
 from funscript_editor.algorithms.scale import ScalingUiThread, ScalingUiParameter
-from funscript_editor.algorithms.postprocessing import Postprocessing, PostprocessingParameter
 from funscript_editor.ui.cut_tracking_result import CutTrackingResultWidget
 from funscript_editor.data.ffmpegstream import FFmpegStream
 from funscript_editor.ui.postprocessing import PostprocessingWidget
@@ -170,16 +169,16 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     def __scaling_completed(self, score):
         self.score = score
         self.__logger.info('scaling completed')
-        self.__next_postprocessing(None, {})
+        self.__next_postprocessing(None, [], [])
 
 
     # Setp 4
-    def __next_postprocessing(self, last_metric, idx_keep):
+    def __next_postprocessing(self, last_metric, idx_keep, val_keep):
         if last_metric is not None:
             self.__logger.info("apply score %s with %d idx", last_metric, len(idx_keep))
-            for idx in idx_keep:
+            for idx, val in zip(idx_keep, val_keep):
                 self.funscripts[last_metric].add_action(
-                        round(self.score[last_metric][idx]),
+                        round(val),
                         FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
                     )
 
