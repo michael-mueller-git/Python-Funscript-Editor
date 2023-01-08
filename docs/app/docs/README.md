@@ -10,3 +10,5 @@ Simple Funscript Editor written in Python with an motion tracking add-on to part
 - [OFS Integration (Installation)](user-guide/ofs-integration.md)
 - [Usage and Settings](user-guide/usage.md)
 - [Build in UI](user-guide/ui.md)
+
+User should read at least the [Usage and Settings](user-guide/usage.md) section.
