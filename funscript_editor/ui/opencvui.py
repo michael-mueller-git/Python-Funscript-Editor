@@ -45,8 +45,15 @@ class KeypressHandler:
         self.listener.start()
 
 
+    def stop_keypress_handler(self):
+        try:
+            self.listener.stop()
+        except:
+            pass
+
+
     def __del__(self):
-        self.listener.stop()
+        self.stop_keypress_handler()
 
 
     def on_key_press(self, key: pynput.keyboard.Key) -> None:
@@ -154,6 +161,7 @@ class OpenCV_GUI(KeypressHandler):
 
 
     def __del__(self):
+        super().stop_keypress_handler()
         super().__del__()
         self.close()
 
@@ -475,13 +483,19 @@ class OpenCV_GUI(KeypressHandler):
         return cv2.selectROI(self.window_name, self.preview_image, False)
 
 
-    def show_loading_screen(self, txt: str = "Please wait...") -> None:
+    def show_loading_screen(self, txt: str = "Please wait...", background_size=None) -> None:
         """ Show an loading screen
 
         Args:
             txt (str): text to display
+            image_size (tuple): optional tuple with (h,w)
         """
-        if self.preview_image_without_scale is not None:
+        if background_size is not None:
+            self.set_background_image(np.full(background_size, 0, dtype=np.uint8))
+            self.print_text(txt, color=(0,0,255))
+            self.show()
+
+        elif self.preview_image_without_scale is not None:
             self.set_background_image(np.full(self.preview_image_without_scale.shape, 0, dtype=np.uint8))
             self.print_text(txt, color=(0,0,255))
             self.show()
@@ -566,11 +580,8 @@ class OpenCV_GUI(KeypressHandler):
         """
         image = np.concatenate((image_min, image_max), axis=1)
 
-        if False:
-            self.preview(image, 0, [], [], 1, False, False, False)
-        else:
-            self.set_background_image(image, copy_image=True)
-            self.show(1)
+        self.set_background_image(image, copy_image=True)
+        self.show(1)
 
         cv2.createTrackbar("Min", self.window_name, recommend_lower, 99, lambda _: None)
         cv2.createTrackbar("Max", self.window_name, recommend_upper, 99, lambda _: None)

@@ -97,7 +97,14 @@ class ScalingUiThread(QtCore.QThread):
             self.logger.error("key %s is not in score dict", metric)
             return
 
-        if len(self.score[metric]) < 2: return
+        if len(self.score[metric]) < 2:
+            return
+
+        self.ui.show_loading_screen(
+                txt = "Please wait...",
+                background_size = (self.params.projection_config['parameter']['height'], self.params.projection_config['parameter']['width']*2)
+            )
+
         min_frame = np.argmin(np.array(self.score[metric])) + self.params.start_frame
         max_frame = np.argmax(np.array(self.score[metric])) + self.params.start_frame
 
