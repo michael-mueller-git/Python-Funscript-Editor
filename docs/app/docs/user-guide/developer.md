@@ -14,9 +14,13 @@ There is no automated way to install the prereleases since they are indented for
 
 I have only a Winows KVM with gpu passthrough for testing, therefore i do not know very much about the development of python applications on Windows. For testing i use the `build_and_deploy.bat` script from the repository root directory.
 
+## Development with Nix
+
+Currently (2023-01-08) I am using nix on Arch Linux for the development process. In Wayland I have to use the command `QT_QPA_PLATFORM="xcb" python3 main.py` in the `nix develop` shell to get the main window open. But the embedded mpv window does not work -> you will get a separate mpv player window.
+
 ## Pushing to multiple git repositories
 
-Use the following to add several pushurls to your origin:
+Use the following to add several push urls to your origin:
 
 ```bash
 git remote set-url --add --push origin git://original/repo.git
