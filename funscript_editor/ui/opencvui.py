@@ -230,12 +230,13 @@ class OpenCV_GUI(KeypressHandler):
         self.__reset_print_positions()
 
 
-    def draw_box(self, bbox, color: tuple = (255, 0, 255)) -> None:
+    def draw_box(self, bbox, color: tuple = (255, 0, 255), connect=False) -> None:
         """ Draw an tracking box to the preview image
 
         Args:
             bbox (tuple): tracking box with (x,y,w,h)
             color (tuple): RGB color values for the box
+            connect (bool): Connect boxes by a line (only if center point is available in box!)
         """
         assert self.preview_image is not None
 
@@ -249,7 +250,7 @@ class OpenCV_GUI(KeypressHandler):
                         (box[0], box[1]),
                         ((box[0] + box[2]), (box[1] + box[3])),
                         color,
-                        3,
+                        1,
                         1
                     )
                 if len(box) >= 6:
@@ -260,6 +261,10 @@ class OpenCV_GUI(KeypressHandler):
                             color,
                             2
                         )
+
+        if len(bbox) == 2 and connect:
+            if len(bbox[0]) >= 6 and len(bbox[1]) >= 6:
+                cv2.line(self.preview_image, (bbox[0][4], bbox[0][5]), (bbox[1][4], bbox[1][5]), color, 2)
 
 
     @staticmethod
@@ -832,7 +837,7 @@ class OpenCV_GUI(KeypressHandler):
             image (np.ndarray): image to preview
             current_frame_number (int): current frame number
             texte (list, optional): list of texte to annotate the preview image
-            boxes (list, optional): draw boxes on the preview image
+            boxes (list, optional): draw boxes on the preview image list of list with boxes
             wait (int): waitKey delay in milliseconds
             show_fps (bool): show processing fps
             show_time (bool): show processing time
@@ -851,7 +856,8 @@ class OpenCV_GUI(KeypressHandler):
             self.print_fps()
 
         self.print_text(texte)
-        self.draw_box(boxes)
+        for boxes_item in boxes:
+            self.draw_box(boxes_item, connect=True)
 
         if beep:
             self.play_notification_sound()

@@ -568,26 +568,33 @@ class TrackingManagerThread(QtCore.QThread):
                 if last_frame is not None:
                     # Process data from last step while the next tracking points get predicted.
                     # This should improve the whole processing speed, because the tracker run in a seperate thread
-                    boxes_to_draw = []
+                    single_boxes_to_draw = []
+                    all_connected_boxes_to_draw = []
                     for tracker_number in range(self.params.number_of_trackers):
+                        connected_boxes_to_draw = []
                         if bbox_woman[tracker_number] is not None:
                             if tracker_number == 0:
                                 bboxes['Woman'][frame_num-1] = { tracker_number: bbox_woman[tracker_number] }
                             else:
                                 bboxes['Woman'][frame_num-1][tracker_number] = bbox_woman[tracker_number]
-                            boxes_to_draw.append(bboxes['Woman'][frame_num-1][tracker_number])
+                            connected_boxes_to_draw.append(bboxes['Woman'][frame_num-1][tracker_number])
                             if self.params.supervised_tracking:
-                                boxes_to_draw.append(tracking_areas_woman[tracker_number])
+                                single_boxes_to_draw.append(tracking_areas_woman[tracker_number])
 
                         if self.params.track_men and bbox_men[tracker_number] is not None:
                             if tracker_number == 0:
                                 bboxes['Men'][frame_num-1] = { tracker_number: bbox_men[tracker_number] }
                             else:
                                 bboxes['Men'][frame_num-1][tracker_number] = bbox_men[tracker_number]
-                            boxes_to_draw.append(bboxes['Men'][frame_num-1][tracker_number])
+                            connected_boxes_to_draw.append(bboxes['Men'][frame_num-1][tracker_number])
                             if self.params.supervised_tracking:
-                                boxes_to_draw.append(tracking_areas_men[tracker_number])
+                                single_boxes_to_draw.append(tracking_areas_men[tracker_number])
 
+                        if len(connected_boxes_to_draw) > 0:
+                            all_connected_boxes_to_draw.append(connected_boxes_to_draw)
+
+                    for box in single_boxes_to_draw:
+                        all_connected_boxes_to_draw.append([box])
 
                     scene_change_quit_flag = False
                     if scene_detector.is_scene_change(frame_num-1 + self.params.start_frame):
@@ -596,7 +603,7 @@ class TrackingManagerThread(QtCore.QThread):
                                 last_frame,
                                 frame_num + self.params.start_frame,
                                 texte = ["Scene change detected, 'space': continue, 'q': stop"],
-                                boxes = boxes_to_draw,
+                                boxes = all_connected_boxes_to_draw,
                                 beep = True
                             )
                         while True:
@@ -622,7 +629,7 @@ class TrackingManagerThread(QtCore.QThread):
                             last_frame,
                             frame_num + self.params.start_frame,
                             texte = ["Press 'q' to stop tracking"],
-                            boxes = boxes_to_draw,
+                            boxes = all_connected_boxes_to_draw,
                         )
 
                     if self.ui.was_key_pressed('q') or key == ord('q'):
