@@ -95,7 +95,7 @@ class PostprocessingWidget(QtWidgets.QWidget):
             return
 
         if current_tab_name == "Visvalingam-Whyatt":
-            self.result_idx = simplify_coords_idx(self.raw_score_np, float(self.tabs_content[current_tab_name]["widgets"]["epsilon"].x) / 10.0)
+            self.result_idx = simplify_coords_vw_idx(self.raw_score_np, float(self.tabs_content[current_tab_name]["widgets"]["epsilon"].x) / 10.0)
             self.result_val = [val for idx,val in enumerate(self.raw_score) if idx in self.result_idx]
             self.curve_result.setData(self.result_idx, self.result_val)
             return
