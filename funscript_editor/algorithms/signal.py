@@ -20,7 +20,6 @@ class SignalParameter:
     distance_minimization_threshold: float = float(HYPERPARAMETER['signal']['distance_minimization_threshold'])
     high_second_derivative_points_threshold: float = float(HYPERPARAMETER['signal']['high_second_derivative_points_threshold'])
     direction_change_filter_len: int = int(HYPERPARAMETER['signal']['direction_change_filter_len'])
-    additional_points_repetitions: int = int(HYPERPARAMETER['signal']['additional_points_repetitions'])
     min_evenly_intermediate_interframes: int = int(HYPERPARAMETER['signal']['min_evenly_intermediate_interframes'])
 
 
@@ -583,13 +582,15 @@ class Signal:
     def decimate(self,
             signal: list,
             base_point_algorithm: BasePointAlgorithm,
-            additional_points_algorithms: List[AdditionalPointAlgorithm]) -> list:
+            additional_points_algorithms: List[AdditionalPointAlgorithm],
+            additional_points_repetitions: int = 2) -> list:
         """ Compute the decimated signal with given algorithms
 
         Args:
             signal (list): raw signal
             base_point_algorithm (BasePointAlgorithm): algorithm to determine the base points
             additional_points_algorithms (List[AdditionalPointAlgorithm]): list with algorithms to determine additional points
+            additional_points_repetitions: number of runs for the additional points algorithm (max number of points that will be insert between 2 base points)
 
         Returns:
             list: indexes for decimated signal
@@ -601,7 +602,7 @@ class Signal:
         else:
             raise NotImplementedError("Selected Base Point Algorithm is not implemented")
 
-        for run_idx in range(self.params.additional_points_repetitions):
+        for run_idx in range(additional_points_repetitions):
             self.logger.info("Run Additional Points Algorithms #%d", run_idx+1)
             len_before_merge = len(decimated_indexes)
             for algo in additional_points_algorithms:

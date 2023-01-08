@@ -189,7 +189,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
                 continue
 
             if found_last:
-                self.postprocessing_widget = PostprocessingWidget(metric, self.score[metric])
+                self.postprocessing_widget = PostprocessingWidget(metric, self.score[metric], self.video_info)
                 self.postprocessing_widget.postprocessingCompleted.connect(self.__next_postprocessing)
                 self.postprocessing_widget.show()
                 return
@@ -205,7 +205,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             if len(funscripts) > 1:
                 self.__logger.warning("Multiaxis output for build-in UI is not implemented")
             for item in funscripts[first_metric].get_actions():
-                self.output_file.add_action(item['pos'], item['at'], SETTINGS['raw_output'])
+                self.output_file.add_action(item['pos'], item['at'], True)
             self.funscriptCompleted.emit(self.output_file, msg, success)
         else:
             os.makedirs(os.path.dirname(self.output_file), exist_ok=True)

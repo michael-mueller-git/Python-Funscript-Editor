@@ -40,9 +40,6 @@ signal:
   # min interframes without an additional datapoint for the evenly intermediate algorithm
   min_evenly_intermediate_interframes: 2
 
-  # number of runs for the additional points algorithm (max number of points that will be insert between 2 base points)
-  additional_points_repetitions: 2
-
 
 # Scene Detector Hyperparameter
 scene_detector:
