@@ -20,7 +20,7 @@ jobs:
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: build
+          activate-environment: python-funscript-editor
           environment-file: environment_windows.yaml
           python-version: 3.9
           auto-activate-base: false

@@ -1,10 +1,10 @@
-name: build
+name: python-funscript-editor
 channels:
   - defaults
 dependencies:
   - blas=1.0=mkl
-  - ca-certificates=2021.5.25=haa95532_1
-  - certifi=2021.5.30=py39haa95532_0
+  - ca-certificates=2022.10.11=haa95532_0
+  - certifi=2022.12.7=py39haa95532_0
   - freetype=2.10.4=hd328e21_0
   - icc_rt=2019.0.0=h0cc432a_1
   - icu=58.2=ha925a31_3
@@ -20,10 +20,11 @@ dependencies:
   - numpy=1.20.2=py39ha4e8547_0
   - numpy-base=1.20.2=py39hc2deb75_0
   - olefile=0.46=py_0
-  - openssl=1.1.1k=h2bbff1b_0
+  - openssl=1.1.1s=h2bbff1b_0
   - pillow=8.2.0=py39h4fa10fc_0
   - pip=21.1.2=py39haa95532_0
   - pyqt=5.9.2=py39hd77b12b_6
+  - pyqtgraph=0.11.0=py_0
   - python=3.9.5=h6244533_3
   - pyyaml=5.4.1=py39h2bbff1b_1
   - qt=5.9.7=vc14h73c81de_0
@@ -43,36 +44,37 @@ dependencies:
   - zlib=1.2.11=h62dcd97_4
   - zstd=1.4.9=h19a0ad4_0
   - pip:
-    - altgraph==0.17
-    - click==8.0.1
-    - colorama==0.4.4
-    - coloredlogs==15.0.1
-    - cycler==0.10.0
-    - future==0.18.2
-    - ghp-import==2.0.1
-    - humanfriendly==9.2
-    - importlib-metadata==4.6.1
-    - jinja2==3.0.1
-    - kiwisolver==1.3.1
-    - markdown==3.3.4
-    - markupsafe==2.0.1
-    - matplotlib==3.4.2
-    - mergedeep==1.3.4
-    - mkdocs==1.2.1
-    - opencv-contrib-python==4.5.2.54
-    - packaging==21.0
-    - pefile==2021.5.24
-    - playsound==1.3.0
-    - pyinstaller==4.7
-    - pyinstaller-hooks-contrib==2021.2
-    - pynput==1.7.3
-    - pyparsing==2.4.7
-    - pyreadline==2.1
-    - python-dateutil==2.8.1
-    - python-mpv==0.5.2
-    - pywin32-ctypes==0.2.0
-    - pyyaml-env-tag==0.1
-    - screeninfo==0.6.7
-    - watchdog==2.1.3
-    - zipp==3.5.0
-prefix: C:\Users\win10\miniconda3\envs\build
+      - altgraph==0.17
+      - click==8.0.1
+      - colorama==0.4.4
+      - coloredlogs==15.0.1
+      - cycler==0.10.0
+      - future==0.18.2
+      - ghp-import==2.0.1
+      - humanfriendly==9.2
+      - importlib-metadata==4.6.1
+      - jinja2==3.0.1
+      - kiwisolver==1.3.1
+      - markdown==3.3.4
+      - markupsafe==2.0.1
+      - matplotlib==3.4.2
+      - mergedeep==1.3.4
+      - mkdocs==1.2.1
+      - opencv-contrib-python==4.5.2.54
+      - packaging==21.0
+      - pefile==2021.5.24
+      - playsound==1.3.0
+      - pyinstaller==4.7
+      - pyinstaller-hooks-contrib==2021.2
+      - pynput==1.7.3
+      - pyparsing==2.4.7
+      - pyreadline==2.1
+      - python-dateutil==2.8.1
+      - python-mpv==0.5.2
+      - pywin32-ctypes==0.2.0
+      - pyyaml-env-tag==0.1
+      - screeninfo==0.6.7
+      - simplification==0.6.2
+      - watchdog==2.1.3
+      - zipp==3.5.0
+prefix: C:\Users\win11\miniconda3\envs\python-funscript-editor

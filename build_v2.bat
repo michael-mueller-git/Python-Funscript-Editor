@@ -5,7 +5,6 @@ rmdir /Q /S "dist/funscript-editor" 2>NUL
 del "dist\\funscript-editor.zip" 2>NUL
 del funscript-editor.spec 2>NUL
 
-
 set CONDAPATH=%USERPROFILE%\Miniconda3
 set ENVNAME=python-funscript-editor
 
@@ -14,12 +13,12 @@ if %ENVNAME%==base (set ENVPATH=%CONDAPATH%) else (set ENVPATH=%CONDAPATH%\envs\
 call %CONDAPATH%\Scripts\activate.bat base
 
 if exist %ENVPATH% (
-  conda env update --name %ENVNAME& --file environment_windows.yaml --prune
+  call conda env update --name %ENVNAME% --file environment_windows.yaml --prune
 ) else (
-  conda env create -f environment_windows.yaml --name %ENVNAME%
+  call conda env create -f environment_windows.yaml --name %ENVNAME%
 )
 
-conda activate %ENVNAME%
+call conda activate %ENVNAME%
 
 cd docs/app
 mkdocs build
@@ -32,4 +31,5 @@ copy /Y "contrib\\Installer\\assets\\main.lua" "dist\\funscript-editor\\OFS"
 copy /Y "contrib\\Installer\\assets\\json.lua" "dist\\funscript-editor\\OFS"
 powershell Compress-Archive -LiteralPath "dist/funscript-editor" -DestinationPath "dist/funscript-editor.zip"
 
-conda deactivate
+call conda deactivate
+timeout 20 >NUL

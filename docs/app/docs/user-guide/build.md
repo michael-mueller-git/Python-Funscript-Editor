@@ -10,13 +10,13 @@ First download and install [miniconda](https://docs.conda.io/en/latest/miniconda
 
 ```
 conda env create -f environment_windows.yaml
-conda activate build
+conda activate python-funscript-editor
 build.bat
 ```
 
 This create the Windows executable in `./dist`.
 
-Finally you can remove the build environment with `conda env remove -n build`
+Finally you can remove the build environment with `conda env remove -n python-funscript-editor`
 
 ## Ubuntu 20.04 LTS, Ubuntu 21.04, Debian
 
