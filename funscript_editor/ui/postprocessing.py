@@ -45,7 +45,7 @@ class PostprocessingWidget(QtWidgets.QWidget):
         self.p6.vb.setLimits(xMin=0, xMax=len(raw_score), yMin=0, yMax=100)
         self.p6.setMouseEnabled(y=False)
         self.curve_raw = self.p6.plot(pen=pg.mkPen("b", width=2.0))
-        self.curve_result = self.p6.plot(pen=pg.mkPen("r", width=2.0))
+        self.curve_result = self.p6.plot(pen=pg.mkPen("r", width=2.0), symbol='o')
         self.curve_raw.setData(self.raw_score_idx, self.raw_score)
 
         self.result_idx = []
