@@ -67,10 +67,7 @@ Manual Installation:
 
 ## Installation Linux
 
-I create an Install script to setup OFS + MTFG Extension. The script is located in [`./contrib/OpenFunscripter/openfunscripter_setup_linux.sh`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/OpenFunscripter/openfunscripter_setup_linux.sh). You may need to adjust the script depending on your Distribution. Or you may want to install it manually by using the script as reference/manual. The script was test on Arch Linux and Ubuntu.
-
-- For Arch Linux the dependency setup for MTFG is not included in the install script.
-- For Debian based distributions (e.g Ubuntu) you first have to install [Miniconda](https://docs.conda.io/en/latest/miniconda.html)!
+I create an Install script to setup OFS + MTFG Extension. The script is located in [`./contrib/OpenFunscripter/openfunscripter_setup_linux.sh`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/OpenFunscripter/openfunscripter_setup_linux.sh). You may need to adjust the script depending on your Distribution. Or you may want to install it manually by using the script as reference/manual. The script was test on Ubuntu.
 
 One liner to run the installer:
 

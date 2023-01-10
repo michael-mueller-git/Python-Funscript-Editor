@@ -1,7 +1,5 @@
 #!/bin/bash
 # Description: Installer for OFS + MTFG
-# Requirements: On Debian based systems e.g. Ubuntu you have to install Anaconda or Miniconda
-# befor running this installer!
 
 arg1="$1"
 
@@ -13,20 +11,20 @@ fi
 echo "install required packages"
 if command -v apt; then
     # debian based distro:
+    sudo mkdir -p /nix
+    sudo chown $USER /nix
+    sudo apt install curl
+    sh <(curl -L https://nixos.org/nix/install)
+    . /home/$USER/.nix-profile/etc/profile.d/nix.sh
 
-    if [ ! -d ~/anaconda3 ] && [ ! -d ~/miniconda3 ]; then
-        echo "ERROR: miniconda is not properly installed. Please first install [miniconda](https://docs.conda.io/en/latest/miniconda.html)"
-        exit 1
-    fi
-
+    echo "Install OFS build dependencies"
     sudo apt install -y cmake build-essential libmpv-dev libglvnd-dev libxext-dev make \
         git gcc g++ cmake libmpv-dev libatlas-base-dev
 fi
 
-if command -v pacman; then
-    # arch based distro:
-    sudo pacman -Syu --needed --noconfirm
-    sudo pacman -Sy --needed --noconfirm python-opencv python-pyqt5 git base-devel python python-pip mpv cmake
+if [ ! -f ~/.config/nix/nix.conf ]; then
+    mkdir -p ~/.config/nix
+    echo "experimental-features = nix-command flakes" >  ~/.config/nix/nix.conf
 fi
 
 OFS_APP_DIR="$HOME/.local/share/OFS/application"
@@ -57,11 +55,6 @@ if [ "$arg1" != "--latest" ]; then
     git submodule update --init
 else
     echo "Use latest git commit (only for developers!)"
-fi
-
-if command -v pacman; then
-    echo "apply fixes for arch linux"
-    sed -i 's/libmpv.so.1/libmpv.so.2/g' OFS-lib/OFS_MpvLoader.cpp
 fi
 
 echo ">> Build OFS in $PWD"
@@ -103,33 +96,19 @@ else
     fi
 fi
 
-if command -v apt; then
-    # debian based distro:
-    source ~/anaconda3/etc/profile.d/conda.sh 2>/dev/null
-    source ~/miniconda3/etc/profile.d/conda.sh 2>/dev/null
-    export CONDA_ALWAYS_YES="true"
-    conda env create -f environment_ubuntu.yaml
-    conda activate funscript-editor
-    conda env update --file environment_ubuntu.yaml --prune
-    unset CONDA_ALWAYS_YES
-fi
+# build nix environment
+nix develop --command sleep 1
 
-if command -v pacman; then
-    # arch based distro:
-    pip install -r requirements.txt
-fi
+popd
 
 cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/assets/ffmpeg" \
     "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/funscript_editor/data/ffmpeg"
-popd
 
 cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/contrib/Installer/assets/main.lua" \
     "$OFS_EXTENSION_DIR/MTFG/main.lua"
 
 cp -fv "$OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor/contrib/Installer/assets/json.lua" \
     "$OFS_EXTENSION_DIR/MTFG/json.lua"
-
-popd
 
 if [ ! -e ~/.local/bin/OpenFunscripter ]; then
     mkdir -p ~/.local/bin
