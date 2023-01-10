@@ -73,7 +73,7 @@ else
     fi
 fi
 
-# build nix environment
+echo "build nix environment"
 nix develop --command sleep 1
 
 popd
