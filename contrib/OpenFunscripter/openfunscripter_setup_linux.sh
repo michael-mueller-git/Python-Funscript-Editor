@@ -37,9 +37,10 @@ OFS_EXTENSION_DIR="$HOME/.local/share/OFS/OFS3_data/extensions"
 ofs_appimage_download_url=$(curl -s -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/OpenFunscripter/OFS/releases/latest | grep -Eo "https://.*64x.*AppImage")
 
 echo "OFS AppImage Download URL: $ofs_appimage_download_url"
-mkdir -p $OFS_APP_DIR/bin
+mkdir -p $OFS_APP_DIR/bin/data
 rm -rf $OFS_APP_DIR/bin/OpenFunscripter
 wget -c "$ofs_appimage_download_url" -O $OFS_APP_DIR/bin/OpenFunscripter
+wget -c https://raw.githubusercontent.com/OpenFunscripter/OFS/master/data/logo64.png -O $OFS_APP_DIR/bin/data/logo64.png
 chmod +x $OFS_APP_DIR/bin/OpenFunscripter
 
 echo ">> Install ofs extension"
