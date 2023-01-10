@@ -11,11 +11,16 @@ fi
 echo "install required packages"
 if command -v apt; then
     # debian based distro:
-    sudo mkdir -p /nix
-    sudo chown $USER /nix
     sudo apt install -y curl
-    sh <(curl -L https://nixos.org/nix/install)
-    . /home/$USER/.nix-profile/etc/profile.d/nix.sh
+    sh <(curl -L https://nixos.org/nix/install) --daemon --yes
+
+    if [ -f /etc/profile.d/nix.sh ]; then
+        . /etc/profile.d/nix.sh
+    fi
+
+    if [ -f /home/$USER/.nix-profile/etc/profile.d/nix.sh ]; then
+        . /home/$USER/.nix-profile/etc/profile.d/nix.sh
+    fi
 
     echo "Install OFS AppImage dependencies"
     sudo apt install -y fuse
@@ -29,6 +34,7 @@ fi
 if [ ! -f ~/.config/nix/nix.conf ]; then
     mkdir -p ~/.config/nix
     echo "experimental-features = nix-command flakes" >  ~/.config/nix/nix.conf
+    sudo systemctl restart nix-daemon.service
 fi
 
 OFS_APP_DIR="$HOME/.local/share/OFS/application"
@@ -110,3 +116,6 @@ echo "Installation Completed"
 if [ "$arg1" = "--latest" ]; then
     echo "WARNING: you have install the latest application code"
 fi
+
+# When nix was installed with this scrip we need an reboot to work
+echo "You may need to restart you computer to get MTFG working"
