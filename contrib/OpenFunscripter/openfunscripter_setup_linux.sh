@@ -40,6 +40,7 @@ echo "OFS AppImage Download URL: $ofs_appimage_download_url"
 mkdir -p $OFS_APP_DIR/bin
 rm -rf $OFS_APP_DIR/bin/OpenFunscripter
 wget -c "$ofs_appimage_download_url" -O $OFS_APP_DIR/bin/OpenFunscripter
+chmod +x $OFS_APP_DIR/bin/OpenFunscripter
 
 echo ">> Install ofs extension"
 mkdir -p "$OFS_EXTENSION_DIR/MTFG"
