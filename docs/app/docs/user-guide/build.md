@@ -20,7 +20,7 @@ Finally you can remove the build environment with `conda env remove -n python-fu
 
 ## Linux
 
-To run the application on Linux you need the [nix package manager](https://nixos.org/download.html) with experimental [`flakes` feature enabled](https://github.com/mschwaig/howto-install-nix-with-flake-support).
+To run the application on Linux you need the [nix package manager](https://nixos.org/download.html) with experimental [`flakes` feature enabled](https://github.com/mschwaig/howto-install-nix-with-flake-support). Open an environment with `nix develop` in the repository root directory and start the application with `python main.py` from activated nix develop shell.
 
 ## Flatpak
 
