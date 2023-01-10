@@ -22,6 +22,11 @@ if command -v apt; then
         git gcc g++ cmake libmpv-dev libatlas-base-dev
 fi
 
+if ! command -v nix; then
+    echo "This installer require the package manager nix"
+    exit 1
+fi
+
 if [ ! -f ~/.config/nix/nix.conf ]; then
     mkdir -p ~/.config/nix
     echo "experimental-features = nix-command flakes" >  ~/.config/nix/nix.conf
