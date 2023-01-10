@@ -17,9 +17,8 @@ if command -v apt; then
     sh <(curl -L https://nixos.org/nix/install)
     . /home/$USER/.nix-profile/etc/profile.d/nix.sh
 
-    echo "Install OFS build dependencies"
-    sudo apt install -y cmake build-essential libmpv-dev libglvnd-dev libxext-dev make \
-        git gcc g++ cmake libmpv-dev libatlas-base-dev
+    echo "Install OFS AppImage dependencies"
+    sudo apt install fuse
 fi
 
 if ! command -v nix; then
@@ -35,41 +34,12 @@ fi
 OFS_APP_DIR="$HOME/.local/share/OFS/application"
 OFS_EXTENSION_DIR="$HOME/.local/share/OFS/OFS3_data/extensions"
 
-if [ -d $OFS_APP_DIR ]; then
-    echo ">> OpenFunscripter Source already downloaded (Updating...)"
-    pushd $OFS_APP_DIR
-    git pull
-    git reset --hard HEAD
-    git clean -fd
-    git remote prune origin
-    git checkout master
-    git pull
-    git submodule update --init
-else
-    mkdir -p `dirname $OFS_APP_DIR`
-    echo ">> Clone OpenFunscripter Source"
-    git clone https://github.com/OpenFunscripter/OFS.git $OFS_APP_DIR
-    pushd $OFS_APP_DIR
-    git submodule update --init
-    echo ">> OpenFunscripter Source downloaded to $OFS_APP_DIR"
-fi
+ofs_appimage_download_url=$(curl -s -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/OpenFunscripter/OFS/releases/latest | grep -Eo "https://.*64x.*AppImage")
 
-if [ "$arg1" != "--latest" ]; then
-    echo "Checkout latest OpenFunscripter release"
-    git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
-    git submodule update --init
-else
-    echo "Use latest git commit (only for developers!)"
-fi
-
-echo ">> Build OFS in $PWD"
-rm -rf build
-mkdir -p build
-pushd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j$(expr $(nproc) \+ 1)
-popd  # build
-popd  # $OFS_APP_DIR
+echo "OFS AppImage Download URL: $ofs_appimage_download_url"
+mkdir -p $OFS_APP_DIR/bin
+rm -rf $OFS_APP_DIR/bin/OpenFunscripter
+wget -c "$ofs_appimage_download_url" -O $OFS_APP_DIR/bin/OpenFunscripter
 
 echo ">> Install ofs extension"
 mkdir -p "$OFS_EXTENSION_DIR/MTFG"
