@@ -12,18 +12,21 @@ echo "install required packages"
 if command -v apt; then
     # debian based distro:
     sudo apt install -y curl
-    sh <(curl -L https://nixos.org/nix/install) --daemon --yes
 
-    if [ -f /etc/profile.d/nix.sh ]; then
-        . /etc/profile.d/nix.sh
-    fi
-
-    if [ -f /home/$USER/.nix-profile/etc/profile.d/nix.sh ]; then
-        . /home/$USER/.nix-profile/etc/profile.d/nix.sh
+    if ! command -v nix; then
+        sh <(curl -L https://nixos.org/nix/install) --daemon --yes
     fi
 
     echo "Install OFS AppImage dependencies"
     sudo apt install -y fuse
+fi
+
+if [ -f /etc/profile.d/nix.sh ]; then
+    . /etc/profile.d/nix.sh
+fi
+
+if [ -f /home/$USER/.nix-profile/etc/profile.d/nix.sh ]; then
+    . /home/$USER/.nix-profile/etc/profile.d/nix.sh
 fi
 
 if ! command -v nix; then
