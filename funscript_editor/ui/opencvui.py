@@ -170,12 +170,14 @@ class OpenCV_GUI(KeypressHandler):
     def close(self):
         """Close all OpenCV GUIs"""
         try:
-            self.set_background_image(np.full((1,1,1), 0, dtype=np.uint8))
-            self.show()
-            cv2.resizeWindow(self.window_name, 1, 1)
-            self.show()
-            # TODO the following break the application (core dump)
-            # cv2.destroyWindow(self.window_name)
+            if False:
+                self.set_background_image(np.full((1,1,1), 0, dtype=np.uint8))
+                self.show()
+                cv2.resizeWindow(self.window_name, 1, 1)
+                self.show()
+            else:
+                # TODO the following break the application (core dump)
+                cv2.destroyWindow(self.window_name)
         except:
             pass
 

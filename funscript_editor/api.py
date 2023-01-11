@@ -50,7 +50,11 @@ def generate_funscript(
     logger.info("Args: video_file=%s, start_time=%s, end_time=%s, output_file=%s", \
             str(video_file), str(start_time), str(end_time), str(output_file))
     app = QtWidgets.QApplication(sys.argv)
-    _ = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file, include_multiaxis_options)
+    w = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file, include_multiaxis_options)
+    w.setFixedHeight(5)
+    w.setFixedWidth(5)
+    w.move(1,1)
+    w.show()
     ret = app.exec_()
     logger.info("EXIT")
     sys.exit(ret)
