@@ -4,12 +4,18 @@ from simplification.cutil import (
     simplify_coords_vw_idx,
 )
 
+import copy
 import numpy as np
 import pyqtgraph as pg
 
 from funscript_editor.algorithms.signal import Signal
 from funscript_editor.ui.cut_tracking_result import Slider
 
+class QHLine(QtWidgets.QFrame):
+    def __init__(self):
+        super(QHLine, self).__init__()
+        self.setFrameShape(QtWidgets.QFrame.HLine)
+        self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
 class PostprocessingWidget(QtWidgets.QWidget):
     def __init__(self, metric, raw_score, video_info, parent=None):
@@ -97,14 +103,27 @@ class PostprocessingWidget(QtWidgets.QWidget):
         self.tabs_content[tab_name]["widgets"]["evenly_intermediate"] = QtWidgets.QCheckBox("Evenly Intermediate")
         self.tabs_content[tab_name]["widgets"]["evenly_intermediate"].stateChanged.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["runs"] = Slider("Additionl Points Algorthm Runs", 8, 2)
+        self.tabs_content[tab_name]["widgets"]["runs"] = Slider("Max additional Points", 8, 2)
         self.tabs_content[tab_name]["widgets"]["runs"].slider.valueChanged.connect(self.update_plot)
 
+        self.tabs_content[tab_name]["widgets"]["lower"] = Slider("Lower Offset", 100, 0)
+        self.tabs_content[tab_name]["widgets"]["lower"].slider.valueChanged.connect(self.update_plot)
+
+        self.tabs_content[tab_name]["widgets"]["upper"] = Slider("Upper Offset", 100, 0)
+        self.tabs_content[tab_name]["widgets"]["upper"].slider.valueChanged.connect(self.update_plot)
+
+        self.tabs_content[tab_name]["main"].layout.addWidget(QtWidgets.QLabel("Points:"))
         self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["points"])
+        self.tabs_content[tab_name]["main"].layout.addWidget(QHLine())
+        self.tabs_content[tab_name]["main"].layout.addWidget(QtWidgets.QLabel("Additinal Points:"))
         self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["high_second_derivate"])
         self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["distance_minimization"])
         self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["evenly_intermediate"])
         self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["runs"])
+        self.tabs_content[tab_name]["main"].layout.addWidget(QHLine())
+        self.tabs_content[tab_name]["main"].layout.addWidget(QtWidgets.QLabel("Offset:"))
+        self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["lower"])
+        self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["upper"])
 
         self.tabs_content[tab_name]["main"].setLayout(self.tabs_content[tab_name]["main"].layout)
         self.tabs.addTab(self.tabs_content[tab_name]["main"], tab_name)
@@ -138,6 +157,8 @@ class PostprocessingWidget(QtWidgets.QWidget):
         if current_tab_name == "Custom":
             base_algo = self.tabs_content[current_tab_name]["widgets"]["points"].currentText()
             runs = self.tabs_content[current_tab_name]["widgets"]["runs"].x
+            offset_lower = self.tabs_content[current_tab_name]["widgets"]["lower"].x
+            offset_upper = self.tabs_content[current_tab_name]["widgets"]["upper"].x
 
             base_point_algorithm = Signal.BasePointAlgorithm.local_min_max
             if base_algo == 'Direction Changed':
@@ -160,6 +181,15 @@ class PostprocessingWidget(QtWidgets.QWidget):
                     additional_points_algorithms,
                     additional_points_repetitions = runs
             )
-            self.result_val = [val for idx,val in enumerate(self.raw_score) if idx in self.result_idx]
+            categorized = signal.categorize_points(self.raw_score, self.result_idx)
+            self.result_val = []
+            score = copy.deepcopy(self.raw_score)
+            score_min, score_max = min(score), max(score)
+            for idx in categorized['upper']:
+                score[idx] = max(( score_min, min((score_max, score[idx] + offset_upper)) ))
+            for idx in categorized['lower']:
+                score[idx] = max(( score_min, min((score_max, score[idx] - offset_lower)) ))
+
+            self.result_val = [val for idx,val in enumerate(score) if idx in self.result_idx]
             self.curve_result.setData(self.result_idx, self.result_val)
             return

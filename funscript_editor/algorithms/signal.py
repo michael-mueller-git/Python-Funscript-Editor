@@ -541,18 +541,18 @@ class Signal:
             points (list): list with all point indexes
 
         Returns:
-            dict: dictionary with grouped points { 'min': [], 'max': [] }
+            dict: dictionary with grouped points { 'upper': [], 'lower': [] }
         """
         avg = Signal.moving_average(signal, w=round(self.fps * self.params.avg_sec_for_local_min_max_extraction))
         smothed_signal = Signal.moving_average(signal, w=self.params.local_min_max_filter_len)
 
-        grouped_points = {'min': [], 'max': []}
+        grouped_points = {'upper': [], 'lower': []}
         for idx in points:
             if -1 < idx < min((len(smothed_signal), len(avg))):
                 if smothed_signal[idx] > avg[idx]:
-                    grouped_points['max'].append(idx)
+                    grouped_points['upper'].append(idx)
                 else:
-                    grouped_points['min'].append(idx)
+                    grouped_points['lower'].append(idx)
 
         return grouped_points
 
