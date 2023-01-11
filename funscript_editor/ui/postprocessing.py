@@ -181,12 +181,15 @@ class PostprocessingWidget(QtWidgets.QWidget):
                     additional_points_algorithms,
                     additional_points_repetitions = runs
             )
+
             categorized = signal.categorize_points(self.raw_score, self.result_idx)
-            self.result_val = []
+
             score = copy.deepcopy(self.raw_score)
             score_min, score_max = min(score), max(score)
+
             for idx in categorized['upper']:
                 score[idx] = max(( score_min, min((score_max, score[idx] + offset_upper)) ))
+
             for idx in categorized['lower']:
                 score[idx] = max(( score_min, min((score_max, score[idx] - offset_lower)) ))
 
