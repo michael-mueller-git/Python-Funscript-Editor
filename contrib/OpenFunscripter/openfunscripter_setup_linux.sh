@@ -13,12 +13,12 @@ if command -v apt; then
     # debian based distro:
     sudo apt install -y curl
 
+    echo "Install OFS AppImage dependencies"
+    sudo apt install -y fuse
+
     if ! command -v nix; then
         sh <(curl -L https://nixos.org/nix/install) --daemon --yes
     fi
-
-    echo "Install OFS AppImage dependencies"
-    sudo apt install -y fuse
 fi
 
 if [ -f /etc/profile.d/nix.sh ]; then
