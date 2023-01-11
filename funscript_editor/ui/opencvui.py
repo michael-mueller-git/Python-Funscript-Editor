@@ -158,6 +158,7 @@ class OpenCV_GUI(KeypressHandler):
         self.preview_scaling_applied = False
         self.preview_image = None
         self.preview_image_without_scale = None
+        cv2.startWindowThread()
 
 
     def __del__(self):
@@ -169,7 +170,12 @@ class OpenCV_GUI(KeypressHandler):
     def close(self):
         """Close all OpenCV GUIs"""
         try:
-            cv2.destroyWindow(self.window_name)
+            self.set_background_image(np.full((1,1,1), 0, dtype=np.uint8))
+            self.show()
+            cv2.resizeWindow(self.window_name, 1, 1)
+            self.show()
+            # TODO the following break the application (core dump)
+            # cv2.destroyWindow(self.window_name)
         except:
             pass
 
@@ -466,7 +472,7 @@ class OpenCV_GUI(KeypressHandler):
         """ Show annotated preview image
 
         Args:
-            wait (int): waitKey time in milliseconds
+            wait (int): waitKey time in millisecondscv2.resizeWindow("Resized_Window", 300, 700)
 
         Returns:
             int: waitKey result
