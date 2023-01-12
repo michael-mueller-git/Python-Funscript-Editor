@@ -1,4 +1,4 @@
-# usage: `nix develop --impure`
+# usage: `nix develop --command zsh`
 {
   description = "MTFG";
 

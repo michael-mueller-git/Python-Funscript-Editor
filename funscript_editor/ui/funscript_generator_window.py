@@ -169,7 +169,18 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     def __scaling_completed(self, score):
         self.score = score
         self.__logger.info('scaling completed')
-        self.__next_postprocessing(None, [], [])
+        if not SETTINGS["raw_output"]:
+            self.__next_postprocessing(None, [], [])
+        else:
+            self.__logger.info("Raw Output")
+            for metric in self.funscripts:
+                for idx, val in enumerate(self.score[metric]):
+                    self.funscripts[metric].add_action(
+                            round(val),
+                            FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
+                        )
+
+            self.__funscript_generated(self.funscripts, "OK", True)
 
 
     # Setp 4

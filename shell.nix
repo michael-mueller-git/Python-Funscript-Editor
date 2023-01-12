@@ -26,6 +26,7 @@ let python =
 in
   pkgs.mkShell {
     nativeBuildInputs = with pkgs; [
+      zsh
       qt5.qtbase
       qt5.full
       qt5.wrapQtAppsHook

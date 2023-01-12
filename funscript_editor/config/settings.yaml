@@ -26,6 +26,9 @@ notification_sound: 'off'
 # - 'THRESHOLD': Detects fades in video.
 scene_detector: 'CSV'
 
+# Disable postprocessing
+raw_output: False
+
 # Force dark ui theme
 dark_theme: False
 
