@@ -62,7 +62,7 @@ jobs:
           cp "contrib/Installer/assets/json.lua" "dist/funscript-editor/OFS/json.lua"
 
       - name: Create Asset Archive
-        uses: vimtor/action-zip@v1
+        uses: vimtor/action-zip@v1.1
         with:
           files: dist/funscript-editor
           recursive: true
