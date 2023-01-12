@@ -75,11 +75,19 @@ class CutTrackingResultWidget(QWidget):
             "stop": data_len
         }
         self.update_plot()
+        self.close_with_ok = False
 
     cutCompleted = QtCore.pyqtSignal(dict)
 
 
+    def closeEvent(self, event):
+        event.accept()
+        if not self.close_with_ok:
+            sys.exit(1)
+
+
     def confirm(self):
+        self.close_with_ok = True
         self.hide()
         self.cutCompleted.emit(self.result)
         self.close()

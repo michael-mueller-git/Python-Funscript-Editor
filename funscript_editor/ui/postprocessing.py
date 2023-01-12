@@ -6,6 +6,7 @@ from simplification.cutil import (
 
 import funscript_editor.utils.logging as logging
 import copy
+import sys
 import numpy as np
 import pyqtgraph as pg
 
@@ -59,6 +60,7 @@ class PostprocessingWidget(QtWidgets.QWidget):
         self.result_idx = []
         self.result_val = []
 
+        self.close_with_ok = False
         self.update_plot()
 
 
@@ -158,7 +160,14 @@ class PostprocessingWidget(QtWidgets.QWidget):
         return self.tabs.tabText(self.tabs.currentIndex())
 
 
+    def closeEvent(self, event):
+        event.accept()
+        if not self.close_with_ok:
+            sys.exit(1)
+
+
     def confirm(self):
+        self.close_with_ok = True
         self.hide()
         self.postprocessingCompleted.emit(self.metric, self.result_idx, self.result_val)
         self.close()

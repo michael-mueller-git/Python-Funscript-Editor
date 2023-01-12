@@ -1,6 +1,7 @@
 """ Settings Dialog for the Funscript Generator """
 import json
 import os
+import sys
 import webbrowser
 
 import funscript_editor.ui.settings_view as settings_view
@@ -11,6 +12,19 @@ from funscript_editor.utils.config import PROJECTION
 from funscript_editor.definitions import CONFIG_DIR
 
 from PyQt5 import QtWidgets, QtCore, QtGui
+
+
+class MyQDialog(QtWidgets.QDialog):
+
+    def __init__(self):
+        super(MyQDialog, self).__init__()
+        self.close_with_ok = False
+
+    def closeEvent(self, event):
+        event.accept()
+        if not self.close_with_ok:
+            sys.exit(1)
+
 
 class SettingsDialog(QtWidgets.QDialog):
     """ Settings Dialog
@@ -26,7 +40,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.include_vr = include_vr
         self.include_multiaxis = include_multiaxis
         self.ui = settings_view.Ui_Form()
-        self.form = QtWidgets.QDialog()
+        self.form = MyQDialog()
         self.ui.setupUi(self.form)
         self.form.setWindowTitle("MTFG Settings")
         self.settings = settings
@@ -171,6 +185,7 @@ class SettingsDialog(QtWidgets.QDialog):
 
 
     def __apply(self):
+        self.form.close_with_ok = True
         self.__save_settings()
         self.form.hide()
         self.applySettings.emit()
