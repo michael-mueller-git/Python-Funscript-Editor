@@ -9,33 +9,13 @@
 min_frames: 90
 
 # reaction time of the user to stop the tracking when scene changed or tracking box shifts
-user_reaction_time_in_milliseconds: 1000
+user_reaction_time_in_milliseconds: 800
 
 
 # Signal Processing Hyperparameter
 signal:
-
-  # Specify the window size for the calculation of smothed tracking signal for the local min and max search.
-  # For slow actions in your video, i recommend to set this to '3' to reduce the false positive predictions.
-  local_max_min_filter_len: 1
-
   # Specify the window size for the calculation of the reference value for the local min and max search.
   avg_sec_for_local_min_max_extraction: 2.0
-
-  # threshold value to predict an distance minimization point candidate
-  distance_minimization_threshold: 16.0
-
-  # threshold value tor get additional points by comparing second derivative with the rolling standard deviation and given threshold
-  high_second_derivative_points_threshold: 1.2
-
-  # filter length to detect a direction change
-  direction_change_filter_len: 3
-
-  # threshold value in milliseconds to merge additional points
-  additional_points_merge_time_threshold_in_ms: 60
-
-  # threshold value to merge additional points
-  additional_points_merge_distance_threshold: 8.0
 
   # min interframes without an additional datapoint for the evenly intermediate algorithm
   min_evenly_intermediate_interframes: 2

@@ -13,20 +13,20 @@ import matplotlib.pyplot as plt
 
 @dataclass
 class SignalParameter:
-    local_min_max_filter_len: int = int(HYPERPARAMETER['signal']['local_max_min_filter_len'])
+    additional_points_merge_time_threshold_in_ms: float
+    additional_points_merge_distance_threshold: float
+    high_second_derivative_points_threshold: float
+    distance_minimization_threshold: float
+    local_min_max_filter_len: int
+    direction_change_filter_len: int
     avg_sec_for_local_min_max_extraction: float = float(HYPERPARAMETER['signal']['avg_sec_for_local_min_max_extraction'])
-    additional_points_merge_time_threshold_in_ms: float = float(HYPERPARAMETER['signal']['additional_points_merge_time_threshold_in_ms'])
-    additional_points_merge_distance_threshold: float = float(HYPERPARAMETER['signal']['additional_points_merge_distance_threshold'])
-    distance_minimization_threshold: float = float(HYPERPARAMETER['signal']['distance_minimization_threshold'])
-    high_second_derivative_points_threshold: float = float(HYPERPARAMETER['signal']['high_second_derivative_points_threshold'])
-    direction_change_filter_len: int = int(HYPERPARAMETER['signal']['direction_change_filter_len'])
     min_evenly_intermediate_interframes: int = int(HYPERPARAMETER['signal']['min_evenly_intermediate_interframes'])
 
 
 class Signal:
 
-    def __init__(self, fps):
-        self.params = SignalParameter()
+    def __init__(self, params, fps):
+        self.params = params
         self.fps = fps
         self.logger = logging.getLogger(__name__)
 
