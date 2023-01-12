@@ -12,7 +12,7 @@ jobs:
             os: ["windows-latest"]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -36,7 +36,7 @@ jobs:
         working-directory: ./contrib/Installer
         run: |
           pyinstaller --add-data="assets/*;./" --noupx --onefile mtfg-ofs-extension-installer.py
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: mtfg-ofs-extension-installer-${{env.INSTALLER_VERSION}}.exe
           path: ./contrib/Installer/dist/mtfg-ofs-extension-installer.exe

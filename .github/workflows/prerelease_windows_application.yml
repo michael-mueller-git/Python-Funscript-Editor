@@ -13,7 +13,7 @@ jobs:
     steps:
 
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
@@ -68,7 +68,7 @@ jobs:
           recursive: true
           dest: funscript-editor_${{ github.sha }}.zip
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: funscript-editor_${{ github.sha }}.zip
           path: ./funscript-editor_${{ github.sha }}.zip
