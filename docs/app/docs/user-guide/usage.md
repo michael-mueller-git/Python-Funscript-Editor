@@ -10,8 +10,10 @@ First of all I want to mention that this application is not a fully automated so
 2. Select an features for the Woman and Men in the video, which should be tracked.
 3. The application try to track the selected feature in the following video frames.
 4. When the user stop the Tracking or the application can not find the selected feature in the next video frame the application calculate the difference between the predicted tracking boxes for each frame.
-5. The user set the minimum and maximum position for the tracked video sequence.
-6. The Application determine all local min and max points of the movement of the tracker and insert them in OpenFunscripter.
+5. Now you can cut the raw tracking result e.g. to remove an tracker shift
+6. Then the user set the minimum and maximum position for the tracked video sequence.
+7. Finally set the desired post processing parameter.
+8. The Lua Extension automatically import the result to OpenFunscripter.
 
 ## Options
 
@@ -26,8 +28,6 @@ You can then specify blocking/non blocking: the first means that when the featur
 
 ## Settings
 
-![Settings Dialog](./images/settings_dialog.png)
-
 All important settings can be set in the settings dialog before the tracking starts.
 
 Description:
@@ -37,7 +37,3 @@ Description:
 - Tracking Method: Select the desired tracking method. Available methods depend on the selected `Tracking Metric` setting.
 - Processing Speed: Select the processing speed. This option set the skip frames factor. For an higher processing speed we track only every `n % skip_frame == 0` frame and interpolate the skipped frames. Recommend settings is `1 (normal)` for 60 FPS Videos (and above) and `0 (accurate)` for Videos with 30 FPS or less.
 - Number of Tracker: Select the number of trackers per target. We use the average of all tracker for the output. Using a higher number of Tracker should increase the accuracy. For most video scenes i recommend to use only `1` tracker because the accuracy increases only slightly but the processing speed is significantly higher.
-- Points: Select the algorithm to determine the predicted points from the tracking signal.
-- Additional Points: Select an algorithm to add additional points to the output.
-- Top Points Offset: Add an given offset to all predicted top points. Recommend is an value between `10` and `25`.
-- Bottom Points Offset: Add an given offset to all predicted bottom points. Recommend is an value between `-10` and `-25`.
