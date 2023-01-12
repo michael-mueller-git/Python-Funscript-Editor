@@ -29,6 +29,8 @@ in
       qt5.qtbase
       qt5.full
       qt5.wrapQtAppsHook
+      libsForQt5.breeze-qt5
+      libsForQt5.qt5ct
       python.pkgs.opencv4
       python.pkgs.simplification
       (python39.withPackages (p: with p; [
@@ -47,5 +49,4 @@ in
         screeninfo
       ]))
     ];
-
 }
