@@ -110,19 +110,19 @@ class PostprocessingWidget(QtWidgets.QWidget):
         self.tabs_content[tab_name]["widgets"]["evenly_intermediate"] = QtWidgets.QCheckBox("Evenly Intermediate")
         self.tabs_content[tab_name]["widgets"]["evenly_intermediate"].stateChanged.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["runs"] = Slider("Max additional Points", 8, 2)
+        self.tabs_content[tab_name]["widgets"]["runs"] = Slider("Max Iterations", 8, 2)
         self.tabs_content[tab_name]["widgets"]["runs"].slider.valueChanged.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["mergeThresholdMs"] = Slider("Merge Threshold Time in ms", 1000, 60)
         self.tabs_content[tab_name]["widgets"]["mergeThresholdMs"].slider.valueChanged.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"] = Slider("Merge Threshold Distance", 100, 12)
+        self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"] = Slider("Merge Threshold Distance", 100, 8)
         self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"].slider.valueChanged.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["highSecondDerivateThreshold"] = Slider("Threshold", 100, 12)
         self.tabs_content[tab_name]["widgets"]["highSecondDerivateThreshold"].slider.valueChanged.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"] = Slider("Threshold", 100, 16)
+        self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"] = Slider("Threshold", 100, 12)
         self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"].slider.valueChanged.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["lower"] = Slider("Lower Offset", 100, 0)
