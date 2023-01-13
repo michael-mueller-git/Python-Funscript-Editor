@@ -50,4 +50,8 @@ in
         screeninfo
       ]))
     ];
+
+ shellHook = ''
+    export QT_QPA_PLATFORM="xcb"
+  '';
 }
