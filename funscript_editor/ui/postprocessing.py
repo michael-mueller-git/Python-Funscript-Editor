@@ -99,7 +99,7 @@ class PostprocessingWidget(QtWidgets.QWidget):
         self.tabs_content[tab_name]["widgets"]["points"].currentIndexChanged.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["filterLen"] = Slider("Filter Len", 10, 2)
-        self.tabs_content[tab_name]["widgets"]["filterLen"].slider.valueChanged.connect(self.update_plot)
+        self.tabs_content[tab_name]["widgets"]["filterLen"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["high_second_derivate"] = QtWidgets.QCheckBox("High Second Derivate")
         self.tabs_content[tab_name]["widgets"]["high_second_derivate"].stateChanged.connect(self.update_plot)
@@ -111,25 +111,25 @@ class PostprocessingWidget(QtWidgets.QWidget):
         self.tabs_content[tab_name]["widgets"]["evenly_intermediate"].stateChanged.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["runs"] = Slider("Max Iterations", 8, 2)
-        self.tabs_content[tab_name]["widgets"]["runs"].slider.valueChanged.connect(self.update_plot)
+        self.tabs_content[tab_name]["widgets"]["runs"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["mergeThresholdMs"] = Slider("Merge Threshold Time in ms", 1000, 60)
-        self.tabs_content[tab_name]["widgets"]["mergeThresholdMs"].slider.valueChanged.connect(self.update_plot)
+        self.tabs_content[tab_name]["widgets"]["mergeThresholdMs"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"] = Slider("Merge Threshold Distance", 100, 8)
-        self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"].slider.valueChanged.connect(self.update_plot)
+        self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["highSecondDerivateThreshold"] = Slider("Threshold", 100, 12)
-        self.tabs_content[tab_name]["widgets"]["highSecondDerivateThreshold"].slider.valueChanged.connect(self.update_plot)
+        self.tabs_content[tab_name]["widgets"]["highSecondDerivateThreshold"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"] = Slider("Threshold", 100, 12)
-        self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"].slider.valueChanged.connect(self.update_plot)
+        self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["lower"] = Slider("Lower Offset", 100, 0)
-        self.tabs_content[tab_name]["widgets"]["lower"].slider.valueChanged.connect(self.update_plot)
+        self.tabs_content[tab_name]["widgets"]["lower"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["upper"] = Slider("Upper Offset", 100, 0)
-        self.tabs_content[tab_name]["widgets"]["upper"].slider.valueChanged.connect(self.update_plot)
+        self.tabs_content[tab_name]["widgets"]["upper"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["main"].layout.addWidget(QtWidgets.QLabel("Points:"))
         self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["points"])
