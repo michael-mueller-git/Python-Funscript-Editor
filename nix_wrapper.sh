@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 root_dir="$(dirname $0)"
 cmd="python3 `dirname $0`/funscript-editor.py"
