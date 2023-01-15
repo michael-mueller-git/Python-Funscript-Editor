@@ -42,6 +42,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             output_file: str,
             include_multiaxis: bool = False):
         super(FunscriptGeneratorWindow, self).__init__()
+        self.allow_close = False
         setup_theme()
         if os.path.exists(definitions.ICON_PATH):
             self.setWindowIcon(QtGui.QIcon(definitions.ICON_PATH))
@@ -99,6 +100,13 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
     funscriptCompleted = QtCore.pyqtSignal(object, str, bool)
     openCutWidget = QtCore.pyqtBoundSignal
+
+
+    def closeEvent(self, event):
+        if self.allow_close:
+            event.accept()
+        else:
+            event.ignore()
 
 
     def get_absolute_framenumber(self, frame_number: int) -> int:
@@ -210,6 +218,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
     # Setp 5
     def __funscript_generated(self, funscripts, msg, success) -> None:
+        self.allow_close = True
         first_metric = [x for x in funscripts.keys()][0]
 
         if isinstance(self.output_file, Funscript):
