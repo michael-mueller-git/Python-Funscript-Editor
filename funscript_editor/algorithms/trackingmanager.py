@@ -303,7 +303,7 @@ class TrackingManagerThread(QtCore.QThread):
 
         self.logger.info("tracking_metrics: %s", self.params.tracking_metrics)
         for metric in score.keys():
-            if metric in self.params.tracking_metrics and "inverted" in self.params.tracking_metrics and self.params.tracking_metrics["inverted"]:
+            if metric in self.params.tracking_metrics and "inverted" in self.params.tracking_metrics[metric] and self.params.tracking_metrics[metric]["inverted"]:
                 if metric == 'roll':
                     self.logger.info("%s: Get absolute inverted Score", metric)
                     self.score[metric] = [abs(-1.0*item + 100) for item in score[metric]]
