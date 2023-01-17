@@ -420,6 +420,5 @@ class StaticVideoTracker:
                     self.last_valid_tracking_box = bbox
 
         if platform.system() != 'Windows':
-            # TODO logging here on windows cause open background process
             self.logger.info("Video Tracker Stoped")
 
