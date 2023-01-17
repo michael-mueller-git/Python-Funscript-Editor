@@ -158,7 +158,7 @@ class OpenCV_GUI(KeypressHandler):
         self.preview_scaling_applied = False
         self.preview_image = None
         self.preview_image_without_scale = None
-        cv2.startWindowThread()
+        # cv2.startWindowThread()
 
 
     def __del__(self):
