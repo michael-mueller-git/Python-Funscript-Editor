@@ -301,6 +301,7 @@ class TrackingManagerThread(QtCore.QThread):
             pool[metric].join()
             score[metric] = queue[metric].get()
 
+        self.logger.info("tracking_metrics: %s", self.params.tracking_metrics)
         for metric in score.keys():
             if metric in self.params.tracking_metrics and "inverted" in self.params.tracking_metrics and self.params.tracking_metrics["inverted"]:
                 if metric == 'roll':

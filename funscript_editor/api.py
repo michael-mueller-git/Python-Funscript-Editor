@@ -30,7 +30,8 @@ def generate_funscript(
         end_time :float,
         output_file: str,
         include_multiaxis_options: bool = False,
-        enable_logging: bool = False) -> None:
+        enable_logging: bool = False,
+        stdout_logging: bool = False) -> None:
     """ Generate a funscript with minimal UI
 
     Args:
@@ -39,11 +40,17 @@ def generate_funscript(
         end_time (float): end time in milliseconds (set -1.0 to use video end)
         output_file (str): path for the output file
         include_multiaxis_options (bool): include options for multiaxis output
+        enable_logging (bool): enable logging
+        stdout_logging (bool): enable stdout logging
     """
+    if stdout_logging:
+        enable_logging = True
+
     if enable_logging:
-        logging.setup_logging(silent=True)
+        logging.setup_logging(silent=not stdout_logging)
     else:
         logging.disable_logging()
+
     logger = logging.getLogger(__name__)
     logger.info("Python Funscript Generator %s", VERSION)
     logger.info("Startup Path: %s", str(os.getcwd()))
