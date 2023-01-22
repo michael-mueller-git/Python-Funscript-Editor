@@ -43,6 +43,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             include_multiaxis: bool = False):
         super(FunscriptGeneratorWindow, self).__init__()
         self.allow_close = False
+        self.raw_output = False
         setup_theme()
         if os.path.exists(definitions.ICON_PATH):
             self.setWindowIcon(QtGui.QIcon(definitions.ICON_PATH))
@@ -177,7 +178,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     def __scaling_completed(self, score):
         self.score = score
         self.__logger.info('scaling completed')
-        if not SETTINGS["raw_output"]:
+        if not self.raw_output:
             self.__next_postprocessing(None, [], [])
         else:
             self.__logger.info("Raw Output")
@@ -270,6 +271,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         self.__logger.info('settings: %s', str(self.settings))
         self.settings['videoType'] = list(filter(lambda x: PROJECTION[x]['name'] == self.settings['videoType'], PROJECTION.keys()))[0]
         self.metrics = {k.replace('inverted', '').strip(): {"inverted": "inverted" in k} for k in self.settings['trackingMetrics'].split('+')}
+        self.raw_output = self.settings["outputMode"] == "normalized raw tracking data"
         self.tracking_manager = TrackingManagerThread(
                 self.video_info,
                 TrackingManagerParameter(

@@ -62,6 +62,7 @@ class SettingsDialog(QtWidgets.QDialog):
                 'trackingMethod': self.ui.trackingMethodComboBox,
                 'numberOfTracker': self.ui.numberOfTrackerComboBox,
                 'processingSpeed': self.ui.processingSpeedComboBox,
+                'outputMode': self.ui.outputComboBox
             }
 
 
@@ -164,6 +165,11 @@ class SettingsDialog(QtWidgets.QDialog):
             "0 (accurate)",
             "1 (normal)",
             "2 (fast)"
+        ])
+
+        self.ui.outputComboBox.addItems([
+            "post processed data",
+            "normalized raw tracking data"
         ])
 
         self.ui.numberOfTrackerComboBox.addItems([str(i) for i in range(1, 6)])
