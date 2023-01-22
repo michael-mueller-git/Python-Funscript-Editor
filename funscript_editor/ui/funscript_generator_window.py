@@ -181,10 +181,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         # 1. Now first save the raw tracking data
 
-        print("score", score)
         for metric in self.funscripts:
             for idx, val in enumerate(self.score[metric]):
-                print("add", idx, val)
                 self.funscripts[metric].add_action(
                         round(val),
                         FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps),
@@ -199,12 +197,10 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         for key in self.funscripts:
             raw_tracking_data_json_output['actions'][key] = []
             for item in self.funscripts[key].get_actions():
-                print("transfere", item)
                 raw_tracking_data_json_output['actions'][key].append(item)
 
         os.makedirs(definitions.CACHE_DIR, exist_ok=True)
         with open(definitions.RAW_TRACKING_DATA_CAHCE_FILE, 'w') as f:
-            print("dump", raw_tracking_data_json_output)
             json.dump(raw_tracking_data_json_output, f)
 
         # 2. Continue with selected user option on raw data
