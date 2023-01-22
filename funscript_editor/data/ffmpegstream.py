@@ -216,6 +216,19 @@ class FFmpegStream:
 
         return projection
 
+    @staticmethod
+    def millisec_to_frame(millis: float, fps: float) -> int:
+        """ Get Frame number for given millisec timestamp in video
+
+        Args:
+            millisec (float): millisec timestamp
+            fps (float): video frames per seconds
+
+        Returns:
+            int: frame number
+        """
+        return int(round(float(millis)/(float(1000)/float(fps)))) if millis > 0.0 else 0
+
 
     @staticmethod
     def frame_to_timestamp(frame_number: int, fps: float) -> str:

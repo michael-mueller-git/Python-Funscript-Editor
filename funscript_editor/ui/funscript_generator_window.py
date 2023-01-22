@@ -33,6 +33,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         end_time (float): end position in video (timestamp in milliseconds) use -1.0 for video end.
         output_file (str, Funscript): csv output file path (Optional you can pass a funscript object where to store the result)
         include_multiaxis (bool): include multiaxis output
+        no_tracking (bool): Use previous tracking result
     """
 
     def __init__(self,
@@ -40,7 +41,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             start_time: float,
             end_time: float,
             output_file: str,
-            include_multiaxis: bool = False):
+            include_multiaxis: bool = False,
+            no_tracking: bool = False):
         super(FunscriptGeneratorWindow, self).__init__()
         self.allow_close = False
         self.raw_output = False
@@ -72,35 +74,65 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             sys.exit()
 
         self.video_info = FFmpegStream.get_video_info(video_file)
-        cap = cv2.VideoCapture(video_file)
-        self.fps = cap.get(cv2.CAP_PROP_FPS)
-        height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-        video_aspect_ratio = float(width) / max((1, float(height)))
-        cap.release()
-
         self.video_file = video_file
-        self.is_sbs_vr_video = True if 1.9 < video_aspect_ratio < 2.1 else False
         self.output_file = output_file
-
-        self.start_frame = int(round(float(start_time)/(float(1000)/float(self.fps)))) if start_time > 0.0 else 0
-        self.end_frame = int(round(float(end_time)/(float(1000)/float(self.fps)))) if end_time > 0.0 and start_time < end_time else -1
+        self.start_frame = FFmpegStream.millisec_to_frame(start_time, self.video_info.fps)
+        self.end_frame = FFmpegStream.millisec_to_frame(end_time, self.video_info.fps) if end_time > 0.0 and start_time < end_time else -1
 
         self.__logger.info("Set End Time to Frame Number %d", self.end_frame)
-
         self.__logger.info("Hyperparameter:" + str(HYPERPARAMETER))
         self.__logger.info("Config:" + str(SETTINGS))
 
-        self.settings = {}
-        self.settings_dialog = SettingsDialog(self.settings, include_vr = True, include_multiaxis = include_multiaxis)
-        self.settings_dialog.applySettings.connect(self.run)
-        self.settings_dialog.show()
+        if no_tracking:
+            self.continue_with_tracking_result()
+        else:
+            self.settings = {}
+            self.settings_dialog = SettingsDialog(self.settings, include_vr = True, include_multiaxis = include_multiaxis)
+            self.settings_dialog.applySettings.connect(self.run)
+            self.settings_dialog.show()
 
 
     __logger = logging.getLogger(__name__)
 
     funscriptCompleted = QtCore.pyqtSignal(object, str, bool)
     openCutWidget = QtCore.pyqtBoundSignal
+
+
+    def continue_with_tracking_result(self):
+        self.__logger.info("Use previous tracking result")
+        if not os.path.exists(definitions.RAW_TRACKING_DATA_CAHCE_FILE):
+            self.__show_message("Tracking result not found")
+            sys.exit()
+
+        with open(definitions.RAW_TRACKING_DATA_CAHCE_FILE, 'r') as fd:
+            cache_content = json.load(fd)
+
+        if any(x not in cache_content for x in ["videoFile", "fps", "actions"]):
+            self.__show_message("Invalid tracking result cache file")
+            sys.exit()
+
+        current_video_filename = os.path.basename(self.video_file)
+        if cache_content["videoFile"] != current_video_filename:
+            self.__show_message(f"tracking result for {current_video_filename} not found")
+            sys.exit()
+
+        if cache_content["fps"] != self.video_info.fps:
+            self.__show_message(f"Video propberies has changed")
+            sys.exit()
+
+        self.funscripts = {metric: Funscript(self.video_info.fps) \
+            for metric in cache_content["actions"]}
+
+        self.score = {metric: [ \
+                item["pos"] \
+                for item in cache_content["actions"][metric] \
+            ] \
+            for metric in cache_content["actions"] }
+
+        start_time = min([cache_content["actions"][metric][0]["at"] for metric in cache_content["actions"]])
+        self.start_frame = FFmpegStream.millisec_to_frame(float(start_time), self.video_info.fps)
+        self.__logger.info("Set start frame to %d", self.start_frame)
+        self.__next_postprocessing(None, [], [])
 
 
     def closeEvent(self, event):
@@ -134,7 +166,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
     # Step 1
     def __tracking_completed(self, score, projection_config, tracking_points, msg, success) -> None:
-        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.fps) \
+        self.funscripts = {k.replace('inverted', '').strip(): Funscript(self.video_info.fps) \
                 for k in self.settings['trackingMetrics'].split('+')}
 
         if not success:
@@ -192,6 +224,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
         raw_tracking_data_json_output = {
             'version': 1,
             'comment': "MTFG RAW DATA",
+            'fps': self.video_info.fps,
+            'videoFile': os.path.basename(self.video_file),
             'actions': {}
         }
 
@@ -208,7 +242,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         if not self.raw_output:
             self.__logger.info("Post Processing Data")
-            #NOTE: delete the raw data from funscript
+            #NOTE: delete the raw data from funscripts
             for key in self.funscripts:
                 self.funscripts[key].clear_actions()
             self.__next_postprocessing(None, [], [])

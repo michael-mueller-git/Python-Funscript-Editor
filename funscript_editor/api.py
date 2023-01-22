@@ -30,6 +30,7 @@ def generate_funscript(
         end_time :float,
         output_file: str,
         include_multiaxis_options: bool = False,
+        no_tracking: bool = False,
         enable_logging: bool = False,
         stdout_logging: bool = False) -> None:
     """ Generate a funscript with minimal UI
@@ -40,6 +41,7 @@ def generate_funscript(
         end_time (float): end time in milliseconds (set -1.0 to use video end)
         output_file (str): path for the output file
         include_multiaxis_options (bool): include options for multiaxis output
+        no_tracking (bool): Use previous tracking result
         enable_logging (bool): enable logging
         stdout_logging (bool): enable stdout logging
     """
@@ -57,7 +59,7 @@ def generate_funscript(
     logger.info("Args: video_file=%s, start_time=%s, end_time=%s, output_file=%s", \
             str(video_file), str(start_time), str(end_time), str(output_file))
     app = QtWidgets.QApplication(sys.argv)
-    w = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file, include_multiaxis_options)
+    w = FunscriptGeneratorWindow(video_file, start_time, end_time, output_file, include_multiaxis_options, no_tracking)
     w.setFixedHeight(5)
     w.setFixedWidth(5)
     w.move(1,1)
