@@ -135,7 +135,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             self.__logger.info("Set start frame to %d", self.start_frame)
         except Exception as ex:
             self.logger.critical("The program crashed in continue_with_tracking_result due to a fatal error", exc_info=ex)
-            self.__show_message("Program crashed. Please send logfiles to the developer")
+            self.__show_message("Invalid previous tracking data")
             sys.exit()
 
         self.__next_postprocessing(None, [], [])
