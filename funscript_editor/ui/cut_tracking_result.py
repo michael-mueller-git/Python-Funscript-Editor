@@ -36,7 +36,7 @@ class Slider(QWidget):
         self.label.setText(f"{self.prefix_txt} {self.x: <8}")
 
 
-class CutTrackingResultWidget(QWidget):
+class CutTrackingResultWidget(QtWidgets.QDialog):
     def __init__(self, raw_score, metrics, parent=None):
         super(QWidget, self).__init__(parent=parent)
         pg.setConfigOption("background","w")

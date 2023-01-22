@@ -19,7 +19,7 @@ class QHLine(QtWidgets.QFrame):
         self.setFrameShape(QtWidgets.QFrame.HLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
-class PostprocessingWidget(QtWidgets.QWidget):
+class PostprocessingWidget(QtWidgets.QDialog):
     def __init__(self, metric, raw_score, video_info, parent=None):
         super(QtWidgets.QWidget, self).__init__(parent=parent)
         self.logger = logging.getLogger(__name__)
