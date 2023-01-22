@@ -175,14 +175,18 @@ function import_funscript_generator_json_result()
                 if name and name == scriptNames[v.idx] then
                     if actions[k] then
                         script = ofs.Script(i)
-                        delete_range(script, actions[k][1]["at"] / 1000.0, actions[k][#(actions[k])]["at"] / 1000.0)
-                        for _, action in pairs(actions[k]) do
-                            local closest_action, _ = script:closestAction(action["at"])
-                            local new_action = Action.new(action["at"]/1000.0, action["pos"], true)
-                            if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - new_action.at) <= frame_time then
-                                filtered = filtered + 1
-                            else
-                                script.actions:add(new_action)
+                        if #(actions[k]) < 2 then
+                            print("not enough data available")
+                        else
+                            delete_range(script, actions[k][1]["at"] / 1000.0, actions[k][#(actions[k])]["at"] / 1000.0)
+                            for _, action in pairs(actions[k]) do
+                                local closest_action, _ = script:closestAction(action["at"])
+                                local new_action = Action.new(action["at"]/1000.0, action["pos"], true)
+                                if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - new_action.at) <= frame_time then
+                                    filtered = filtered + 1
+                                else
+                                    script.actions:add(new_action)
+                                end
                             end
                         end
                         script:commit()
@@ -195,14 +199,18 @@ function import_funscript_generator_json_result()
         script = ofs.Script(scriptIdx)
         for metric, actions_metric in pairs(actions) do
             print('add ', metric, ' to ', ofs.ScriptName(scriptIdx))
-            delete_range(script, actions_metric[1]["at"] / 1000.0, actions_metric[#actions_metric]["at"] / 1000.0)
-            for _, action in pairs(actions_metric) do
-                local closest_action, _ = script:closestAction(action["at"]/1000.0)
-                local new_action = Action.new(action["at"]/1000.0, action["pos"], true)
-                if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - new_action.at) <= frame_time then
-                    filtered = filtered + 1
-                else
-                    script.actions:add(new_action)
+            if #actions_metric < 2 then
+                print("not enough data available")
+            else
+                delete_range(script, actions_metric[1]["at"] / 1000.0, actions_metric[#actions_metric]["at"] / 1000.0)
+                for _, action in pairs(actions_metric) do
+                    local closest_action, _ = script:closestAction(action["at"]/1000.0)
+                    local new_action = Action.new(action["at"]/1000.0, action["pos"], true)
+                    if filterSimilarTimestamps and closest_action and math.abs(closest_action.at - new_action.at) <= frame_time then
+                        filtered = filtered + 1
+                    else
+                        script.actions:add(new_action)
+                    end
                 end
             end
         end
