@@ -45,6 +45,10 @@ end
 platform = get_platform()
 
 function binding.start_funscript_generator()
+    exec_mtfg(false)
+end
+
+function exec_mtfg(no_tracking)
     if processHandleMTFG then
         print('MTFG already running')
         return
@@ -112,12 +116,36 @@ function binding.start_funscript_generator()
         table.insert(args, tostring(math.floor(next_action.at*1000.0)))
     end
 
+    if no_tracking then
+        table.insert(args, "--no-tracking")
+    end
+
     print("cmd: ", cmd)
     print("args: ", table.unpack(args))
 
     processHandleMTFG = Process.new(cmd, table.unpack(args))
 
     status = "MTFG running"
+end
+
+
+function delete_range(script, start_of_range, end_of_range)
+    local fps = player.FPS()
+    local frame_time = 1.0/fps
+    for idx, action in ipairs(script.actions) do
+      if action.at >= (start_of_range - frame_time) and action.at <= (end_of_range + frame_time) then
+        script:markForRemoval(idx)
+      end
+    end
+    print("delete range", start_of_range, end_of_range)
+    script:removeMarked()
+end
+
+
+function tableLength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
 end
 
 
@@ -147,6 +175,7 @@ function import_funscript_generator_json_result()
                 if name and name == scriptNames[v.idx] then
                     if actions[k] then
                         script = ofs.Script(i)
+                        delete_range(script, actions[k][1]["at"] / 1000.0, actions[k][#(actions[k])]["at"] / 1000.0)
                         for _, action in pairs(actions[k]) do
                             local closest_action, _ = script:closestAction(action["at"])
                             local new_action = Action.new(action["at"]/1000.0, action["pos"], true)
@@ -164,9 +193,10 @@ function import_funscript_generator_json_result()
         end
     else
         script = ofs.Script(scriptIdx)
-
         for metric, actions_metric in pairs(actions) do
             print('add ', metric, ' to ', ofs.ScriptName(scriptIdx))
+            print(type(actions_metric))
+            delete_range(script, actions_metric[1]["at"] / 1000.0, actions_metric[#actions_metric]["at"] / 1000.0)
             for _, action in pairs(actions_metric) do
                 local closest_action, _ = script:closestAction(action["at"]/1000.0)
                 local new_action = Action.new(action["at"]/1000.0, action["pos"], true)
@@ -388,9 +418,12 @@ function gui()
 
     ofs.SameLine()
     if not processHandleMTFG then
-
         if ofs.Button("Start MTFG") then
-            binding.start_funscript_generator()
+            exec_mtfg(false)
+        end
+        ofs.SameLine()
+        if ofs.Button("Reprocess Data") then
+            exec_mtfg(true)
         end
     else
         if ofs.Button("Kill MTFG") then

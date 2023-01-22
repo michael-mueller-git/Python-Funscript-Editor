@@ -114,7 +114,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
             current_video_filename = os.path.basename(self.video_file)
             if cache_content["videoFile"] != current_video_filename:
-                self.__show_message(f"tracking result for {current_video_filename} not found")
+                self.__show_message(f"Tracking result for {current_video_filename} not found")
                 sys.exit()
 
             if cache_content["fps"] != self.video_info.fps:
