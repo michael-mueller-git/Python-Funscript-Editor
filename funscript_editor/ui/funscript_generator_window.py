@@ -191,6 +191,7 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         raw_tracking_data_json_output = {
             'version': 1,
+            'comment': "MTFG RAW DATA",
             'actions': {}
         }
 
