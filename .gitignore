@@ -16,3 +16,4 @@ build-dir
 .flatpak-builder
 repo
 *.flatpak
+funscript_editor/cache

@@ -178,17 +178,45 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
     def __scaling_completed(self, score):
         self.score = score
         self.__logger.info('scaling completed')
+
+        # 1. Now first save the raw tracking data
+
+        print("score", score)
+        for metric in self.funscripts:
+            for idx, val in enumerate(self.score[metric]):
+                print("add", idx, val)
+                self.funscripts[metric].add_action(
+                        round(val),
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps),
+                        True
+                    )
+
+        raw_tracking_data_json_output = {
+            'version': 1,
+            'actions': {}
+        }
+
+        for key in self.funscripts:
+            raw_tracking_data_json_output['actions'][key] = []
+            for item in self.funscripts[key].get_actions():
+                print("transfere", item)
+                raw_tracking_data_json_output['actions'][key].append(item)
+
+        os.makedirs(definitions.CACHE_DIR, exist_ok=True)
+        with open(definitions.RAW_TRACKING_DATA_CAHCE_FILE, 'w') as f:
+            print("dump", raw_tracking_data_json_output)
+            json.dump(raw_tracking_data_json_output, f)
+
+        # 2. Continue with selected user option on raw data
+
         if not self.raw_output:
+            self.__logger.info("Post Processing Data")
+            #NOTE: delete the raw data from funscript
+            for key in self.funscripts:
+                self.funscripts[key].clear_actions()
             self.__next_postprocessing(None, [], [])
         else:
             self.__logger.info("Raw Output")
-            for metric in self.funscripts:
-                for idx, val in enumerate(self.score[metric]):
-                    self.funscripts[metric].add_action(
-                            round(val),
-                            FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
-                        )
-
             self.__funscript_generated(self.funscripts, "OK", True)
 
 
@@ -199,7 +227,8 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             for idx, val in zip(idx_keep, val_keep):
                 self.funscripts[last_metric].add_action(
                         round(val),
-                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps)
+                        FFmpegStream.frame_to_millisec(self.get_absolute_framenumber(idx), self.video_info.fps),
+                        True
                     )
 
         found_last = last_metric is None
