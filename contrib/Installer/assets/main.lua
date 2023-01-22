@@ -195,7 +195,6 @@ function import_funscript_generator_json_result()
         script = ofs.Script(scriptIdx)
         for metric, actions_metric in pairs(actions) do
             print('add ', metric, ' to ', ofs.ScriptName(scriptIdx))
-            print(type(actions_metric))
             delete_range(script, actions_metric[1]["at"] / 1000.0, actions_metric[#actions_metric]["at"] / 1000.0)
             for _, action in pairs(actions_metric) do
                 local closest_action, _ = script:closestAction(action["at"]/1000.0)
