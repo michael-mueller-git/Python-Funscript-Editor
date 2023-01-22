@@ -100,38 +100,44 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
     def continue_with_tracking_result(self):
         self.__logger.info("Use previous tracking result")
-        if not os.path.exists(definitions.RAW_TRACKING_DATA_CAHCE_FILE):
-            self.__show_message("Tracking result not found")
+        try:
+            if not os.path.exists(definitions.RAW_TRACKING_DATA_CAHCE_FILE):
+                self.__show_message("Tracking result not found")
+                sys.exit()
+
+            with open(definitions.RAW_TRACKING_DATA_CAHCE_FILE, 'r') as fd:
+                cache_content = json.load(fd)
+
+            if any(x not in cache_content for x in ["videoFile", "fps", "actions"]):
+                self.__show_message("Invalid tracking result cache file")
+                sys.exit()
+
+            current_video_filename = os.path.basename(self.video_file)
+            if cache_content["videoFile"] != current_video_filename:
+                self.__show_message(f"tracking result for {current_video_filename} not found")
+                sys.exit()
+
+            if cache_content["fps"] != self.video_info.fps:
+                self.__show_message(f"Video propberies has changed")
+                sys.exit()
+
+            self.funscripts = {metric: Funscript(self.video_info.fps) \
+                for metric in cache_content["actions"]}
+
+            self.score = {metric: [ \
+                    item["pos"] \
+                    for item in cache_content["actions"][metric] \
+                ] \
+                for metric in cache_content["actions"] }
+
+            start_time = min([cache_content["actions"][metric][0]["at"] for metric in cache_content["actions"]])
+            self.start_frame = FFmpegStream.millisec_to_frame(float(start_time), self.video_info.fps)
+            self.__logger.info("Set start frame to %d", self.start_frame)
+        except Exception as ex:
+            self.logger.critical("The program crashed in continue_with_tracking_result due to a fatal error", exc_info=ex)
+            self.__show_message("Program crashed. Please send logfiles to the developer")
             sys.exit()
 
-        with open(definitions.RAW_TRACKING_DATA_CAHCE_FILE, 'r') as fd:
-            cache_content = json.load(fd)
-
-        if any(x not in cache_content for x in ["videoFile", "fps", "actions"]):
-            self.__show_message("Invalid tracking result cache file")
-            sys.exit()
-
-        current_video_filename = os.path.basename(self.video_file)
-        if cache_content["videoFile"] != current_video_filename:
-            self.__show_message(f"tracking result for {current_video_filename} not found")
-            sys.exit()
-
-        if cache_content["fps"] != self.video_info.fps:
-            self.__show_message(f"Video propberies has changed")
-            sys.exit()
-
-        self.funscripts = {metric: Funscript(self.video_info.fps) \
-            for metric in cache_content["actions"]}
-
-        self.score = {metric: [ \
-                item["pos"] \
-                for item in cache_content["actions"][metric] \
-            ] \
-            for metric in cache_content["actions"] }
-
-        start_time = min([cache_content["actions"][metric][0]["at"] for metric in cache_content["actions"]])
-        self.start_frame = FFmpegStream.millisec_to_frame(float(start_time), self.video_info.fps)
-        self.__logger.info("Set start frame to %d", self.start_frame)
         self.__next_postprocessing(None, [], [])
 
 
