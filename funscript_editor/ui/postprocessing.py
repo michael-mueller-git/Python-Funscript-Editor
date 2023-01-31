@@ -282,6 +282,7 @@ class PostprocessingWidget(QtWidgets.QDialog):
 
                 self.result_val = [val for idx,val in enumerate(smothed_score) if idx in self.result_idx]
                 self.curve_result.setData(self.result_idx, self.result_val)
+                return
 
         except Exception as ex:
             self.logger.critical("Invalid Values in Postprocessing Widget", exc_info=ex)
