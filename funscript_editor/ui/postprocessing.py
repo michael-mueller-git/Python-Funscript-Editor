@@ -9,6 +9,7 @@ import copy
 import sys
 import numpy as np
 import pyqtgraph as pg
+from scipy.signal import savgol_filter, find_peaks, find_peaks_cwt
 
 from funscript_editor.algorithms.signal import Signal,SignalParameter
 from funscript_editor.ui.cut_tracking_result import Slider
@@ -36,9 +37,12 @@ class PostprocessingWidget(QtWidgets.QDialog):
 
         self.tabs = QtWidgets.QTabWidget()
         self.tabs_content = {}
+
         self.add_rdp_tab()
         self.add_vw_tab()
         self.add_custom_tab()
+        self.add_auto_tab()
+
         self.verticalLayout.addWidget(self.tabs)
         self.tabs.currentChanged.connect(self.update_plot)
 
@@ -155,6 +159,14 @@ class PostprocessingWidget(QtWidgets.QDialog):
         self.tabs_content[tab_name]["main"].setLayout(self.tabs_content[tab_name]["main"].layout)
         self.tabs.addTab(self.tabs_content[tab_name]["main"], tab_name)
 
+    def add_auto_tab(self):
+        tab_name = "Developer"
+        self.tabs_content[tab_name] = {"main": QtWidgets.QWidget(), "widgets": {}}
+        self.tabs_content[tab_name]["main"].layout = QtWidgets.QVBoxLayout(self)
+
+        self.tabs_content[tab_name]["main"].setLayout(self.tabs_content[tab_name]["main"].layout)
+        self.tabs.addTab(self.tabs_content[tab_name]["main"], tab_name)
+
 
     def get_current_tab_name(self) -> str:
         return self.tabs.tabText(self.tabs.currentIndex())
@@ -245,6 +257,32 @@ class PostprocessingWidget(QtWidgets.QDialog):
                 self.result_val = [val for idx,val in enumerate(score) if idx in self.result_idx]
                 self.curve_result.setData(self.result_idx, self.result_val)
                 return
+
+            if current_tab_name == "Developer":
+                smothed_score = savgol_filter(self.raw_score, 5, 2)
+
+                max_idx, _ = find_peaks(smothed_score)
+                min_idx, _ = find_peaks([100.0-1.0 * x for x in smothed_score])
+
+                d1 = savgol_filter(np.diff(smothed_score, 1).tolist(), 5, 2)
+                d2 = savgol_filter(np.diff(d1, 1).tolist(), 5, 2)
+
+                d2_max_idx, _ = find_peaks(d2)
+                d2_min_idx, _ = find_peaks([-1.0*x for x in d2])
+
+                print("min_idx", min_idx)
+                print("max_idx", max_idx)
+                print("d2_min_idx", d2_min_idx)
+                print("d2_max_idx", d2_max_idx)
+
+                all_idx = list(max_idx) + list(min_idx) + list(d2_max_idx) + list(d2_min_idx)
+
+                self.result_idx = list(set(all_idx))
+                self.result_idx.sort()
+
+                self.result_val = [val for idx,val in enumerate(smothed_score) if idx in self.result_idx]
+                self.curve_result.setData(self.result_idx, self.result_val)
+
         except Exception as ex:
             self.logger.critical("Invalid Values in Postprocessing Widget", exc_info=ex)
 
