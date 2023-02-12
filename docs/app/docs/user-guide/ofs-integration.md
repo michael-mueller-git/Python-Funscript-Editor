@@ -77,6 +77,8 @@ wget -O - https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript
 
 Please also take a look at the [application build instruction](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/build.md) where the basic setup of Python-Funscript-Editor is explained.
 
+When i update the installer script you may need to clone the current file version with git due to the bad github RAW caching issue [#46681](https://github.com/orgs/community/discussions/46691).
+
 <br>
 
 ## Troubleshot
