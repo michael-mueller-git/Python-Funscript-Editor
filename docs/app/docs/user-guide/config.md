@@ -13,6 +13,6 @@ Config Files:
 - `logging_windows.yaml`: the logging configuration for windows
 - `settings.yaml`: application settings
 - `ui.yaml`: user interface settings
-- `projection.yaml`: the FFmpeg filter parameter for different video types
+- `projection.yaml`: the FFmpeg filter parameter for different video types. You can change the keys for the zooming, rotation, ... for each video projection configuration.
 
 All available config parameter are described with an comment inside the config file.
