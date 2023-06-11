@@ -145,6 +145,8 @@ class SettingsDialog(QtWidgets.QDialog):
             'y inverted (down-up)',
             'x (left-right)',
             'x inverted (right-left)',
+            'distance (p1-p2)',
+            'distance inverted (p2-p1)',
             'roll (rotation)',
             'roll inverted (rotation)'
         ])
@@ -152,13 +154,9 @@ class SettingsDialog(QtWidgets.QDialog):
         if self.include_multiaxis:
             self.ui.trackingMetricComboBox.addItems([
                 "y + roll (up-down + rotation)",
+                "distance + roll (p1-p1 + rotation)",
                 "x + y (left-right + up-down)",
                 "x + y + roll (left-right + up-down + rotation)",
-            ])
-        else:
-            self.ui.trackingMetricComboBox.addItems([
-                'distance (p1-p2)',
-                'distance inverted (p2-p1)',
             ])
 
         self.ui.processingSpeedComboBox.addItems([

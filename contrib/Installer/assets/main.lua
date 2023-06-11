@@ -18,7 +18,7 @@ stopAtNextActionPoint = true
 filterSimilarTimestamps = true
 scriptNames = {}
 scriptNamesCount = 0
-scriptAssignment = {x={idx=1}, y={idx=1}, roll={idx=1}}
+scriptAssignment = {x={idx=1}, y={idx=1}, distance={idx=1}, roll={idx=1}}
 
 function exists(file)
    return os.rename(file, file)
@@ -483,6 +483,8 @@ function gui()
     multiaxis, _ = ofs.Checkbox("Enable multiaxis", multiaxis)
 
     if multiaxis then
+        ofs.Separator()
+        ofs.Text("Multiaxis Output Assignment:")
         local comboNum = 1
         for k,v in pairs(scriptAssignment) do
             ofs.Text("  o "..k.." ->")
