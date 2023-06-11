@@ -67,6 +67,7 @@ git reset --hard HEAD
 git clean -fd
 git remote prune origin
 git checkout main
+git fetch --prune
 git pull
 
 if [ "$arg1" != "--latest" ]; then
