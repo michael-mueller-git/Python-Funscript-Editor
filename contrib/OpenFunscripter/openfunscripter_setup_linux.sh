@@ -65,7 +65,6 @@ pushd $OFS_EXTENSION_DIR/MTFG/Python-Funscript-Editor
 echo "Update MTFG"
 git reset --hard HEAD
 git clean -fd
-git pull --all
 git remote prune origin
 git checkout main
 git pull
