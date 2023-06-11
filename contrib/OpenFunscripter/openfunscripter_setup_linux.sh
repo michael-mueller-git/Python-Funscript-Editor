@@ -75,11 +75,11 @@ if [ "$arg1" != "--latest" ]; then
     git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 else
     echo "Use latest git commit (only for developers!)"
-    if git branch -a | grep -q "next" ; then
-        echo "Switch to 'next' branch"
-        git checkout next
-        git pull
-    fi
+    # if git branch -a | grep -q "next" ; then
+    #     echo "Switch to 'next' branch"
+    #     git checkout next
+    #     git pull
+    # fi
 fi
 
 echo "build nix environment"
