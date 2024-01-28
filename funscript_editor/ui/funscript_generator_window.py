@@ -277,7 +277,11 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
             if found_last:
                 self.postprocessing_widget = PostprocessingWidget(metric, self.score[metric], self.video_info)
                 self.postprocessing_widget.postprocessingCompleted.connect(self.__next_postprocessing)
-                self.postprocessing_widget.show()
+                if "open_postprocessing_maximized" in SETTINGS and SETTINGS["open_postprocessing_maximized"]: 
+                    self.__logger.info("open postprocessing as maximized window")
+                    self.postprocessing_widget.showMaximized()
+                else:
+                    self.postprocessing_widget.show()
                 return
 
         self.__funscript_generated(self.funscripts, "OK", True)

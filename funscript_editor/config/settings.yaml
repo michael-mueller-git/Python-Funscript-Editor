@@ -34,3 +34,6 @@ tracking_plausibility_check: False
 
 # timeout for an ffmpeg stream
 ffmpeg_timeout_in_seconds: 15
+
+# open post processing window in maximized mode
+open_postprocessing_maximized: True
