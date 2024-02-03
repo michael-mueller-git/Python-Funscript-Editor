@@ -22,5 +22,10 @@ def main():
     if os.getcwd() not in os.environ['PATH']:
         os.environ['PATH'] = os.getcwd() + os.sep + os.environ['PATH']
 
+    if os.path.abspath(__file__).startswith("/nix"):
+        # pynput does not work well with native wayland so we use xwayland to get proper keyboard inputs
+        print("Warning: Force QT_QPA_PLATFORM=xcb")
+        os.environ['QT_QPA_PLATFORM'] = "xcb"
+
     if not args.generator: show_editor()
     else: generate_funscript(args.input, args.start, args.end, args.output, args.multiaxis, args.no_tracking, args.logs, args.stdout)
