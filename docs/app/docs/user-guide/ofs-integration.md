@@ -75,6 +75,8 @@ nix run github:michael-mueller-git/OFS --refresh
 
 Limitation: The nix package is stored in a read only filesystem path. You can currently not change the config files for MTFG.
 
+**At first lauch of the MTFG Extension nix need to build all dependencies for MTFG this may take several minutes! You may want to run `nix run github:michael-mueller-git/Python-Funscript-Editor --refresh` once before using the extension in OFS to see the current build process output.**
+
 <br>
 
 ## Troubleshot
