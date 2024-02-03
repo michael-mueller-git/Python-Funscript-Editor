@@ -105,9 +105,11 @@ class SettingsDialog(QtWidgets.QDialog):
                 self.__set_number_setting(key, settings[key])
             else:
                 raise NotImplementedError(str(type(self.dialog_elements[key])) + " type is not implemented")
-
-        with open(self.settings_file, "w") as f:
-            json.dump(settings, f)
+        try:
+            with open(self.settings_file, "w") as f:
+                json.dump(settings, f)
+        except:
+            print("Save dialog settings FAILED")
 
 
     def __setup_ui_bindings(self):
