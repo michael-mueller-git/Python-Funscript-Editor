@@ -17,23 +17,23 @@
         qt5.wrapQtAppsHook
         libsForQt5.breeze-qt5
         libsForQt5.qt5ct
-        customPythonPackages.pkgs.opencv4
-        customPythonPackages.pkgs.simplification
         (python39.withPackages (p: with p; [
-          coloredlogs
-          cryptography
-          matplotlib
-          mpv
-          pillow
-          pip
-          playsound
-          pynput
-          pyqt5
-          pyqtgraph
-          pyyaml
-          scipy
-          screeninfo
-          GitPython
+          customPythonPackages.pkgs.opencv4
+          customPythonPackages.pkgs.simplification
+          customPythonPackages.pkgs.coloredlogs
+          customPythonPackages.pkgs.cryptography
+          customPythonPackages.pkgs.matplotlib
+          customPythonPackages.pkgs.mpv
+          customPythonPackages.pkgs.pillow
+          customPythonPackages.pkgs.pip
+          customPythonPackages.pkgs.playsound
+          customPythonPackages.pkgs.pynput
+          customPythonPackages.pkgs.pyqt5
+          customPythonPackages.pkgs.pyqtgraph
+          customPythonPackages.pkgs.pyyaml
+          customPythonPackages.pkgs.scipy
+          customPythonPackages.pkgs.screeninfo
+          customPythonPackages.pkgs.GitPython
         ]))
       ];
       libPath = pkgs.lib.makeLibraryPath mtfgDependencies;
@@ -65,28 +65,22 @@
         pkgs.python39.override { inherit packageOverrides; self = customPythonPackages; };
     in
     {
-      packages.${system}.mtfg = pkgs.stdenv.mkDerivation {
-        pname = "MTFG";
+      packages.${system}.mtfg = pkgs.python39Packages.buildPythonPackage {
+        pname = "funscript-editor";
         version = "0.5.3";
         src = pkgs.fetchgit {
           url = "https://github.com/michael-mueller-git/Python-Funscript-Editor.git";
-          rev = "5b049018f20f8d3e90413d663e47c7120dec99a7";
-          sha256 = "sha256-q2ew4rmZV7G5HgoQq4ZAuEf+GRMVuq+K+yc/WBEWsPM=";
+          rev = "0b6b02c1c57ceb970197a7215d910115a18d4056";
+          sha256 = "sha256-bdaPoDQEykKC8Y5bJ/SfiVj4JJhaXVvBMMqHzSix7ZQ=";
         };
-        buildInputs = mtfgDependencies;
+        propagatedBuildInputs = mtfgDependencies;
+        QT_QPA_PLATFORM = "xcb";
         nativeBuildInputs = with pkgs; [
           makeWrapper
-          python39Packages.wrapPython
         ];
-        QT_QPA_PLATFORM = "xcb";
         postInstall = ''
-          mkdir -p "$out/bin"
-          cp -rfv "$src/." "$out"
-          cp -rfv "$out/main.py" "$out/bin/MTFG"
-          chmod +x "$out/bin/MTFG"
-          wrapPythonPrograms $out
+          wrapProgram "$out/bin/funscript-editor" --prefix LD_LIBRARY_PATH : "${libPath}" --prefix PATH : "${binPath}"
         '';
-
       };
       defaultPackage.${system} = self.packages.x86_64-linux.mtfg;
       formatter.${system} = pkgs.nixpkgs-fmt;

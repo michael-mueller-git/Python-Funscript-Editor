@@ -12,7 +12,10 @@ import multiprocessing as mp
 ###############
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-CACHE_DIR = os.path.join(ROOT_DIR, 'cache')
+if os.path.abspath(__file__).starts_with("/nix"):
+    CACHE_DIR = '/tmp/cache'
+else:
+    CACHE_DIR = os.path.join(ROOT_DIR, 'cache')
 CONFIG_DIR = os.path.join(ROOT_DIR, 'config')
 UI_DIR = os.path.join(ROOT_DIR, 'ui')
 ICON_PATH = os.path.join(CONFIG_DIR, 'icon.png')
