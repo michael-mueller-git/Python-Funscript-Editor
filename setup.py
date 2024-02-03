@@ -11,13 +11,22 @@ DESCRIPTION = "A tool to create funscripts"
 INCLUDE_REQUIREMENTS = False
 DOCS = ['docs/app/site', 'docs/code/_build/html']
 
-TAGS = sorted(git.Repo('.').tags, key=lambda x: x.commit.committed_datetime) if os.path.exists('.git') else []
+try:
+    TAGS = sorted(git.Repo('.').tags, key=lambda x: x.commit.committed_datetime) if os.path.exists('.git') else []
+except:
+    print("Warning: not a git repository")
+    TAGS = []
 VERSION = str(TAGS[-1]) if len(TAGS) > 0 else "0.0.0"
 
-src = [os.path.join('..', x) \
-        for x in git.Git('.').ls_files().splitlines() \
-        if x.startswith(PACKAGE+os.sep) \
-        and os.path.exists(x)]
+try:
+    src = [os.path.join('..', x) \
+            for x in git.Git('.').ls_files().splitlines() \
+            if x.startswith(PACKAGE+os.sep) \
+            and os.path.exists(x)]
+except:
+    # TODO untested
+    print("Warning fallback to glob")
+    src = [f for f in glob.glob(PACKAGE+os.sep+"*")]
 
 docs = []
 for docs_dir in DOCS:

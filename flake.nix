@@ -33,6 +33,7 @@
           pyyaml
           scipy
           screeninfo
+          GitPython
         ]))
       ];
       libPath = pkgs.lib.makeLibraryPath mtfgDependencies;
@@ -64,7 +65,7 @@
         pkgs.python39.override { inherit packageOverrides; self = customPythonPackages; };
     in
     {
-      packages.${system}.mtfg = pkgs.stdenv.mkDerivation {
+      packages.${system}.mtfg = pkgs.python39Packages.buildPythonPackage {
         pname = "MTFG";
         version = "0.5.3";
         src = pkgs.fetchgit {
@@ -74,6 +75,11 @@
         };
         buildInputs = mtfgDependencies;
         QT_QPA_PLATFORM = "xcb";
+        postInstall = ''
+          mkdir -p "$out/bin"
+          cp -rfv "$src" "$out/bin/"
+        '';
+
       };
       defaultPackage.${system} = self.packages.x86_64-linux.mtfg;
       formatter.${system} = pkgs.nixpkgs-fmt;
