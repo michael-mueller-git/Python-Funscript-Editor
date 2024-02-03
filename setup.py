@@ -26,7 +26,7 @@ try:
 except:
     # TODO untested
     print("Warning fallback to glob")
-    src = [f for f in glob.glob(PACKAGE+os.sep+"**/*", recursive=True)]
+    src = [os.path.join('..', f) for f in glob.glob(PACKAGE+os.sep+"**"+os.sep+"*", recursive=True)]
 
 docs = []
 for docs_dir in DOCS:
