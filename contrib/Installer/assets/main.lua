@@ -1,5 +1,5 @@
 json = require "json"
--- MTFG LUA Wrappper Version 2.0.2
+-- MTFG LUA Wrappper Version 2.0.3
 
 -- global var
 processHandleMTFG = nil
@@ -88,8 +88,19 @@ function exec_mtfg(no_tracking)
         cmd = "/usr/bin/bash"
         table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/conda_wrapper.sh")
     elseif platform == "Linux, Nix" then
-        os.execute("chmod +x \"" .. ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh" .. "\"")
-        cmd = ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh"
+        -- old code:
+        -- os.execute("chmod +x \"" .. ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh" .. "\"")
+        -- cmd = ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh"
+        
+        file = io.open("/tmp/nix-mtfg.sh", "w")
+        file:write("#!/usr/bin/env bash\n")
+        file:write("unset LD_LIBRARY_PATH\n")
+        file:write("nix run github:michael-mueller-git/Python-Funscript-Editor --refresh -- \"$@\"\n")
+        file:close()
+    
+        os.execute("chmod +x /tmp/nix-mtfg.sh")
+        
+        cmd = "/tmp/nix-mtfg.sh"
     else
         print("ERROR: Platform Not Implemented (", platform, ")")
     end
