@@ -13,7 +13,7 @@ import multiprocessing as mp
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 if os.path.abspath(__file__).starts_with("/nix"):
-    CACHE_DIR = '/tmp/cache'
+    CACHE_DIR = '/tmp/mtfg-cache'
 else:
     CACHE_DIR = os.path.join(ROOT_DIR, 'cache')
 CONFIG_DIR = os.path.join(ROOT_DIR, 'config')
