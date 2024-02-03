@@ -7,12 +7,16 @@ from simplification.cutil import (
 import funscript_editor.utils.logging as logging
 import copy
 import sys
+import os
+import json
 import numpy as np
 import pyqtgraph as pg
 from scipy.signal import savgol_filter, find_peaks, find_peaks_cwt
 
 from funscript_editor.algorithms.signal import Signal,SignalParameter
 from funscript_editor.ui.cut_tracking_result import Slider
+from funscript_editor.definitions import CONFIG_DIR
+
 
 class QHLine(QtWidgets.QFrame):
     def __init__(self):
@@ -32,6 +36,8 @@ class PostprocessingWidget(QtWidgets.QDialog):
         self.raw_score_idx = [x for x in range(len(raw_score))]
         self.raw_score = raw_score
         self.raw_score_np = [[i, raw_score[i]] for i in range(len(raw_score))]
+        self.ui_settings_file = os.path.join(CONFIG_DIR, "postprocessing_ui_settings.json")
+        self.load_prev_ui_settings()
 
         self.verticalLayout.addWidget(QtWidgets.QLabel(f"Postprocessing for {metric}"))
 
@@ -65,6 +71,11 @@ class PostprocessingWidget(QtWidgets.QDialog):
         self.result_val = []
 
         self.close_with_ok = False
+
+        for index in range(self.tabs.count()):
+            if self.prev_ui_settings["selected"] == self.tabs.tabText(index):
+                self.tabs.setCurrentIndex(index)
+        
         self.update_plot()
 
 
@@ -73,9 +84,15 @@ class PostprocessingWidget(QtWidgets.QDialog):
 
     def add_rdp_tab(self):
         tab_name = "Ramer–Douglas–Peucker"
+        if tab_name not in self.prev_ui_settings["tabs"]:
+            self.prev_ui_settings["tabs"][tab_name] = {}
+
+        previous_or_default = lambda name, default: \
+            self.prev_ui_settings["tabs"][tab_name][name] if name in self.prev_ui_settings["tabs"][tab_name] else default
+            
         self.tabs_content[tab_name] = {"main": QtWidgets.QWidget(), "widgets": {}}
         self.tabs_content[tab_name]["main"].layout = QtWidgets.QVBoxLayout(self)
-        self.tabs_content[tab_name]["widgets"]["epsilon"] = Slider("Epsilon", 100, 10)
+        self.tabs_content[tab_name]["widgets"]["epsilon"] = Slider("Epsilon", 100, previous_or_default("epsilon", 20))
         self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["epsilon"])
         self.tabs_content[tab_name]["widgets"]["epsilon"].slider.valueChanged.connect(self.update_plot)
         self.tabs_content[tab_name]["main"].setLayout(self.tabs_content[tab_name]["main"].layout)
@@ -84,9 +101,15 @@ class PostprocessingWidget(QtWidgets.QDialog):
 
     def add_vw_tab(self):
         tab_name = "Visvalingam-Whyatt"
+        if tab_name not in self.prev_ui_settings["tabs"]:
+            self.prev_ui_settings["tabs"][tab_name] = {}
+
+        previous_or_default = lambda name, default: \
+            self.prev_ui_settings["tabs"][tab_name][name] if name in self.prev_ui_settings["tabs"][tab_name] else default
+
         self.tabs_content[tab_name] = {"main": QtWidgets.QWidget(), "widgets": {}}
         self.tabs_content[tab_name]["main"].layout = QtWidgets.QVBoxLayout(self)
-        self.tabs_content[tab_name]["widgets"]["epsilon"] = Slider("Epsilon", 200, 50)
+        self.tabs_content[tab_name]["widgets"]["epsilon"] = Slider("Epsilon", 200, previous_or_default("epsilon", 50))
         self.tabs_content[tab_name]["main"].layout.addWidget(self.tabs_content[tab_name]["widgets"]["epsilon"])
         self.tabs_content[tab_name]["widgets"]["epsilon"].slider.valueChanged.connect(self.update_plot)
         self.tabs_content[tab_name]["main"].setLayout(self.tabs_content[tab_name]["main"].layout)
@@ -95,44 +118,60 @@ class PostprocessingWidget(QtWidgets.QDialog):
 
     def add_custom_tab(self):
         tab_name = "Custom"
+
+        if tab_name not in self.prev_ui_settings["tabs"]:
+            self.prev_ui_settings["tabs"][tab_name] = {}
+
+        previous_or_default = lambda name, default: \
+            self.prev_ui_settings["tabs"][tab_name][name] if name in self.prev_ui_settings["tabs"][tab_name] else default
+
         self.tabs_content[tab_name] = {"main": QtWidgets.QWidget(), "widgets": {}}
         self.tabs_content[tab_name]["main"].layout = QtWidgets.QVBoxLayout(self)
 
         self.tabs_content[tab_name]["widgets"]["points"] = QtWidgets.QComboBox()
         self.tabs_content[tab_name]["widgets"]["points"].addItems(["Local Min Max", "Direction Changed"])
+        
+        if "points" in self.prev_ui_settings["tabs"][tab_name]:
+            index = self.tabs_content[tab_name]["widgets"]["points"].findText(str(self.prev_ui_settings["tabs"][tab_name]["points"]), QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                self.tabs_content[tab_name]["widgets"]["points"].setCurrentIndex(index)
+                
         self.tabs_content[tab_name]["widgets"]["points"].currentIndexChanged.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["filterLen"] = Slider("Filter Len", 10, 2)
+        self.tabs_content[tab_name]["widgets"]["filterLen"] = Slider("Filter Len", 10, previous_or_default("filterLen", 2))
         self.tabs_content[tab_name]["widgets"]["filterLen"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["high_second_derivate"] = QtWidgets.QCheckBox("High Second Derivate")
+        self.tabs_content[tab_name]["widgets"]["high_second_derivate"].setChecked(previous_or_default("high_second_derivate", False))
         self.tabs_content[tab_name]["widgets"]["high_second_derivate"].stateChanged.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["distance_minimization"] = QtWidgets.QCheckBox("Distance Minimization")
+        self.tabs_content[tab_name]["widgets"]["distance_minimization"].setChecked(previous_or_default("distance_minimization", False))
         self.tabs_content[tab_name]["widgets"]["distance_minimization"].stateChanged.connect(self.update_plot)
 
         self.tabs_content[tab_name]["widgets"]["evenly_intermediate"] = QtWidgets.QCheckBox("Evenly Intermediate")
+        self.tabs_content[tab_name]["widgets"]["evenly_intermediate"].setChecked(previous_or_default("evenly_intermediate", False))
         self.tabs_content[tab_name]["widgets"]["evenly_intermediate"].stateChanged.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["runs"] = Slider("Max Iterations", 8, 2)
+        self.tabs_content[tab_name]["widgets"]["runs"] = Slider("Max Iterations", 8, previous_or_default("runs", 2))
         self.tabs_content[tab_name]["widgets"]["runs"].slider.sliderReleased.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["mergeThresholdMs"] = Slider("Merge Threshold Time in ms", 1000, 60)
+        self.tabs_content[tab_name]["widgets"]["mergeThresholdMs"] = Slider("Merge Threshold Time in ms", 1000, previous_or_default("mergeThresholdMs", 60))
         self.tabs_content[tab_name]["widgets"]["mergeThresholdMs"].slider.sliderReleased.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"] = Slider("Merge Threshold Distance", 100, 8)
+        self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"] = Slider("Merge Threshold Distance", 100, previous_or_default("mergeThresholdDistance", 8))
         self.tabs_content[tab_name]["widgets"]["mergeThresholdDistance"].slider.sliderReleased.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["highSecondDerivateThreshold"] = Slider("Threshold", 100, 12)
+        self.tabs_content[tab_name]["widgets"]["highSecondDerivateThreshold"] = Slider("Threshold", 100, previous_or_default("highSecondDerivateThreshold", 12))
         self.tabs_content[tab_name]["widgets"]["highSecondDerivateThreshold"].slider.sliderReleased.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"] = Slider("Threshold", 100, 12)
+        self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"] = Slider("Threshold", 100, previous_or_default("distanzMinimizationThreshold", 12))
         self.tabs_content[tab_name]["widgets"]["distanzMinimizationThreshold"].slider.sliderReleased.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["lower"] = Slider("Lower Offset", 100, 0)
+        self.tabs_content[tab_name]["widgets"]["lower"] = Slider("Lower Offset", 100, previous_or_default("lower", 0))
         self.tabs_content[tab_name]["widgets"]["lower"].slider.sliderReleased.connect(self.update_plot)
 
-        self.tabs_content[tab_name]["widgets"]["upper"] = Slider("Upper Offset", 100, 0)
+        self.tabs_content[tab_name]["widgets"]["upper"] = Slider("Upper Offset", 100, previous_or_default("upper", 0))
         self.tabs_content[tab_name]["widgets"]["upper"].slider.sliderReleased.connect(self.update_plot)
 
         self.tabs_content[tab_name]["main"].layout.addWidget(QtWidgets.QLabel("Points:"))
@@ -159,6 +198,43 @@ class PostprocessingWidget(QtWidgets.QDialog):
         self.tabs_content[tab_name]["main"].setLayout(self.tabs_content[tab_name]["main"].layout)
         self.tabs.addTab(self.tabs_content[tab_name]["main"], tab_name)
 
+    def load_prev_ui_settings(self):
+        if not os.path.exists(self.ui_settings_file):
+            self.prev_ui_settings = {}
+        else:
+            with open(self.ui_settings_file, "r") as f:
+                self.prev_ui_settings = json.load(f)
+
+        if "selected" not in self.prev_ui_settings:
+            self.prev_ui_settings["selected"] = ""
+
+        if "tabs" not in self.prev_ui_settings:
+            self.prev_ui_settings["tabs"] = {}
+            
+
+    def save_ui_settings(self):
+        settings = {
+            "selected": self.get_current_tab_name(),
+            "tabs": {}
+        }
+        for tab_name in self.tabs_content:
+            settings["tabs"][tab_name] = {}
+            for widget in self.tabs_content[tab_name]["widgets"]:
+                if isinstance(self.tabs_content[tab_name]["widgets"][widget], Slider):
+                    settings["tabs"][tab_name][widget] = self.tabs_content[tab_name]["widgets"][widget].slider.value()
+                elif isinstance(self.tabs_content[tab_name]["widgets"][widget], QtWidgets.QCheckBox):
+                    settings["tabs"][tab_name][widget] = self.tabs_content[tab_name]["widgets"][widget].isChecked()
+                elif isinstance(self.tabs_content[tab_name]["widgets"][widget], QtWidgets.QComboBox):
+                    settings["tabs"][tab_name][widget] = self.tabs_content[tab_name]["widgets"][widget].currentText()
+                else:
+                    print("ERROR: widget", widget, "not implemented")
+                
+        try:
+            with open(self.ui_settings_file, "w") as f:
+                json.dump(settings, f)
+        except:
+            print("Warning: failed to save post processing settings")
+
     def add_auto_tab(self):
         tab_name = "Developer"
         self.tabs_content[tab_name] = {"main": QtWidgets.QWidget(), "widgets": {}}
@@ -180,6 +256,7 @@ class PostprocessingWidget(QtWidgets.QDialog):
 
     def confirm(self):
         self.close_with_ok = True
+        self.save_ui_settings()
         self.hide()
         self.postprocessingCompleted.emit(self.metric, self.result_idx, self.result_val)
         self.close()

@@ -88,19 +88,22 @@ function exec_mtfg(no_tracking)
         cmd = "/usr/bin/bash"
         table.insert(args, ofs.ExtensionDir() .. "/Python-Funscript-Editor/conda_wrapper.sh")
     elseif platform == "Linux, Nix" then
-        -- old code:
-        -- os.execute("chmod +x \"" .. ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh" .. "\"")
-        -- cmd = ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh"
-        
-        file = io.open("/tmp/nix-mtfg.sh", "w")
-        file:write("#!/usr/bin/env bash\n")
-        file:write("unset LD_LIBRARY_PATH\n")
-        file:write("nix run github:michael-mueller-git/Python-Funscript-Editor --refresh -- \"$@\"\n")
-        file:close()
+        if exists(ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh") then
+            print("nix: use local repository")
+            os.execute("chmod +x \"" .. ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh" .. "\"")
+            cmd = ofs.ExtensionDir() .. "/Python-Funscript-Editor/nix_wrapper.sh"
+        else
+            print("nix: use remote repository")
+            file = io.open("/tmp/nix-mtfg.sh", "w")
+            file:write("#!/usr/bin/env bash\n")
+            file:write("unset LD_LIBRARY_PATH\n")
+            file:write("nix run github:michael-mueller-git/Python-Funscript-Editor --refresh -- \"$@\"\n")
+            file:close()
     
-        os.execute("chmod +x /tmp/nix-mtfg.sh")
+            os.execute("chmod +x /tmp/nix-mtfg.sh")
         
-        cmd = "/tmp/nix-mtfg.sh"
+            cmd = "/tmp/nix-mtfg.sh"
+        end
     else
         print("ERROR: Platform Not Implemented (", platform, ")")
     end
