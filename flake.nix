@@ -65,19 +65,26 @@
         pkgs.python39.override { inherit packageOverrides; self = customPythonPackages; };
     in
     {
-      packages.${system}.mtfg = pkgs.python39Packages.buildPythonPackage {
+      packages.${system}.mtfg = pkgs.stdenv.mkDerivation {
         pname = "MTFG";
         version = "0.5.3";
         src = pkgs.fetchgit {
           url = "https://github.com/michael-mueller-git/Python-Funscript-Editor.git";
-          rev = "7cb898de9fec72c7e7b0ce2c3f25ad52f1d3a24e";
-          sha256 = "sha256-SMHaGIMkoVdc2gENR1ILV/H+BZ7yHB4yxcpVxJaY9oo=";
+          rev = "5b049018f20f8d3e90413d663e47c7120dec99a7";
+          sha256 = "sha256-q2ew4rmZV7G5HgoQq4ZAuEf+GRMVuq+K+yc/WBEWsPM=";
         };
         buildInputs = mtfgDependencies;
+        nativeBuildInputs = with pkgs; [
+          makeWrapper
+          python39Packages.wrapPython
+        ];
         QT_QPA_PLATFORM = "xcb";
         postInstall = ''
           mkdir -p "$out/bin"
-          cp -rfv "$src" "$out/bin/"
+          cp -rfv "$src/." "$out"
+          cp -rfv "$out/main.py" "$out/bin/MTFG"
+          chmod +x "$out/bin/MTFG"
+          wrapPythonPrograms $out
         '';
 
       };
