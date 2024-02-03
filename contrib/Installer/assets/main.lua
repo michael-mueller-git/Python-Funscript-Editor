@@ -354,14 +354,18 @@ function init()
         os.execute(cmd)
         version_file_path = mtfg_repo_path.."/funscript_editor/VERSION.txt"
     end
-    local f = io.open(version_file_path)
-    if f then
-        for line in f:lines() do
-            if string.find(string.lower(line), "v") then
-                mtfgVersion = string.lower(line):gsub("v", "")
+    if platform == "Linux, Nix" then
+        mtfgVersion = "nixpkgs" 
+    else
+        local f = io.open(version_file_path)
+        if f then
+            for line in f:lines() do
+                if string.find(string.lower(line), "v") then
+                    mtfgVersion = string.lower(line):gsub("v", "")
+                end
             end
+            f:close()
         end
-        f:close()
     end
 end
 
