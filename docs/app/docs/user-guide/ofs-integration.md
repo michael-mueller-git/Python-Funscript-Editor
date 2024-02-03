@@ -67,17 +67,11 @@ Manual Installation:
 
 ## Installation Linux
 
-I create an Install script to setup OFS + MTFG Extension. The script is located in [`./contrib/OpenFunscripter/openfunscripter_setup_linux.sh`](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/contrib/OpenFunscripter/openfunscripter_setup_linux.sh). You may need to adjust the script depending on your Distribution. Or you may want to install it manually by using the script as reference/manual. The script was test on Ubuntu.
+Yo can use my OFS Fork with nix support. My OFS Fork includes the MTFG Extension by default. For nix setup with flake read https://github.com/mschwaig/howto-install-nix-with-flake-support/blob/main/README.md
 
-One liner to run the installer:
-
-```bash
-wget -O - https://raw.githubusercontent.com/michael-mueller-git/Python-Funscript-Editor/main/contrib/OpenFunscripter/openfunscripter_setup_linux.sh | bash
+```sh
+nix run github:michael-mueller-git/OFS --refresh
 ```
-
-Please also take a look at the [application build instruction](https://github.com/michael-mueller-git/Python-Funscript-Editor/blob/main/docs/app/docs/user-guide/build.md) where the basic setup of Python-Funscript-Editor is explained.
-
-When i update the installer script recently you may need to clone the current file version with git due to the bad github RAW caching issue [#46681](https://github.com/orgs/community/discussions/46691).
 
 <br>
 
