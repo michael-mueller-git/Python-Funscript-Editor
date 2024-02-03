@@ -70,8 +70,8 @@
         version = "0.5.3";
         src = pkgs.fetchgit {
           url = "https://github.com/michael-mueller-git/Python-Funscript-Editor.git";
-          rev = "0b6b02c1c57ceb970197a7215d910115a18d4056";
-          sha256 = "sha256-bdaPoDQEykKC8Y5bJ/SfiVj4JJhaXVvBMMqHzSix7ZQ=";
+          rev = "218cf759c3ac926ffa1be1b47093935bf5401b08";
+          sha256 = "sha256-nQmXGiOp9oo9XTrlVKnDV6EI5YW0XBtHtGW1utb8+pM=";
         };
         propagatedBuildInputs = mtfgDependencies;
         QT_QPA_PLATFORM = "xcb";
