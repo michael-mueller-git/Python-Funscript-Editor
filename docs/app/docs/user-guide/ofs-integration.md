@@ -73,6 +73,8 @@ Yo can use my OFS Fork with nix support. My OFS Fork includes the MTFG Extension
 nix run github:michael-mueller-git/OFS --refresh
 ```
 
+Limitation: The nix package is stored in a read only filesystem path. You can currently not change the config files for MTFG.
+
 <br>
 
 ## Troubleshot
