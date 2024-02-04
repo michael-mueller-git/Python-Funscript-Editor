@@ -199,12 +199,15 @@ class PostprocessingWidget(QtWidgets.QDialog):
         self.tabs.addTab(self.tabs_content[tab_name]["main"], tab_name)
 
     def load_prev_ui_settings(self):
-        if not os.path.exists(self.ui_settings_file):
-            self.prev_ui_settings = {}
-        else:
-            with open(self.ui_settings_file, "r") as f:
-                self.prev_ui_settings = json.load(f)
+        self.all_prev_ui_settings = {}
+        self.prev_ui_settings = {}
 
+        if os.path.exists(self.ui_settings_file):
+            with open(self.ui_settings_file, "r") as f:
+                self.all_prev_ui_settings = json.load(f)
+            if self.metric in self.all_prev_ui_settings:
+                self.prev_ui_settings = self.all_prev_ui_settings[self.metric]
+                
         if "selected" not in self.prev_ui_settings:
             self.prev_ui_settings["selected"] = ""
 
@@ -228,10 +231,13 @@ class PostprocessingWidget(QtWidgets.QDialog):
                     settings["tabs"][tab_name][widget] = self.tabs_content[tab_name]["widgets"][widget].currentText()
                 else:
                     print("ERROR: widget", widget, "not implemented")
-                
+
+        all_ui_settings = self.all_prev_ui_settings
+        all_ui_settings[self.metric] = settings
+            
         try:
             with open(self.ui_settings_file, "w") as f:
-                json.dump(settings, f)
+                json.dump(all_ui_settings, f)
         except:
             print("Warning: failed to save post processing settings")
 
