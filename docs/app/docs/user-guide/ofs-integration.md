@@ -67,7 +67,7 @@ Manual Installation:
 
 ## Installation Linux
 
-Yo can use my OFS Fork with nix support. My OFS Fork includes the MTFG Extension by default. For nix setup with flake read https://github.com/mschwaig/howto-install-nix-with-flake-support/blob/main/README.md
+You can use my OFS Fork with nix support. My OFS Fork includes the MTFG Extension by default. For nix setup with flake read https://github.com/mschwaig/howto-install-nix-with-flake-support/blob/main/README.md
 
 ```sh
 nix run github:michael-mueller-git/OFS --refresh
