@@ -186,7 +186,11 @@ class FunscriptGeneratorWindow(QtWidgets.QMainWindow):
 
         self.cut_tracking_result_widget = CutTrackingResultWidget(self.score, [k for k in self.funscripts])
         self.cut_tracking_result_widget.cutCompleted.connect(self.__cut_completed)
-        self.cut_tracking_result_widget.show()
+        if "open_postprocessing_maximized" in SETTINGS and SETTINGS["open_postprocessing_maximized"]: 
+            self.__logger.info("open cut window as maximized window")
+            self.cut_tracking_result_widget.showMaximized()
+        else:
+            self.cut_tracking_result_widget.show()
 
 
     # Step 2
