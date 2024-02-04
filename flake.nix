@@ -67,11 +67,11 @@
     {
       packages.${system}.mtfg = pkgs.python39Packages.buildPythonPackage {
         pname = "funscript-editor";
-        version = "0.5.3";
+        version = "0.5.4";
         src = pkgs.fetchgit {
           url = "https://github.com/michael-mueller-git/Python-Funscript-Editor.git";
-          rev = "1bb944adcb0a66eb9688c311d3fe99afc12051aa";
-          sha256 = "sha256-Fma+5hr+q9iebbwVp2ZTcLP18IEY+rJDGULmixNCTEA=";
+          rev = "4c3b1cb0562a4a12cb27190e73a4445320d678d";
+          sha256 = "sha256-LsNjMVmawDMyh38N2MtAn0xsc1l5umaAnq/nomerjrw=";
         };
         propagatedBuildInputs = mtfgDependencies;
         nativeBuildInputs = with pkgs; [
