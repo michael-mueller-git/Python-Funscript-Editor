@@ -24,6 +24,7 @@ if os.path.abspath(__file__).startswith("/nix"):
         os.system(f"cp -rfv \"{CONFIG_TEMPLATE_DIR}/.\" \"{CONFIG_DIR}\"")
         with open(CONFIG_VERSION_FILE, "w") as f:
             f.write(str(CONFIG_VERSION))
+        os.system(f"chmod 755 -R {CONFIG_DIR}")
 else:
     CACHE_DIR = os.path.join(ROOT_DIR, 'cache')
     CONFIG_DIR = CONFIG_TEMPLATE_DIR
