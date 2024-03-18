@@ -73,6 +73,12 @@ You can use my OFS Fork with nix support. My OFS Fork includes the MTFG Extensio
 nix run github:michael-mueller-git/OFS --refresh
 ```
 
+if you encounter the error message `ÈRROR: Failed to load glad.` when running the program, try the following:
+
+```sh
+nix run --impure github:guibou/nixGL -- nix run github:michael-mueller-git/OFS --refresh
+```
+
 The config files for nix version are stored in `~/.config/mtfg`.
 
 **At first lauch of the MTFG Extension nix need to build all dependencies for MTFG this may take several minutes! You may want to run `nix run github:michael-mueller-git/Python-Funscript-Editor --refresh` once before using the extension in OFS to see the current build process output.**
