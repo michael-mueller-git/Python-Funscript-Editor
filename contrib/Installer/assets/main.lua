@@ -1,5 +1,5 @@
 json = require "json"
--- MTFG LUA Wrappper Version 2.0.3
+-- MTFG LUA Wrappper Version 2.0.4
 
 -- global var
 processHandleMTFG = nil
@@ -46,6 +46,34 @@ platform = get_platform()
 
 function binding.start_funscript_generator()
     exec_mtfg(false)
+end
+
+function binding.gainplus()
+    gain_selected(1.05)
+end
+
+function binding.gainmin()
+    gain_selected(0.95)
+end
+
+function binding.continueMinMax()
+    continue_minmax(-1)
+end
+
+function binding.dTrend_0()
+    detrend_selected(1,4,0)
+end
+
+function binding.norm_3()
+    normalize_selection(3,50)
+end
+
+function binding.norm_7()
+    normalize_selection(7,50)
+end
+
+function binding.norm_15()
+    normalize_selection(15,50)
 end
 
 function exec_mtfg(no_tracking)
@@ -250,6 +278,66 @@ function invert_selected()
 end
 
 
+function gain_selected(gain)
+    local script = ofs.Script(ofs.ActiveIdx())
+    print('pos gain',gain)
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            action.pos = clamp((action.pos-50)*gain+50, 0, 100)
+            --action.pos = clamp(100 - action.pos, 0, 100)
+        end
+    end
+    script:commit()
+end
+
+
+function minmaxpos(start,stop,script)
+    local minpos=100
+	local maxpos=0
+    for i=start,stop,1 do
+	     minpos = math.min(minpos,script.actions[i].pos)
+		 maxpos = math.max(maxpos,script.actions[i].pos)
+	end
+	return minpos, maxpos
+end
+
+
+function detrend_selected(order,n,adjust_gain)
+    local script = ofs.Script(ofs.ActiveIdx())
+    print('deTrend')
+    local idxlo,idxhi
+    script:sort()
+    -- find first and last index
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            idxlo = idxlo or idx
+            idxhi = idx
+        end
+    end
+	if idxlo then
+	    min0,max0 = minmaxpos(idxlo, idxlo+n, script)
+	    min1,max1 = minmaxpos(idxhi-n, idxhi, script)
+	    pos0 = 0.5*(min0+max0)
+	    pos1 = 0.5*(min1+max1)
+	    at0 = script.actions[idxlo].at
+	    at1 = script.actions[idxhi].at
+	    range0 = max0-min0
+	    range1 = max1-min1
+        for idx, action in ipairs(script.actions) do
+            if action.selected then
+		        center = pos0 + (pos1 - pos0) * (action.at - at0) / (at1 - at0)
+			    if adjust_gain>0 then
+			        range = range0 + (range1 - range0) * (action.at - at0) / (at1 - at0)
+			    else
+			        range=50
+			    end
+                action.pos = clamp(50*(action.pos - center)/range +50, 0, 100)
+            end
+        end
+    script:commit()
+    end
+end
+
 function align_bottom_points(align_value)
     local script = ofs.Script(ofs.ActiveIdx())
     script:sort()
@@ -295,7 +383,6 @@ function align_bottom_points(align_value)
 
     script:commit()
 end
-
 
 function align_top_points(align_value)
     local script = ofs.Script(ofs.ActiveIdx())
@@ -343,6 +430,138 @@ function align_top_points(align_value)
     script:commit()
 end
 
+function continue_minmax(window)
+    local script = ofs.Script(ofs.ActiveIdx())
+    local maxpos,minpos
+    script:sort()
+
+    -- get min and max valuea just before the selection in selection
+    stop=false
+    for idx, action in ipairs(script.actions) do
+        if action.selected and not stop then
+            minpos=100
+            maxpos=0
+            act1 = script:closestActionBefore(action.at)
+            maxpos=math.max(act1.pos,maxpos)
+            minpos=math.min(act1.pos,minpos)
+            act2 = script:closestActionBefore(act1.at)
+            maxpos=math.max(act2.pos,maxpos)
+            minpos=math.min(act2.pos,minpos)
+            act3 = script:closestActionBefore(act2.at)
+            maxpos=math.max(act3.pos,maxpos)
+            minpos=math.min(act3.pos,minpos)
+            act4 = script:closestActionBefore(act3.at)
+            maxpos=math.max(act4.pos,maxpos)
+            minpos=math.min(act4.pos,minpos)
+            stop=true
+        end
+    end
+
+
+    print('align selected points')
+
+    -- align top points
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            local top_point = true
+
+            local next_action, _ = script:closestActionAfter(action.at)
+            if next_action then
+                if next_action.pos >= action.pos then
+                    top_point = false
+                end
+            end
+
+            local prev_action, _ = script:closestActionBefore(action.at)
+            if prev_action then
+                if prev_action.pos >= action.pos then
+                    top_point = false
+                end
+            end
+            if top_point then
+                action.pos = maxpos
+            end
+        end
+    end
+    -- align bottom points
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            local bottom_point = true
+
+            local next_action, _ = script:closestActionAfter(action.at)
+            if next_action then
+                if next_action.pos <= action.pos then
+                    bottom_point = false
+                end
+            end
+
+            local prev_action, _ = script:closestActionBefore(action.at)
+            if prev_action then
+                if prev_action.pos <= action.pos then
+                    bottom_point = false
+                end
+            end
+
+            if bottom_point then
+                action.pos = minpos
+            end
+        end
+    end    
+    script:commit()
+end
+
+function normalize_selection(windowsize,targetrange)
+    local script = ofs.Script(ofs.ActiveIdx())
+    local mav = {}
+    local dev = {}
+    --local devmav = {}
+    local idxlo,idxhi
+    
+    script:sort()
+
+    -- calculate moving averages
+    hwindow = math.floor(windowsize/2)
+    
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            idxlo = idxlo or idx
+            idxhi = idx
+        end
+    end
+
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            mavsum=0
+            for ii = -hwindow,hwindow,1 do
+                if idx+ii <= idxhi and idx+ii >= idxlo then
+                    mavsum = mavsum + (script.actions[idx+ii].pos or 0)
+                end
+            end
+            mavsum=mavsum-0.5*(script.actions[math.max(idx-hwindow,idxlo)].pos + script.actions[math.min(idx+hwindow,idxhi)].pos)
+            --mav[idx] = mavsum/(math.min(idx-idxlo,hwindow)+math.min(idxhi-idx,hwindow)-1)
+            mav[idx] = mavsum/(windowsize-1)
+            dev[idx] = math.abs(action.pos-mav[idx])
+        end
+    end
+    -- calculate moving average of absolute deviation
+    for idx, action in ipairs(script.actions) do
+        if action.selected then
+            devsum=0
+            for ii = -hwindow,hwindow-1,1 do
+                if idx+ii <= idxhi and idx+ii >= idxlo then
+                    devsum = devsum + (dev[idx+ii] or 0)
+                end
+            end
+            devmav = devsum/(math.min(idx-idxlo,hwindow)+math.min(idxhi-idx,hwindow))
+            action.pos = clamp((50+0.005*targetrange*(action.pos - mav[idx])/devmav*100),0,100)
+            --devmav[idx] = devsum/((math.min(idx-idxlo,hwindow)+math.min(idxhi-idx,hwindow)+1)
+        end
+    end       
+    print('normalize points')
+
+    script:commit()
+end
+
 
 function init()
     print("OFS Version:", ofs.Version())
@@ -351,11 +570,13 @@ function init()
     if platform == "Windows" then
         version_file_path = ofs.ExtensionDir().."\\funscript-editor\\funscript_editor\\VERSION.txt"
     else
-        local mtfg_repo_path = ofs.ExtensionDir().."/Python-Funscript-Editor"
-        local cmd = "git -C "..mtfg_repo_path.." describe --tags `git -C "..mtfg_repo_path.." rev-list --tags --max-count=1` > "..mtfg_repo_path.."/funscript_editor/VERSION.txt"
-        -- print("cmd: ", cmd)
-        os.execute(cmd)
-        version_file_path = mtfg_repo_path.."/funscript_editor/VERSION.txt"
+        if platform ~= "Linux, Nix" then
+            local mtfg_repo_path = ofs.ExtensionDir().."/Python-Funscript-Editor"
+            local cmd = "git -C "..mtfg_repo_path.." describe --tags `git -C "..mtfg_repo_path.." rev-list --tags --max-count=1` > "..mtfg_repo_path.."/funscript_editor/VERSION.txt"
+            -- print("cmd: ", cmd)
+            os.execute(cmd)
+            version_file_path = mtfg_repo_path.."/funscript_editor/VERSION.txt"
+        end
     end
     if platform == "Linux, Nix" then
         mtfgVersion = "nixpkgs" 
@@ -521,17 +742,44 @@ function gui()
     if enable_post_processing then
         ofs.Text("Post-Processing:")
         ofs.SameLine()
-        if ofs.Button("Invert") then
-            invert_selected()
+        if ofs.Button("Norm.3") then
+             normalize_selection(3,50)
         end
-
+		ofs.SameLine()
+        if ofs.Button("Norm.7") then
+             normalize_selection(7,50)
+        end
         ofs.SameLine()
-        if ofs.Button("Align Bottom Points") then
+        if ofs.Button("Norm.15") then
+             normalize_selection(15,50)
+        end
+        ofs.SameLine()
+        if ofs.Button("Gain +") then
+            gain_selected(1.05)
+        end
+        ofs.SameLine()
+        if ofs.Button("Gain -") then
+            gain_selected(1/1.05)
+        end
+        if ofs.Button("Invert") then
+            gain_selected(-1)
+        end        
+        ofs.SameLine()
+        if ofs.Button("deTrend_0") then
+            detrend_selected(1,4,0)
+        end        
+        ofs.SameLine()
+        if ofs.Button("deTrend_1") then
+            detrend_selected(1,4,1)
+        end         ofs.SameLine()
+        if ofs.Button("Continue minmax") then
+            continue_minmax(-1)
+        end
+        if ofs.Button("Align Bottom") then
             align_bottom_points(-1)
         end
-
         ofs.SameLine()
-        if ofs.Button("Align Top Points") then
+        if ofs.Button("Align Top") then
              align_top_points(-1)
         end
     end
