@@ -73,7 +73,7 @@ You can use my OFS Fork with nix support. My OFS Fork includes the MTFG Extensio
 nix run github:michael-mueller-git/OFS --refresh
 ```
 
-if you encounter the error message `ÈRROR: Failed to load glad.` when running the program, try the following:
+if you encounter the error message `ERROR: Failed to load glad.` when running the program, try the following:
 
 ```sh
 nix run --impure github:guibou/nixGL -- nix run github:michael-mueller-git/OFS --refresh
