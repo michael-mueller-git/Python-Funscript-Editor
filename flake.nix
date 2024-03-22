@@ -85,10 +85,6 @@
       formatter.${system} = pkgs.nixpkgs-fmt;
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = mtfgDependencies;
-        shellHook = ''
-          # use xwayland not wayland
-          export QT_QPA_PLATFORM="xcb"
-        '';
       };
     };
 }
