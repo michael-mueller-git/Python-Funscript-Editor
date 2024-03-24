@@ -81,7 +81,7 @@ nix run --impure github:guibou/nixGL -- nix run github:michael-mueller-git/OFS -
 
 The config files for nix version are stored in `~/.config/mtfg`.
 
-**At first lauch of the MTFG Extension nix need to build all dependencies for MTFG this may take several minutes! You may want to run `nix run github:michael-mueller-git/Python-Funscript-Editor --refresh` once before using the extension in OFS to see the current build process output.**
+**At first lauch of the MTFG Extension nix need to build all dependencies for MTFG this may take several minutes! You may want to run `nix run github:michael-mueller-git/Python-Funscript-Editor --refresh -- --generator` once before using the extension in OFS to see the current build process output.**
 
 Additional Hint: Every time i update the repository on github the start of the extension could take serveral seconds/minutes!
 
