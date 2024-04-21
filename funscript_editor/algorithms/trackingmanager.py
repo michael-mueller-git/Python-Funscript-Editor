@@ -86,6 +86,7 @@ class TrackingManagerThread(QtCore.QThread):
         self.params = params
         self.video_info = video_info
         self.tracking_points = {}
+        self.projection_config = {'name': 'None', 'video_filter': ''}
         self.score = {
                 'x': [],
                 'y': [],
@@ -513,6 +514,7 @@ class TrackingManagerThread(QtCore.QThread):
             return "Could not extract first frame, please re-encode your video"
 
         self.projection_config = self.ui.get_video_projection_config(first_frame, self.params.projection)
+        print("Use projection config:", self.projection_config)
 
         video = FFmpegStream(
                 video_path = self.params.video_path,

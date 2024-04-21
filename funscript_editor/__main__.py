@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import os
+import platform
 import argparse
 
 from funscript_editor.api import show_editor, generate_funscript
@@ -22,7 +23,7 @@ def main():
     if os.getcwd() not in os.environ['PATH']:
         os.environ['PATH'] = os.getcwd() + os.sep + os.environ['PATH']
 
-    if os.path.abspath(__file__).startswith("/nix"):
+    if platform.system().lower().startswith("linux") or os.path.abspath(__file__).startswith("/nix"):
         # pynput does not work well with native wayland so we use xwayland to get proper keyboard inputs
         if os.environ.get('DISPLAY'):
             print("Warning: Force QT_QPA_PLATFORM=xcb for better user experience")
