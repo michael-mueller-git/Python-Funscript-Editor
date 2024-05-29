@@ -511,7 +511,7 @@ class TrackingManagerThread(QtCore.QThread):
         """
         first_frame = FFmpegStream.get_frame(self.params.video_path, self.params.start_frame)
         if first_frame is None or first_frame.shape[0] == 0 or first_frame.shape[1] == 0:
-            return "Could not extract first frame, please re-encode your video"
+            return "Could not extract first frame, please re-encode your video (Recommend H.264)"
 
         self.projection_config = self.ui.get_video_projection_config(first_frame, self.params.projection)
         print("Use projection config:", self.projection_config)
