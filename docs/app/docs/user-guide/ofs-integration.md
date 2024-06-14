@@ -70,13 +70,13 @@ Manual Installation:
 You can use my OFS Fork with nix support. My OFS Fork includes the MTFG Extension by default. For nix setup with flake read https://github.com/mschwaig/howto-install-nix-with-flake-support/blob/main/README.md
 
 ```sh
-nix run github:michael-mueller-git/OFS --refresh
+nix run github:michael-mueller-git/OFS --refresh --impure
 ```
 
 if you encounter the error message `ERROR: Failed to load glad.` when running the program, try the following:
 
 ```sh
-nix run --impure github:guibou/nixGL -- nix run github:michael-mueller-git/OFS --refresh
+nix run --impure github:guibou/nixGL -- nix run github:michael-mueller-git/OFS --refresh --impure
 ```
 
 The config files for nix version are stored in `~/.config/mtfg`.
