@@ -23,7 +23,7 @@ def main():
         os.environ['PATH'] = os.getcwd() + os.sep + os.environ['PATH']
 
     if platform.system().lower().startswith("linux"):
-        # worakround for ubuntu
+        # workaround for ubuntu
         _ = subprocess.run('xhost +local:$USER', shell=True)
 
     if platform.system().lower().startswith("linux") or os.path.abspath(__file__).startswith("/nix"):
