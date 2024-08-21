@@ -85,6 +85,41 @@ The config files for nix version are stored in `~/.config/mtfg`.
 
 Additional Hint: Every time i update the repository on github the start of the extension could take serveral seconds/minutes!
 
+### Example Setup on Ubuntu
+
+Tested on 2024-08-21 with Ubuntu 24.04.
+
+1. Install nix in ubuntu:
+
+```sh
+sudo apt update
+sudo apt install curl
+sh <(curl -L https://nixos.org/nix/install) --daemon
+reboot
+```
+
+2. Enable nix flakes:
+
+```sh
+mkdir ~/.config/nix
+echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
+exit
+```
+
+3. Create MTFG dependencie cache:
+
+```
+nix run github:michael-mueller-git/Python-Funscript-Editor --refresh -- --generator
+```
+
+When the command is executed on the pc for the first time this can take severl minutes to compile the custom opencv dependencie. When the command success you will see the message box `Video file was not specified`.
+
+4. Finnally run OFS:
+
+```sh
+nix run github:michael-mueller-git/OFS --refresh --impure
+```
+
 <br>
 
 ## Troubleshot
