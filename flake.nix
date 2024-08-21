@@ -71,8 +71,8 @@
         version = "0.5.4";
         src = pkgs.fetchgit {
           url = "https://github.com/michael-mueller-git/Python-Funscript-Editor.git";
-          rev = "eee779a3492397ade4d53129b9b42f6d50e83ec";
-          sha256 = "sha256-5/2TEHQ/pIuRQul41oxjRmxwgt2c22/uoNvOnZXkj+I=";
+          rev = "1c52f4e692c37a86b37fd1c1b1a8462c407c1403";
+          sha256 = "sha256-D3JsZsMt5B2AsnE1DECOIZSXx5rBi8D3AdL0fjSPdxU=";
         };
         propagatedBuildInputs = mtfgDependencies;
         nativeBuildInputs = with pkgs; [
