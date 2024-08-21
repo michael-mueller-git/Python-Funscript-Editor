@@ -3,8 +3,7 @@
 import os
 import platform
 import argparse
-
-from funscript_editor.api import show_editor, generate_funscript
+import subprocess
 
 def main():
     """ CLI Main Function """
@@ -23,11 +22,17 @@ def main():
     if os.getcwd() not in os.environ['PATH']:
         os.environ['PATH'] = os.getcwd() + os.sep + os.environ['PATH']
 
+    if platform.system().lower().startswith("linux"):
+        # worakround for ubuntu
+        _ = subprocess.run('xhost +local:$USER', shell=True)
+
     if platform.system().lower().startswith("linux") or os.path.abspath(__file__).startswith("/nix"):
         # pynput does not work well with native wayland so we use xwayland to get proper keyboard inputs
         if os.environ.get('DISPLAY'):
             print("Warning: Force QT_QPA_PLATFORM=xcb for better user experience")
             os.environ['QT_QPA_PLATFORM'] = "xcb"
+
+    from funscript_editor.api import show_editor, generate_funscript
 
     if not args.generator: show_editor()
     else: generate_funscript(args.input, args.start, args.end, args.output, args.multiaxis, args.no_tracking, args.logs, args.stdout)

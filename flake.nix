@@ -12,6 +12,7 @@
         system = "${system}";
       };
       mtfgDependencies = with pkgs; [
+        ffmpeg_5
         qt5.qtbase
         qt5.full
         qt5.wrapQtAppsHook
