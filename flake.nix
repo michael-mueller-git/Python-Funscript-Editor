@@ -12,6 +12,7 @@
         system = "${system}";
       };
       mtfgDependencies = with pkgs; [
+        xorg.xhost
         ffmpeg_5
         qt5.qtbase
         qt5.full
